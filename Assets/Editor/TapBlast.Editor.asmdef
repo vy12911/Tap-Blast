@@ -1,0 +1,7 @@
+{
+    "name": "TapBlast.Editor",
+    "rootNamespace": "TapBlast.Editor",
+    "references": ["TapBlast.Runtime", "Unity.InputSystem", "UnityEngine.UI"],
+    "includePlatforms": ["Editor"],
+    "autoReferenced": true
+}

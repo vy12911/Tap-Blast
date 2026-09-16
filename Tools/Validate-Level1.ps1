@@ -6,7 +6,7 @@ New-Item -ItemType Directory -Force -Path $reportDir | Out-Null
 $unityData = Join-Path $UnityEditor 'Data'
 $dotnet = Join-Path $unityData 'NetCoreRuntime/dotnet.exe'
 $compiler = Join-Path $unityData 'DotNetSdkRoslyn/csc.dll'
-$baseArgs = @('-nologo', '-langversion:9', '-nostdlib+', ('-r:' + (Join-Path $unityData 'NetStandard/ref/2.1.0/netstandard.dll')))
+$baseArgs = @('-nologo', '-langversion:9', '-nowarn:0649', '-nostdlib+', ('-r:' + (Join-Path $unityData 'NetStandard/ref/2.1.0/netstandard.dll')))
 $runtimeRefs = Get-ChildItem (Join-Path $unityData 'Managed/UnityEngine') -Filter '*.dll' | ForEach-Object { '-r:' + $_.FullName }
 $runtimeRefs += '-r:' + (Join-Path $workspace 'Library/ScriptAssemblies/UnityEngine.UI.dll')
 $runtimeRefs += '-r:' + (Join-Path $workspace 'Library/ScriptAssemblies/Unity.InputSystem.dll')
@@ -16,7 +16,7 @@ $runtimeOut = Join-Path $reportDir 'TapBlast.Runtime.dll'
 if ($LASTEXITCODE -ne 0) { throw 'Runtime compilation failed' }
 $editorRefs = Get-ChildItem (Join-Path $unityData 'Managed') -Filter 'UnityEditor.*.dll' | ForEach-Object { '-r:' + $_.FullName }
 $editorSources = Get-ChildItem (Join-Path $workspace 'Assets/Editor') -Recurse -Filter '*.cs' | ForEach-Object { $_.FullName }
-& $dotnet $compiler $baseArgs $runtimeRefs $editorRefs "-r:$runtimeOut" '-target:library' ('-out:' + (Join-Path $reportDir 'TapBlast.Editor.dll')) $editorSources
+& $dotnet $compiler $baseArgs $runtimeRefs $editorRefs '-define:UNITY_EDITOR' '-target:library' ('-out:' + (Join-Path $reportDir 'TapBlast.Editor.dll')) $sources $editorSources
 if ($LASTEXITCODE -ne 0) { throw 'Editor compilation failed' }
 $framework = Get-ChildItem (Join-Path $unityData 'NetCoreRuntime/shared/Microsoft.NETCore.App') -Directory | Select-Object -First 1
 $testRefs = @('System.Private.CoreLib.dll', 'System.Runtime.dll', 'System.Console.dll') | ForEach-Object { '-r:' + (Join-Path $framework.FullName $_) }

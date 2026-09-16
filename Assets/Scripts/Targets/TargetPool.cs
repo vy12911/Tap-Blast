@@ -8,13 +8,14 @@ namespace TapBlast
     {
         private readonly TargetView[] targets;
         public int ActiveCount { get; private set; }
-        public TargetPool(RectTransform parent, UIArt art, int capacity, Action<TargetView> tapped, Action<TargetView> expired)
+        public TargetPool(RectTransform parent, TargetView prefab, int capacity, Action<TargetView> tapped, Action<TargetView> expired)
         {
             targets = new TargetView[capacity];
             for (int i = 0; i < capacity; i++)
             {
-                var rect = art.Fixed("Normal target " + (i + 1), parent, Vector2.zero, Vector2.one * 112);
-                targets[i] = rect.gameObject.AddComponent<TargetView>(); targets[i].Initialize(art, tapped, expired);
+                targets[i] = UnityEngine.Object.Instantiate(prefab, parent, false);
+                targets[i].name = "Normal target " + (i + 1);
+                targets[i].Initialize(tapped, expired);
             }
         }
         public bool Spawn(Vector2 position, float size, float lifetime, Color color, bool tutorial, bool reducedMotion)

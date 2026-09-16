@@ -10,7 +10,7 @@ public sealed class GameManager : MonoBehaviour
     [SerializeField] private LevelConfig[] levels = new LevelConfig[0];
     public LevelConfig CurrentLevel => level;
     public RoundSession Session { get; private set; }
-    private GameHUD hud;
+    [SerializeField] private GameHUD hud;
     private TargetPool pool;
     private TargetSpawner spawner;
     private FeedbackPlayer feedback;
@@ -29,12 +29,13 @@ public sealed class GameManager : MonoBehaviour
         Application.targetFrameRate = 60;
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
         Session = new RoundSession(level.Rules);
-        hud = GameHUD.Create(transform);
+        if (hud == null || hud.TargetPrefab == null) { Debug.LogError("Assign the scene Canvas and Normal Target prefab to GameManager.", this); enabled = false; return; }
+        hud.Initialize();
         feedback = gameObject.AddComponent<FeedbackPlayer>();
         feedback.Initialize();
         int capacity = level.MaxTargets;
         foreach (var config in levels) if (config != null) capacity = Mathf.Max(capacity, config.MaxTargets);
-        pool = new TargetPool(hud.Arena, hud.Art, capacity, OnTargetTapped, OnTargetExpired);
+        pool = new TargetPool(hud.Arena, hud.TargetPrefab, capacity, OnTargetTapped, OnTargetExpired);
         spawner = new TargetSpawner(pool, hud.Arena, level);
         hud.Play.onClick.AddListener(BeginCountdown);
         hud.Pause.onClick.AddListener(Pause);
@@ -110,6 +111,7 @@ public sealed class GameManager : MonoBehaviour
         int points = Session.Tap();
         feedback.PlayTap(Session.Combo);
         hud.Pop(position, points, color, feedback.ReducedMotion);
+        hud.HitJuice(Session.Combo);
         RefreshHUD();
         if (Session.State == RoundState.Results) { Finish(); return; }
         if (level.Objective == ObjectiveKind.Score)
@@ -124,6 +126,7 @@ public sealed class GameManager : MonoBehaviour
         pool.Release(target);
         if (Session.State != RoundState.Playing) return;
         Session.Miss();
+        hud.MissJuice(target.Position);
         hud.SetHint("TARGET MISSED", "Your combo reset. Try the next one!");
         RefreshHUD();
     }
@@ -179,7 +182,6 @@ public sealed class GameManager : MonoBehaviour
     private void OnApplicationFocus(bool focused) { if (!focused) Pause(); }
     private void OnDestroy()
     {
-        if (hud != null) hud.DisposeAssets();
         if (pool != null) pool.Dispose();
         Screen.sleepTimeout = SleepTimeout.SystemSetting;
     }

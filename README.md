@@ -8,11 +8,11 @@ Unity **6000.3.17f1**, using the existing URP project, uGUI and Input System pac
 2. Choose **Tap Blast > Open Campaign**, then press **Play**.
 3. Select **Let's Play**. Complete Level 1, then select **Next Level** for Level 2.
 
-`Assets/Scenes/Level01.unity` is the shared campaign entry scene and the only enabled build scene. It references both level configurations, reusing the UI and pool across levels. The editor assigns it as the Play Mode start scene when none is assigned. `SampleScene.unity` is preserved. **Open Level 1** remains an alias for the shared scene.
+`Assets/Scenes/Level01.unity` is the shared campaign entry scene and the only enabled build scene. It references both level configurations, reusing the UI and pool across levels. The editor assigns it as the Play Mode start scene when none is assigned. **Open Level 1** remains an alias for the shared scene.
 
 First launch opens Level 1's briefing. Later launches restore the last selected unlocked level. The briefing's back arrow, Pause and Results open level selection. Exiting a paused round abandons the attempt without rewards. Level 2 unlocks when Level 1 earns at least one star; existing completed Level 1 saves automatically unlock it. Level 2 offers replay and level selection, without an unavailable Level 3 button.
 
-The scene contains the camera, existing 2D light and configured GameManager. UI, input, target pool and feedback are constructed once at runtime; there are no missing prefab, font, audio or texture downloads to resolve. Expand **Tap Blast - Level 1 > Tap Blast UI** while playing to inspect the generated hierarchy.
+The scene contains the camera, 2D light, configured GameManager and an editable **Tap Blast UI** Canvas prefab instance. HUD, menus, input, tutorial hand and pooled effects are saved in the scene/prefab hierarchy and are visible outside Play Mode. Scripts bind references, update game values and animate these elements; they do not construct the UI. The four-target pool is prewarmed from the saved NormalTarget prefab at startup.
 
 Use a **9:16** Game view for a phone preview. The design uses a 720 × 1280 reference frame, uniformly fitted into the screen's safe area. Wider/taller displays retain comfortable margins; mobile orientation is portrait.
 
@@ -59,6 +59,10 @@ Rewards are committed before any result animation. Starting a round saves a uniq
 
 ## Tuning
 
+For visual changes, edit `Assets/Prefabs/UI/GameCanvas.prefab` or its scene instance, and `Assets/Prefabs/Targets/NormalTarget.prefab`. **Tap Blast > Select Game Canvas** selects the shared Canvas. See [Canvas editing guide](Documentation/Canvas-Editing.md) for the hierarchy, feedback controls and GDD mechanic boundaries.
+
+The gameplay presentation now includes a layered neon city backdrop, star-emblem normal targets, pooled tap sparks/shockwaves, score/combo punch, GDD Fever threshold labels and sounds, MISS feedback and completion confetti. Reduced motion suppresses decorative movement; pause and replay preserve/reset effects with the round.
+
 Select **Tap Blast > Select Level 1 Settings** / **Select Level 2 Settings**, or the corresponding asset in `Assets/Data/Levels/`.
 
 Duration, objective, base score, spawn interval, target lifetime, capacity, size, spacing and star goals are serialized in this ScriptableObject. Adjust them outside Play Mode. Changes to capacity take effect on the next scene start because the pool is prewarmed once.
@@ -73,7 +77,7 @@ These two levels leave out Bombs, Golden targets, moving targets, power-ups and 
 | `Assets/Scripts/Core/RoundSession.cs` | Pure C# scoring, combo, timer, completion and stars |
 | `Assets/Scripts/Data/` | Level configuration and versioned local progress/settings |
 | `Assets/Scripts/Targets/` | Bounded spawning, circular pointer input and fixed target pool |
-| `Assets/Scripts/UI/` | HUD, panels, safe-area layout, shared procedural sprites and feedback pool |
+| `Assets/Scripts/UI/` | Canvas bindings, safe-area fitting, result and pooled-feedback animation |
 | `Assets/Scripts/Feedback/` | Synthesized tap/result sounds, motion preference, completion vibration |
 | `Assets/Editor/` | Editor-only scene and configuration shortcuts |
 | `Assets/Data/Levels/` | Authored level assets |
@@ -89,13 +93,13 @@ Runtime and editor scripts use separate assembly definitions. Editor utilities a
 - Spawn positions use bounded attempts and minimum spacing; a saturated arena skips a spawn rather than forcing overlap.
 - Static HUD, targets and feedback use separate canvas boundaries to contain frequent UI geometry rebuilds.
 - Gameplay text is refreshed for events and timer-second changes. The brief result count-up updates text only when the displayed integer changes. Small strings can allocate on these events; this is not a zero-allocation claim.
-- Five small shared procedural UI textures and three short mono audio clips are generated once and released on teardown. No post-processing bloom is required.
+- Five small shared sprite assets are stored in Assets/Art/UI and referenced by Canvas Images. Four short mono audio clips are generated once and released on teardown. No runtime texture generation or post-processing bloom is required.
 - Decorative graphics do not receive raycasts. Targets use circular hit testing.
 - No global time-scale changes. Pausing is explicit round state.
 - Local saves occur on round start, results and settings changes, not during every tap or frame.
 - A 60 FPS cap is configured; actual device performance must still be measured on hardware.
 
-Sound, reduced motion and vibration can be toggled from Pause. Vibration uses the device's basic vibration on successful completion only; it is inactive in the editor. Audio is synthesized placeholder feedback, with no music track or commercial assets.
+Sound, reduced motion and vibration can be toggled from Pause. Vibration uses the device's basic vibration on successful completion and major combo milestones; it is inactive in the editor. Audio is synthesized placeholder feedback, with no music track or commercial assets.
 
 ## Validation
 
@@ -113,8 +117,8 @@ The script uses Unity's installed compiler and .NET runtime, compiles runtime an
 
 For the two-level campaign use `Tools/Run-UnitySmoke.ps1 -Method RunCampaign`. This verifies unlocks, level selection, the full timed Level 2 round, size variants, pause/replay/exit, separate records and rewards. Its report is `Temp/Level1Validation/campaign-results.txt`; screenshots are captured alongside it. After it exits, use `-Method VerifyCampaignPersistence` to check the saved campaign and Level 2 startup in a new Unity process.
 
-Latest validation: runtime/editor compilation, **24 rule checks**, **135 Unity campaign checks**, and **2 campaign restart checks** passed. The campaign test plays through Level 1 and a full timed Level 2 round, including locking/unlocking, size variants, bounds, pool reuse, scoring, stars, pause, replay, abandonment, separate saves and level-bound reward protection. Restart verification checks both saved progress and the actual restored Level 2 briefing. The new level-selection, briefing, gameplay and result screens were visually reviewed. Captures are in `Documentation/Previews/`; reports are in `Logs/Validation/`.
+After the Canvas migration: runtime/editor compilation, **24 rule checks**, **564 Canvas/campaign checks**, **68 tutorial/replay smoke checks**, and **2 campaign restart checks** passed. The Canvas checks include persisted sprite/reference validation, retaining a designer text edit across Play Mode, no runtime UI reconstruction, pooled burst movement, paused effects and reduced-motion suppression. The campaign test plays through Level 1 and a full timed Level 2 round, including locking/unlocking, size variants, bounds, pool reuse, scoring, stars, pause, replay, abandonment, separate saves and level-bound reward protection. Restart verification checks both saved progress and the actual restored Level 2 briefing. The new level-selection, briefing, gameplay and result screens were visually reviewed. Captures are in `Documentation/Previews/`; reports are in `Logs/Validation/`.
 
 For the persistence pass, run `Tools/Run-UnitySmoke.ps1 -Method VerifyPersistence` after a successful full smoke run; it expects the deterministic test balances from that run. Unity's optional editor search index threw an unrelated exception during isolated batch startup; the harness recorded it separately.
 
-ADB detected no connected Android device. Android/iOS builds, physical-device vibration, touch feel, background/resume behavior on hardware and on-device profiling remain unverified. These require a device test pass; editor checks do not establish mobile performance.
+This change has not been validated in an Android/iOS build or on a physical device. Device vibration, touch feel, background/resume behavior on hardware and on-device profiling remain unverified. These require a device test pass; editor checks do not establish mobile performance.

@@ -12,6 +12,8 @@ namespace TapBlast
         {
             public int bestScore, bestStars, coins, xp;
             public int level2BestScore, level2BestStars;
+            public int[] scores = new int[10];
+            public int[] stars = new int[10];
             public int selectedLevel = 1, activeLevel = 1;
             public string activeRound = "";
         }
@@ -22,20 +24,34 @@ namespace TapBlast
             public RewardReceipt(int coins, int xp, int totalCoins, int totalXP)
             { Coins = coins; XP = xp; TotalCoins = totalCoins; TotalXP = totalXP; }
         }
-        // One record keeps the consumed round token and its balances together.
-        // Existing Level 1 records are migrated on the first write.
         private static ProgressData Load()
         {
-            if (PlayerPrefs.HasKey(ProgressKey)) return JsonUtility.FromJson<ProgressData>(PlayerPrefs.GetString(ProgressKey));
-            return new ProgressData { bestScore = PlayerPrefs.GetInt(Prefix + "Level01.Best", 0), bestStars = PlayerPrefs.GetInt(Prefix + "Level01.Stars", 0) };
+            ProgressData data;
+            if (PlayerPrefs.HasKey(ProgressKey))
+                data = JsonUtility.FromJson<ProgressData>(PlayerPrefs.GetString(ProgressKey));
+            else
+                data = new ProgressData { bestScore = PlayerPrefs.GetInt(Prefix + "Level01.Best", 0), bestStars = PlayerPrefs.GetInt(Prefix + "Level01.Stars", 0) };
+
+            if (data.scores == null || data.scores.Length < 10) Array.Resize(ref data.scores, 10);
+            if (data.stars == null || data.stars.Length < 10) Array.Resize(ref data.stars, 10);
+            if (data.bestScore > data.scores[0]) data.scores[0] = data.bestScore;
+            if (data.bestStars > data.stars[0]) data.stars[0] = data.bestStars;
+            if (data.level2BestScore > data.scores[1]) data.scores[1] = data.level2BestScore;
+            if (data.level2BestStars > data.stars[1]) data.stars[1] = data.level2BestStars;
+            return data;
         }
-        private static void Save(ProgressData data) { PlayerPrefs.SetString(ProgressKey, JsonUtility.ToJson(data)); PlayerPrefs.Save(); }
-        public static int BestScore => Load().bestScore;
-        public static int BestStars => Load().bestStars;
-        public static int GetBestScore(int level) => level == 1 ? Load().bestScore : level == 2 ? Load().level2BestScore : 0;
-        public static int GetBestStars(int level) => level == 1 ? Load().bestStars : level == 2 ? Load().level2BestStars : 0;
-        public static bool IsUnlocked(int level) => level == 1 || level == 2 && Load().bestStars > 0;
-        public static int SelectedLevel => Load().selectedLevel == 2 && IsUnlocked(2) ? 2 : 1;
+        private static void Save(ProgressData data)
+        {
+            if (data.scores != null && data.scores.Length >= 2) { data.bestScore = data.scores[0]; data.level2BestScore = data.scores[1]; }
+            if (data.stars != null && data.stars.Length >= 2) { data.bestStars = data.stars[0]; data.level2BestStars = data.stars[1]; }
+            PlayerPrefs.SetString(ProgressKey, JsonUtility.ToJson(data)); PlayerPrefs.Save();
+        }
+        public static int BestScore => GetBestScore(1);
+        public static int BestStars => GetBestStars(1);
+        public static int GetBestScore(int level) => level >= 1 && level <= 10 ? Load().scores[level - 1] : 0;
+        public static int GetBestStars(int level) => level >= 1 && level <= 10 ? Load().stars[level - 1] : 0;
+        public static bool IsUnlocked(int level) => level == 1 || (level >= 2 && level <= 10 && GetBestStars(level - 1) > 0);
+        public static int SelectedLevel => IsUnlocked(Load().selectedLevel) ? Load().selectedLevel : 1;
         public static bool SelectLevel(int level)
         {
             if (!IsUnlocked(level)) return false;
@@ -60,10 +76,9 @@ namespace TapBlast
             int earnedCoins = session.Won ? (int)Math.Min(Math.Max(0, coins), (long)int.MaxValue - data.coins) : 0;
             int earnedXP = session.Won ? (int)Math.Min(Math.Max(0, xp), (long)int.MaxValue - data.xp) : 0;
             data.coins += earnedCoins; data.xp += earnedXP;
-            if (session.LevelId == 1)
-            { data.bestScore = Mathf.Max(session.Score, data.bestScore); data.bestStars = Mathf.Max(session.Stars, data.bestStars); }
-            else
-            { data.level2BestScore = Mathf.Max(session.Score, data.level2BestScore); data.level2BestStars = Mathf.Max(session.Stars, data.level2BestStars); }
+            int idx = Mathf.Clamp(session.LevelId - 1, 0, 9);
+            data.scores[idx] = Mathf.Max(session.Score, data.scores[idx]);
+            data.stars[idx] = Mathf.Max(session.Stars, data.stars[idx]);
             data.activeRound = ""; Save(data);
             receipt = new RewardReceipt(earnedCoins, earnedXP, data.coins, data.xp); return true;
         }

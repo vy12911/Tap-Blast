@@ -109,16 +109,15 @@ namespace TapBlast
             HideTapHand();
             resultTitle.text = session.Won ? "BRILLIANT!" : "TRY AGAIN";
             resultSubtitle.text = session.Won ? "LEVEL " + session.LevelId.ToString("00") + " COMPLETE" : "TIME UP  /  OBJECTIVE MISSED";
-            bool hasNext = session.Won && session.LevelId == 1 && ProgressStore.IsUnlocked(2);
+            bool hasNext = session.Won && session.LevelId < 10 && ProgressStore.IsUnlocked(session.LevelId + 1);
             Next.gameObject.SetActive(hasNext);
             Replay.GetComponentInChildren<Text>().text = hasNext ? "REPLAY" : "PLAY AGAIN";
             for (int i = 0; i < 3; i++) resultStars[i].color = i < session.Stars ? UIArt.Gold : new Color32(57, 77, 90, 255);
             resultScore.text = session.Score.ToString("N0");
             resultBest.text = newBest ? "NEW PERSONAL BEST" : "PERSONAL BEST  " + best.ToString("N0");
             resultStats.text = "Targets tapped     " + session.Hits + "\nBest combo          " + session.BestCombo + "\nTargets missed     " + session.Misses;
-            resultHint.text = !session.Won ? "Tap targets as they appear.\nYou can try again immediately." : session.Stars == 3 ? "A perfect first spark. All three stars earned!" : "Chase three stars: keep a clean streak\nand aim for the score goal.";
-            if (hasNext) resultHint.text = "LEVEL 2 UNLOCKED\nDiscover different target sizes!";
-            else if (session.Won && session.LevelId == 2) resultHint.text = session.Stars == 3 ? "Sizes mastered. All three stars earned!" : "Replay for " + currentConfig.TwoStarScore + "+ points\nand a clean streak for three stars.";
+            resultHint.text = !session.Won ? "Tap targets as they appear.\nYou can try again immediately." : session.Stars == 3 ? "Mastery achieved! All three stars earned!" : "Chase three stars: keep a clean streak\nand aim for the score goal.";
+            if (hasNext) resultHint.text = "LEVEL " + (session.LevelId + 1) + " UNLOCKED\nGet ready for the next challenge!";
             rewardEarned.text = session.Won ? "+" + receipt.Coins + " COINS     +" + receipt.XP + " XP" : "COMPLETE THE LEVEL TO EARN REWARDS";
             rewardEarned.fontSize = session.Won ? 22 : 17;
             rewardBalance.text = "WALLET  " + receipt.TotalCoins.ToString("N0") + " COINS   /   TOTAL XP  " + receipt.TotalXP.ToString("N0");
@@ -195,14 +194,120 @@ namespace TapBlast
         public void ShowTapHand() { tapHand.Show(); tapHand.Tick(0, animateFeedback, reducedMotion); }
         public void HideTapHand() { tapHand.Hide(); }
 
-        public void ShowLevels()
+        private Button[] levelButtons;
+        private Text[] selectionTexts;
+
+        public void ShowLevels(LevelConfig[] configs, System.Func<int, bool> onSelectLevel)
         {
             HideOverlays(); levelSelect.SetActive(true); Pause.interactable = false; animateFeedback = false;
             SetHint("", "");
-            selectionOne.text = "BEST " + ProgressStore.GetBestScore(1) + "   /   " + ProgressStore.GetBestStars(1) + " / 3 STARS";
-            LevelTwo.interactable = ProgressStore.IsUnlocked(2);
-            selectionTwo.text = LevelTwo.interactable ? "BEST " + ProgressStore.GetBestScore(2) + "   /   " + ProgressStore.GetBestStars(2) + " / 3 STARS" : "LOCKED  /  Complete Level 1 to unlock";
-            selectionWallet.text = ProgressStore.Coins.ToString("N0") + " COINS   /   " + ProgressStore.XP.ToString("N0") + " XP\nPLAYER LEVEL " + (1 + ProgressStore.XP / 100);
+            if (selectionWallet != null)
+                selectionWallet.text = ProgressStore.Coins.ToString("N0") + " COINS   /   " + ProgressStore.XP.ToString("N0") + " XP\nPLAYER LEVEL " + (1 + ProgressStore.XP / 100);
+
+            if (levelButtons == null || levelButtons.Length < 10)
+            {
+                levelButtons = new Button[10];
+                selectionTexts = new Text[10];
+                levelButtons[0] = LevelOne; selectionTexts[0] = selectionOne;
+                levelButtons[1] = LevelTwo; selectionTexts[1] = selectionTwo;
+
+                Transform container = LevelOne != null ? LevelOne.transform.parent : null;
+                if (container != null)
+                {
+                    var layout = container.GetComponent<VerticalLayoutGroup>();
+                    if (layout == null)
+                    {
+                        layout = container.gameObject.AddComponent<VerticalLayoutGroup>();
+                        layout.childControlHeight = false;
+                        layout.childControlWidth = true;
+                        layout.childForceExpandHeight = false;
+                        layout.childForceExpandWidth = true;
+                        layout.spacing = 6;
+                    }
+                    var fitter = container.GetComponent<ContentSizeFitter>();
+                    if (fitter == null)
+                    {
+                        fitter = container.gameObject.AddComponent<ContentSizeFitter>();
+                        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+                    }
+
+                    var scrollRect = levelSelect.GetComponentInChildren<ScrollRect>();
+                    if (scrollRect == null && container.parent != null)
+                    {
+                        var scrollObj = new GameObject("ScrollArea", typeof(RectTransform), typeof(ScrollRect), typeof(Image), typeof(Mask));
+                        scrollObj.transform.SetParent(levelSelect.transform, false);
+                        var scrollRt = scrollObj.GetComponent<RectTransform>();
+                        scrollRt.anchorMin = new Vector2(0.05f, 0.15f);
+                        scrollRt.anchorMax = new Vector2(0.95f, 0.85f);
+                        scrollRt.offsetMin = Vector2.zero; scrollRt.offsetMax = Vector2.zero;
+
+                        var scroll = scrollObj.GetComponent<ScrollRect>();
+                        scrollObj.GetComponent<Image>().color = new Color(0, 0, 0, 0.01f);
+                        scrollObj.GetComponent<Mask>().showMaskGraphic = false;
+
+                        container.SetParent(scrollRt, false);
+                        scroll.content = container as RectTransform;
+                        scroll.horizontal = false;
+                        scroll.vertical = true;
+                    }
+
+                    for (int i = 2; i < 10; i++)
+                    {
+                        if (LevelOne != null && selectionOne != null)
+                        {
+                            GameObject btnObj = Instantiate(LevelOne.gameObject, container, false);
+                            GameObject subObj = Instantiate(selectionOne.gameObject, container, false);
+                            btnObj.name = "Level button " + (i + 1);
+                            subObj.name = "Selection text " + (i + 1);
+                            levelButtons[i] = btnObj.GetComponent<Button>();
+                            selectionTexts[i] = subObj.GetComponent<Text>();
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < 10; i++)
+            {
+                int levelId = i + 1;
+                LevelConfig cfg = (configs != null && i < configs.Length && configs[i] != null) ? configs[i] : null;
+                string nameStr = cfg != null ? cfg.DisplayName : "LEVEL " + levelId.ToString("00");
+
+                if (levelButtons[i] != null)
+                {
+                    Text mainText = levelButtons[i].GetComponentInChildren<Text>();
+                    if (mainText != null) mainText.text = levelId.ToString("00") + "  /  " + nameStr;
+
+                    bool unlocked = ProgressStore.IsUnlocked(levelId);
+                    int stars = ProgressStore.GetBestStars(levelId);
+                    int score = ProgressStore.GetBestScore(levelId);
+
+                    levelButtons[i].interactable = unlocked;
+
+                    if (selectionTexts[i] != null)
+                    {
+                        if (stars > 0)
+                        {
+                            selectionTexts[i].text = "✓ COMPLETED   BEST " + score.ToString("N0") + "   /   " + stars + " / 3 STARS";
+                            selectionTexts[i].color = UIArt.Gold;
+                        }
+                        else if (unlocked)
+                        {
+                            selectionTexts[i].text = "UNLOCKED   BEST " + score.ToString("N0") + "   /   0 / 3 STARS";
+                            selectionTexts[i].color = UIArt.Cyan;
+                        }
+                        else
+                        {
+                            selectionTexts[i].text = "🔒 LOCKED   Complete Level " + i + " to unlock";
+                            selectionTexts[i].color = new Color32(120, 140, 150, 255);
+                        }
+                    }
+
+                    int id = levelId;
+                    levelButtons[i].onClick.RemoveAllListeners();
+                    levelButtons[i].onClick.AddListener(() => onSelectLevel(id));
+                }
+            }
         }
+        public void ShowLevels() { ShowLevels(null, (id) => false); }
     }
 }

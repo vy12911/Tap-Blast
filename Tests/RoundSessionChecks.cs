@@ -59,6 +59,12 @@ internal static class RoundSessionChecks
             s = new RoundSession(levelTwo); s.Reset(); s.StartPlaying(); s.Tap(); s.Tick(45);
             Check(!s.Won && s.Stars == 0, "Level 2 fails below 500 points");
             s.Reset(); Check(s.LevelId == 2 && s.Score == 0 && s.RemainingTime == 45, "Level 2 replay resets state and retains its rules");
+            var level10 = new RoundRules(50, 20, 10, 3800, 25, ObjectiveKind.Score, 3000, 10);
+            s = new RoundSession(level10); s.Reset(); s.StartPlaying();
+            Check(s.LevelId == 10 && s.State == RoundState.Playing, "Level 10 initializes correctly");
+            while (s.Score < 3000) s.Tap();
+            Check(s.GoalMet, "Level 10 score goal met");
+            s.Tick(50); Check(s.Won, "Level 10 completed successfully");
             Console.WriteLine(checks + " round-rule checks passed."); return 0;
         }
         catch (Exception e) { Console.Error.WriteLine(e); return 1; }

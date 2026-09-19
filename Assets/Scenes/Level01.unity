@@ -417,6 +417,10 @@ PrefabInstance:
       propertyPath: m_FontData.m_MaxSize
       value: 43
       objectReference: {fileID: 0}
+    - target: {fileID: 5417170333634362843, guid: 1c2e295fabb8f01458a33da517f0dbe7, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6983672066814776466, guid: 1c2e295fabb8f01458a33da517f0dbe7, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -512,6 +516,22 @@ PrefabInstance:
     - target: {fileID: 7987093211574821448, guid: 1c2e295fabb8f01458a33da517f0dbe7, type: 3}
       propertyPath: m_FontData.m_MaxSize
       value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 8078661721903633879, guid: 1c2e295fabb8f01458a33da517f0dbe7, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8485503867484106989, guid: 1c2e295fabb8f01458a33da517f0dbe7, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8806286001806637169, guid: 1c2e295fabb8f01458a33da517f0dbe7, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9070206061715301254, guid: 1c2e295fabb8f01458a33da517f0dbe7, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

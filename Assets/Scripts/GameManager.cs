@@ -23,6 +23,7 @@ public sealed class GameManager : MonoBehaviour
 
     private void Start()
     {
+        EnsureAllLevelsLoaded();
         if (level == null) { Debug.LogError("Assign a LevelConfig to GameManager.", this); enabled = false; return; }
         if (levels == null || levels.Length == 0) levels = new[] { level };
         foreach (var config in levels) if (config != null && config.LevelId == ProgressStore.SelectedLevel) level = config;
@@ -49,11 +50,31 @@ public sealed class GameManager : MonoBehaviour
         hud.IntroMenu.onClick.AddListener(ShowLevels);
         hud.PauseMenu.onClick.AddListener(ShowLevels);
         hud.ResultMenu.onClick.AddListener(ShowLevels);
-        hud.LevelOne.onClick.AddListener(() => SelectLevel(1));
-        hud.LevelTwo.onClick.AddListener(() => SelectLevel(2));
         RefreshSettings();
         hud.ShowIntro(level, ProgressStore.GetBestScore(level.LevelId));
         RefreshHUD();
+    }
+
+    private void EnsureAllLevelsLoaded()
+    {
+        if (levels == null || levels.Length < 10)
+        {
+            var list = new System.Collections.Generic.List<LevelConfig>();
+            for (int i = 1; i <= 10; i++)
+            {
+                LevelConfig cfg = null;
+                if (levels != null)
+                {
+                    foreach (var c in levels) if (c != null && c.LevelId == i) cfg = c;
+                }
+#if UNITY_EDITOR
+                if (cfg == null)
+                    cfg = UnityEditor.AssetDatabase.LoadAssetAtPath<LevelConfig>(string.Format("Assets/Data/Levels/Level{0:D2}.asset", i));
+#endif
+                if (cfg != null) list.Add(cfg);
+            }
+            if (list.Count > 0) levels = list.ToArray();
+        }
     }
 
     private void Update()
@@ -105,17 +126,41 @@ public sealed class GameManager : MonoBehaviour
         if (Session.State != RoundState.Playing) return;
         Vector2 position = target.Position;
         Color color = target.Tint;
+
+        if (target.Kind == TargetKind.Boss && !target.Damage())
+        {
+            feedback.PlayTap(Session.Combo);
+            hud.Pop(position, 10, color, feedback.ReducedMotion);
+            hud.HitJuice(Session.Combo);
+            hud.SetHint("BOSS HIT! (" + target.Health + "/" + target.MaxHealth + ")", "Keep tapping to destroy the Golden Core!");
+            return;
+        }
+
         pool.Release(target);
         tutorialStarted = true;
         hud.HideTapHand();
+
         int points = Session.Tap();
+        if (target.Kind == TargetKind.Golden)
+        {
+            int bonus = 50;
+            points += bonus;
+            hud.SetHint("GOLDEN TARGET! +" + (points), "Golden bonus awarded!");
+        }
+        else if (target.Kind == TargetKind.Time)
+        {
+            Session.Tick(-3.0f); // Add 3s back to clock
+            hud.SetHint("TIME BUBBLE! +3 SECONDS", "Extra time added to clock!");
+        }
+
         feedback.PlayTap(Session.Combo);
         hud.Pop(position, points, color, feedback.ReducedMotion);
         hud.HitJuice(Session.Combo);
         RefreshHUD();
+
         if (Session.State == RoundState.Results) { Finish(); return; }
         if (level.Objective == ObjectiveKind.Score)
-            hud.SetHint(Session.GoalMet ? "GOAL MET! KEEP SCORING" : "DIFFERENT SIZES, SAME POINTS", Session.GoalMet ? "Keep your streak until time runs out" : "Reach " + level.TargetScore + " points before time runs out");
+            hud.SetHint(Session.GoalMet ? "GOAL MET! KEEP SCORING" : "BUILD YOUR SCORE", Session.GoalMet ? "Keep your streak until time runs out" : "Reach " + level.TargetScore + " points before time runs out");
         else if (Session.Hits < 3) hud.SetHint("NICE TAP! +" + points, "Each target adds points. Keep going!");
         else if (Session.Hits < 5) hud.SetHint("BUILD YOUR COMBO", "Tap targets before their rings run out");
         else hud.SetHint(Session.Combo >= 5 ? "KEEP THE STREAK ALIVE" : "YOU'VE GOT THIS", "Tap " + (level.RequiredTaps - Session.Hits) + " more to finish");
@@ -167,7 +212,7 @@ public sealed class GameManager : MonoBehaviour
     {
         ProgressStore.AbandonRound(roundId); roundId = null; roundFinalized = false;
         pool.Clear(); hud.ClearFeedback(); hud.HideTapHand(); spawner.Reset();
-        Session = new RoundSession(level.Rules); tutorialStarted = false; hud.ShowLevels(); RefreshHUD();
+        Session = new RoundSession(level.Rules); tutorialStarted = false; hud.ShowLevels(levels, SelectLevel); RefreshHUD();
     }
     public void NextLevel()
     {

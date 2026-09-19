@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9218bab79c640ef96f356711932423c, type: 3}
+  m_Name: Level06
+  m_EditorClassIdentifier:
+  displayName: GOLDEN OPPORTUNITY
+  levelId: 6
+  objective: 1
+  targetScore: 1500
+  firstTapTutorial: 0
+  targetSizes: []
+  duration: 45
+  requiredTaps: 20
+  basePoints: 10
+  spawnInterval: 0.65
+  targetLifetime: 4.2
+  maxTargets: 5
+  targetSize: 100
+  targetSpacing: 24
+  movingTargets: 0
+  goldenChance: 0.25
+  timeChance: 0
+  isBossLevel: 0
+  bossHealth: 1
+  twoStarScore: 1000
+  threeStarCombo: 15
+  coinReward: 125
+  xpReward: 60

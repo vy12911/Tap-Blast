@@ -18,11 +18,11 @@ namespace TapBlast
                 targets[i].Initialize(tapped, expired);
             }
         }
-        public bool Spawn(Vector2 position, float size, float lifetime, Color color, bool tutorial, bool reducedMotion)
+        public bool Spawn(Vector2 position, float size, float lifetime, Color color, bool tutorial, bool reducedMotion, TargetKind kind = TargetKind.Normal, Vector2 moveVelocity = default, int health = 1)
         {
             for (int i = 0; i < targets.Length; i++) if (!targets[i].Active)
             {
-                targets[i].Spawn(position, size, lifetime, color, tutorial, reducedMotion); ActiveCount++; return true;
+                targets[i].Spawn(position, size, lifetime, color, tutorial, reducedMotion, kind, moveVelocity, health); ActiveCount++; return true;
             }
             return false;
         }
@@ -35,7 +35,7 @@ namespace TapBlast
         public void Tick(float delta, bool reducedMotion) { for (int i = 0; i < targets.Length; i++) targets[i].Tick(delta, reducedMotion); }
         public void Clear() { for (int i = 0; i < targets.Length; i++) targets[i].Release(); ActiveCount = 0; }
         public void SetInteractable(bool value) { for (int i = 0; i < targets.Length; i++) targets[i].SetInteractable(value); }
-        public void ClampToArena(Rect bounds, float margin) { for (int i = 0; i < targets.Length; i++) if (targets[i].Active) targets[i].MoveInside(bounds, margin); }
+        public void ClampToArena(Rect bounds, float margin) { for (int i = 0; i < targets.Length; i++) if (targets[i].Active) targets[i].Bounce(bounds, margin); }
         public void Dispose() { for (int i = 0; i < targets.Length; i++) if (targets[i] != null) UnityEngine.Object.Destroy(targets[i].gameObject); }
     }
 }

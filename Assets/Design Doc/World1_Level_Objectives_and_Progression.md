@@ -1,80 +1,38 @@
-# World 1 Level Objectives & Progression Guide
+# World 1 objectives and progression
 
-This document defines the complete level requirements, star criteria, rewards, and player XP leveling formulas for **World 1 (Levels 1 to 10)** in Tap Blast.
+The supplied GDD v1.0 page 12 is the basis for the primary objectives below. This guide replaces the older tap-count substitutes for combo/collection levels and the score-only boss objective. The GDD's early “5x”, “10x” and “15x” goals are interpreted as streak lengths, not scoring multipliers.
 
----
+| Level | Name | Primary objective | Base time | Two-star score | Three-star combo | Coins | XP |
+|---|---|---|---|---|---|---|---|
+| 1 | FIRST SPARK | 20 taps | 60s | 240 | 20 | 50 | 25 |
+| 2 | SIZE IT UP | 500 points | 45s | 750 | 20 | 75 | 35 |
+| 3 | STREAK STARTER | 5-hit best streak | 45s | 600 | 15 | 85 | 40 |
+| 4 | PRECISION PUSH | 1,000 points | 45s | 1,250 | 15 | 100 | 45 |
+| 5 | ON THE MOVE | 10-hit best streak | 45s | 800 | 15 | 110 | 50 |
+| 6 | GOLDEN OPPORTUNITY | 3 Golden targets | 45s | 1,800 | 15 | 125 | 60 |
+| 7 | FAST & FURIOUS | 2,000 points | 40s | 2,500 | 20 | 140 | 70 |
+| 8 | TICK TOCK | 3 Time Bubbles | 35s | 1,400 | 20 | 150 | 75 |
+| 9 | MASTER STREAK | 15-hit best streak | 45s | 1,600 | 25 | 175 | 85 |
+| 10 | GOLDEN CORE | Destroy the 5-hit Core | 50s | 3,000 | 25 | 250 | 100 |
 
-## 🎯 World 1 Level Objectives & Requirements
+## Completion and mastery
 
-| Level | Name | Objective Type | ⏱️ Time | Primary Requirement (1 Star) | ⭐⭐ 2 Stars Goal | ⭐⭐⭐ 3 Stars Goal (Mastery) | Coins | XP |
-|---|---|---|---|---|---|---|---|---|
-| **Level 01** | **FIRST SPARK** | `Taps (0)` | 60s | Tap **20 targets** within 60s | Score **240+** | Score **240+** + 0 misses + 20x combo | 50 | 25 |
-| **Level 02** | **SIZE IT UP** | `Score (1)` | 45s | Score **500 points** within 45s | Score **750+** | Score **750+** + 0 misses + 20x combo | 75 | 35 |
-| **Level 03** | **STREAK STARTER** | `Taps (0)` | 45s | Tap **25 targets** with combo focus within 45s | Score **320+** | Score **320+** + 0 misses + 15x combo | 85 | 40 |
-| **Level 04** | **PRECISION PUSH** | `Score (1)` | 45s | Score **1,000 points** (small target sizes 85–95px) within 45s | Score **750+** | Score **750+** + 0 misses + 15x combo | 100 | 45 |
-| **Level 05** | **ON THE MOVE** | `Taps (0)` | 45s | Tap **30 moving targets** (drifting velocity) within 45s | Score **700+** | Score **700+** + 0 misses + 15x combo | 110 | 50 |
-| **Level 06** | **GOLDEN OPPORTUNITY** | `Score (1)` | 45s | Score **1,500 points** (Golden bonus targets +50 pts) within 45s | Score **1,000+** | Score **1,000+** + 0 misses + 15x combo | 125 | 60 |
-| **Level 07** | **FAST & FURIOUS** | `Score (1)` | 40s | Score **2,000 points** (0.5s spawn acceleration) within 40s | Score **950+** | Score **950+** + 0 misses + 20x combo | 140 | 70 |
-| **Level 08** | **TICK TOCK** | `Taps (0)` | 35s | Tap **30 targets** (+3s Time Bubbles) within 35s | Score **1,100+** | Score **1,100+** + 0 misses + 20x combo | 150 | 75 |
-| **Level 09** | **MASTER STREAK** | `Taps (0)` | 45s | Tap **35 targets** without missing within 45s | Score **1,000+** | Score **1,000+** + 0 misses + 25x combo | 175 | 85 |
-| **Level 10** | **GOLDEN CORE** | `Score (1)` | 50s | Score **3,000 points** & Destroy 5-hit Boss target within 50s | Score **1,250+** | Score **1,250+** + 0 misses + 25x combo | 250 | 100 |
+- Level 1 finishes immediately on its twentieth tap; the clock starts with its tutorial tap.
+- Levels 2–10 start their clock after countdown and finish at timeout. Meeting the objective secures a win while leaving time for mastery. Briefings and HUD communicate this.
+- One star: achieve the primary objective. Two: also meet the score threshold. Three: also have zero expired targets and meet the best-combo threshold.
+- Misses break the current streak but do not erase a previously reached best streak. Normal taps never count toward special collection goals. Core health damage is not Core destruction.
+- Timings, star scores and rewards are tunable implementation choices rather than fixed GDD values. Score-level two-star thresholds are higher than the winning score. The Unity World 1 harness checks that an ideal clean run can reach all three stars with the actual spawn pacing.
 
----
+## Mechanics
 
-## ⚡ Level Mechanics Breakdown
+Level 2 cycles 144/100/112px normal targets. Level 4 uses 85/95px targets worth 15 base points. Level 5 introduces movement, with boundaries enforced every pooled tick. Level 6 starts with a Golden target and guarantees regular Golden opportunities; Golden targets give 100 base points multiplied by combo. Level 7 accelerates from 0.75s to 0.5s spawns over 20 seconds. Level 8 starts with a Time Bubble and guarantees regular opportunities; each adds 3 seconds. At most six Time Bubbles spawn per round (up to 18 extra seconds). Level 9 combines movement and specials with a higher streak goal. Level 10 begins with a 180px, 5-hit Core whose health ring remains visible until destruction.
 
-- **Level 1 ("FIRST SPARK")**: Introduces the animated first-tap tutorial hand. Clock starts on the first successful tap.
-- **Level 2 ("SIZE IT UP")**: Target diameters cycle between 144px, 100px, and 112px to test accuracy.
-- **Level 3 ("STREAK STARTER")**: Focuses on building combo streaks up to 15x without letting target rings expire.
-- **Level 4 ("PRECISION PUSH")**: Small target diameters (85px and 95px) awarding 15 base points.
-- **Level 5 ("ON THE MOVE")**: Targets drift inside the arena, bouncing off screen boundaries.
-- **Level 6 ("GOLDEN OPPORTUNITY")**: Spawns rare Golden targets awarding **+50 bonus points** on hit.
-- **Level 7 ("FAST & FURIOUS")**: Spawn rate accelerates to 0.5 seconds with up to 6 active targets simultaneously.
-- **Level 8 ("TICK TOCK")**: Spawns Time Bubbles that add **+3 seconds** back onto the timer clock when tapped.
-- **Level 9 ("MASTER STREAK")**: Advanced speed and streak challenge requiring a 25x combo for 3 stars.
-- **Level 10 ("GOLDEN CORE")**: World 1 finale featuring a giant **5-hit Mini-Boss target** with a health ring indicator.
+## Player XP and saves
 
----
+Successful rounds and successful replays grant the full configured coin/XP reward. Failed or abandoned rounds grant neither. Profile level is `1 + TotalXP / 100`; XP within that level is `TotalXP % 100`. Results identify a level-up when a 100-XP boundary is crossed.
 
-## 📈 XP & Player Leveling System
+Per-level best scores and stars are stored independently. Finishing a level with at least one star unlocks the next. Rewards and the consumed level-bound round token are saved together before the result animation. Existing saves remain valid; previously earned records are not removed when objectives are updated.
 
-### 1. How XP is Earned
-- **Winning Rounds**: Completing any level round successfully grants the level's configured XP payout:
-  - **Level 01**: 25 XP
-  - **Level 02**: 35 XP
-  - **Level 03**: 40 XP
-  - **Level 04**: 45 XP
-  - **Level 05**: 50 XP
-  - **Level 06**: 60 XP
-  - **Level 07**: 70 XP
-  - **Level 08**: 75 XP
-  - **Level 09**: 85 XP
-  - **Level 10**: 100 XP
-- **Replays Included**: Replaying completed levels continues to award full Coins and XP.
-- **Failed / Abandoned Rounds**: If a round expires before meeting the objective or is exited early via Pause menu, **0 XP and 0 Coins** are granted.
+## Content boundary
 
----
-
-### 2. Step-by-Step: How the Player Level Increases
-
-1. **Starting State**: All new players begin at **Player Level 1** with `0 Total XP`.
-2. **XP Accumulation**: Earned XP accumulates across all rounds into a single persistent counter (`TotalXP`) saved in `PlayerPrefs` via [`ProgressStore.cs`](file:///d:/own/tap%20blast/Tap-Blast/Assets/Scripts/Data/ProgressStore.cs).
-3. **Mathematical Formula**:
-   $$\text{Player Level} = 1 + \left\lfloor \frac{\text{Total XP}}{100} \right\rfloor$$
-   *(In C# code: `1 + TotalXP / 100`)*
-4. **Milestone Level Thresholds**:
-   - `0 – 99 Total XP` $\rightarrow$ **Player Level 1**
-   - `100 – 199 Total XP` $\rightarrow$ **Player Level 2** *(Crossed at 100 XP)*
-   - `200 – 299 Total XP` $\rightarrow$ **Player Level 3** *(Crossed at 200 XP)*
-   - `300 – 399 Total XP` $\rightarrow$ **Player Level 4** *(Crossed at 300 XP)*
-   - `400 – 499 Total XP` $\rightarrow$ **Player Level 5** *(Crossed at 400 XP)*
-   - `500 – 599 Total XP` $\rightarrow$ **Player Level 6** *(Crossed at 500 XP)*
-   - `1,000+ Total XP` $\rightarrow$ **Player Level 11+**
-
-5. **Level-Up UI Detection & Banner**:
-   - At the end of each round, [`GameHUD.cs`](file:///d:/own/tap%20blast/Tap-Blast/Assets/Scripts/UI/GameHUD.cs) checks if a 100 XP boundary was crossed during that specific round:
-     ```csharp
-     bool leveledUp = receipt.TotalXP / 100 > (receipt.TotalXP - receipt.XP) / 100;
-     ```
-   - If `leveledUp == true`, the UI displays a gold **"LEVEL UP! PLAYER LEVEL X"** banner, animates the XP bar fill, and updates the player level tag across all menus.
-
+The detailed GDD campaign introduces Chain at Level 11 and Bombs at Level 16, with later power-up/Perfect/Ultimate progression. These are outside this World 1 change. The general MVP list elsewhere in the PDF is a separate scope recommendation, not the first-ten-level mechanic schedule.

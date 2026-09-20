@@ -33,7 +33,8 @@ MonoBehaviour:
   timeChance: 0
   isBossLevel: 0
   bossHealth: 1
-  twoStarScore: 750
+  twoStarScore: 1250
   threeStarCombo: 15
   coinReward: 100
   xpReward: 45
+  mechanicHint: Small targets award 15 base points. Tap carefully to reach 1,000.

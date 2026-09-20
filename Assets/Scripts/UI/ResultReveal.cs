@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,14 +7,14 @@ namespace TapBlast
     /// <summary>Presentation only. Never grants rewards; replay may interrupt this safely.</summary>
     public sealed class ResultReveal
     {
-        private readonly Text score, best;
+        private readonly TMP_Text score, best;
         private readonly Image[] stars;
         private readonly CanvasGroup rewards;
         private float elapsed;
         private int finalScore, finalStars, displayedScore = -1;
         private bool active;
         public bool IsComplete => !active;
-        public ResultReveal(Text score, Text best, Image[] stars, CanvasGroup rewards)
+        public ResultReveal(TMP_Text score, TMP_Text best, Image[] stars, CanvasGroup rewards)
         { this.score = score; this.best = best; this.stars = stars; this.rewards = rewards; }
         public void Begin(int points, int earnedStars, bool reducedMotion)
         {

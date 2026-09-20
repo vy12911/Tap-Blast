@@ -59,12 +59,46 @@ internal static class RoundSessionChecks
             s = new RoundSession(levelTwo); s.Reset(); s.StartPlaying(); s.Tap(); s.Tick(45);
             Check(!s.Won && s.Stars == 0, "Level 2 fails below 500 points");
             s.Reset(); Check(s.LevelId == 2 && s.Score == 0 && s.RemainingTime == 45, "Level 2 replay resets state and retains its rules");
-            var level10 = new RoundRules(50, 20, 10, 3800, 25, ObjectiveKind.Score, 3000, 10);
+            var level10 = new RoundRules(50, 20, 10, 3000, 25, ObjectiveKind.Boss, 3000, 10);
             s = new RoundSession(level10); s.Reset(); s.StartPlaying();
             Check(s.LevelId == 10 && s.State == RoundState.Playing, "Level 10 initializes correctly");
-            while (s.Score < 3000) s.Tap();
-            Check(s.GoalMet, "Level 10 score goal met");
+            for (int i = 0; i < 150; i++) s.Tap();
+            Check(!s.GoalMet, "High score cannot replace destroying the Core");
+            for (int i = 0; i < 4; i++) s.Tap(TargetKind.Boss, false);
+            Check(s.BossesDestroyed == 0 && !s.GoalMet, "Partial Core damage does not satisfy objective");
+            s.Tap(TargetKind.Boss, true);
+            Check(s.BossesDestroyed == 1 && s.GoalMet && s.State == RoundState.Playing, "Core destruction earns goal and leaves time for mastery");
             s.Tick(50); Check(s.Won, "Level 10 completed successfully");
+            s.Reset(); Check(s.BossesDestroyed == 0 && !s.GoalMet, "Replay clears Core objective");
+            foreach (int goal in new[] { 5, 10, 15 })
+            {
+                s = new RoundSession(new RoundRules(45, 20, 10, 600, 20, ObjectiveKind.Combo, 500, 3, goal));
+                s.Reset(); s.StartPlaying();
+                for (int i = 0; i < 40; i++) { s.Tap(); s.Miss(); }
+                Check(!s.GoalMet, "Total taps cannot replace a " + goal + "-hit streak");
+                for (int i = 0; i < goal; i++) s.Tap();
+                Check(s.GoalMet && s.State == RoundState.Playing, "Streak goal " + goal + " allows timed mastery");
+                s.Miss(); s.Tick(45);
+                Check(s.Won && s.Stars < 3, "Reached streak remains earned but expiry prevents mastery");
+            }
+            s = new RoundSession(new RoundRules(45, 20, 10, 1800, 15, ObjectiveKind.Golden, 500, 6, 3));
+            s.Reset(); s.StartPlaying();
+            Check(s.Tap(TargetKind.Golden) == 100 && s.Score == 100 && s.GoldenHits == 1, "Golden score and collection commit together");
+            s.Tap(); s.Tap(); s.Tap();
+            Check(s.Tap(TargetKind.Golden) == 125 && s.Score == 255, "Golden value uses the current combo multiplier");
+            Check(!s.GoalMet, "Normal taps do not count as Golden collection");
+            s.Tap(TargetKind.Golden); s.Tick(45); Check(s.Won && s.Stars == 1, "Three Golden targets satisfy collection without forcing two stars");
+            s.Reset(); Check(s.GoldenHits == 0 && s.TimeHits == 0, "Replay resets special collection counters");
+            s = new RoundSession(new RoundRules(35, 20, 10, 1400, 20, ObjectiveKind.Time, 500, 8, 3));
+            s.Reset(); s.StartPlaying(); s.Tick(5); s.Tap(TargetKind.Time);
+            Check(s.RemainingTime == 33 && s.TimeHits == 1 && s.Score == 10, "Time Bubble adds three seconds and normal tap points");
+            s.Pause(); s.Tap(TargetKind.Time); s.Tick(5);
+            Check(s.RemainingTime == 33 && s.TimeHits == 1, "Pause rejects special rewards and clock changes");
+            s.Resume(); s.Tap(TargetKind.Time); s.Tap(TargetKind.Time); s.Tick(100);
+            Check(s.Won && s.TimeHits == 3, "Time collection goal completes at timeout");
+            float finishedTime = s.RemainingTime; int finishedScore = s.Score;
+            s.Tap(TargetKind.Time); s.Tap(TargetKind.Golden);
+            Check(s.RemainingTime == finishedTime && s.Score == finishedScore && s.TimeHits == 3, "Results reject late special taps");
             Console.WriteLine(checks + " round-rule checks passed."); return 0;
         }
         catch (Exception e) { Console.Error.WriteLine(e); return 1; }

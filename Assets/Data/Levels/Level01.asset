@@ -28,3 +28,4 @@ MonoBehaviour:
   threeStarCombo: 20
   coinReward: 50
   xpReward: 25
+  mechanicHint: Tap glowing circles before they fade. Your first tap starts the clock.

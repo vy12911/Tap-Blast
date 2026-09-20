@@ -21,14 +21,14 @@
   - **World 1 (Levels 1–10 Fully Implemented)**:
     - **Level 1 ("FIRST SPARK")**: Tap 20 targets within 60s (First-tap tutorial hand).
     - **Level 2 ("SIZE IT UP")**: Score 500 points within 45s (Cycling target diameters).
-    - **Level 3 ("STREAK STARTER")**: Score 600 points with 15x combo goal.
+    - **Level 3 ("STREAK STARTER")**: Reach a 5-hit streak; timed mastery play.
     - **Level 4 ("PRECISION PUSH")**: Score 1,000 points (Small target sizes 85–95px).
-    - **Level 5 ("ON THE MOVE")**: Score 1,200 points (Drifting/moving targets).
-    - **Level 6 ("GOLDEN OPPORTUNITY")**: Score 1,500 points (Golden targets +50 bonus pts).
+    - **Level 5 ("ON THE MOVE")**: Reach a 10-hit streak (drifting/moving targets).
+    - **Level 6 ("GOLDEN OPPORTUNITY")**: Tap 3 Golden targets (100 base points each before combo multiplier).
     - **Level 7 ("FAST & FURIOUS")**: Score 2,000 points (0.5s spawn acceleration).
-    - **Level 8 ("TICK TOCK")**: Score 1,800 points (Time Bubbles adding +3s).
-    - **Level 9 ("MASTER STREAK")**: Score 2,500 points (Advanced combo goal).
-    - **Level 10 ("GOLDEN CORE")**: Score 3,000 points (World 1 Mini-Boss target).
+    - **Level 8 ("TICK TOCK")**: Collect 3 Time Bubbles (+3s each; at most six spawn per round).
+    - **Level 9 ("MASTER STREAK")**: Reach a 15-hit streak (advanced combo challenge).
+    - **Level 10 ("GOLDEN CORE")**: Destroy the 5-hit Golden Core; continue timed play for score mastery.
 - **Star Rating (1–3 Stars per Level)**:
   - 1 Star: Complete level / meet primary goal.
   - 2 Stars: Reach higher score threshold.
@@ -44,10 +44,10 @@
 - **Full GDD File**: [`Assets/Design Doc/Tap_Blast_FULL_GDD_v1.0.pdf`](file:///d:/own/tap%20blast/Tap-Blast/Assets/Design%20Doc/Tap_Blast_FULL_GDD_v1.0.pdf) — Production Design document outlining the 100-level campaign, target types (Normal, Golden, Time, Bomb, Perfect, Rainbow, Chain), power-ups, Ultimate meter, daily challenges, cosmetics, economy, and technical architecture.
 - **World 1 Level & XP Guide**: [`Assets/Design Doc/World1_Level_Objectives_and_Progression.md`](file:///d:/own/tap%20blast/Tap-Blast/Assets/Design%20Doc/World1_Level_Objectives_and_Progression.md) — Detailed table of level requirements, star thresholds, target mechanics, and player XP leveling formulas.
 - **Authoritative Implementation References**:
-  1. [`README.md`](file:///d:/own/tap%20blast/Tap-Blast/README.md) — Level 1 & Level 2 active rules, scoring formulas, rewards, performance standards, and tuning instructions.
+  1. [`README.md`](file:///d:/own/tap%20blast/Tap-Blast/README.md) — World 1 active rules, scoring formulas, rewards, performance standards, and tuning instructions.
   2. [`Documentation/Canvas-Editing.md`](file:///d:/own/tap%20blast/Tap-Blast/Documentation/Canvas-Editing.md) — Canvas object hierarchy, visual feedback rules, and UI prefab boundaries.
 - **Future GDD Features (Reserved for Higher Levels)**:
-  - Targets: Golden targets (L6), Time targets (L8), Chain targets (L11), Bombs (L16), moving targets.
+  - Targets: Chain targets (L11), Bombs (L16), and later Perfect/Rainbow target types.
   - Systems: Power-ups, Perfect bonuses, Ultimate meter.
 
 ---
@@ -63,7 +63,7 @@
 | [`Assets/Scripts/Targets/`](file:///d:/own/tap%20blast/Tap-Blast/Assets/Scripts/Targets/) | `TargetPool` (fixed preallocated target pool), `TargetSpawner` (positioning/spacing), `TargetView` (view & hit testing). |
 | [`Assets/Scripts/UI/`](file:///d:/own/tap%20blast/Tap-Blast/Assets/Scripts/UI/) | `GameHUD.cs`, `GameHUD.Juice.cs`, `ResultReveal.cs`, `TapHandHint.cs` — Canvas bindings and animation. |
 | [`Assets/Scripts/Feedback/FeedbackPlayer.cs`](file:///d:/own/tap%20blast/Tap-Blast/Assets/Scripts/Feedback/FeedbackPlayer.cs) | Audio synthesis, screen shake, haptics/vibration, reduced-motion preferences. |
-| [`Assets/Data/Levels/`](file:///d:/own/tap%20blast/Tap-Blast/Assets/Data/Levels/) | Authored level configs (`Level01.asset`, `Level02.asset`). |
+| [`Assets/Data/Levels/`](file:///d:/own/tap%20blast/Tap-Blast/Assets/Data/Levels/) | Authored level configs (`Level01.asset` through `Level10.asset`). |
 | [`Tools/`](file:///d:/own/tap%20blast/Tap-Blast/Tools/) | PowerShell validation scripts and automated Unity editor smoke test harness. |
 
 ---
@@ -74,6 +74,7 @@
    - **No per-target `Update()` calls**, `Coroutines`, physics simulation, or `LINQ` in gameplay execution loops.
    - Use fixed preallocated pools (`TargetPool`, pooled feedback particles). Do not instantiate/destroy targets dynamically during gameplay.
 2. **UI Architecture Rules**:
+   - **Always use `TMPro.TMP_Text` for UI text fields, parameters, arrays, and component lookups.** Author Canvas labels as `TextMeshProUGUI`, assign a TMP font asset, and wire the saved prefab/scene references. Do not introduce `UnityEngine.UI.Text` or construct replacement text objects at runtime.
    - **Do NOT reconstruct UI elements via script**. The UI is built visually in `Assets/Prefabs/UI/GameCanvas.prefab` (`Assets/Scenes/Level01.unity`). Scripts only bind fields, update text, and toggle panel visibility.
    - Dynamic screens fit inside the 720 × 1280 reference safe area frame.
 3. **Pure C# Logic Decoupling**:
@@ -88,7 +89,7 @@
 Before concluding any work, verify your changes by running the CLI validation suite from PowerShell:
 
 ```powershell
-# Run pure C# round-rules validation (24 rule checks):
+# Run pure C# round-rules validation (48 rule checks):
 powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Validate-Level1.ps1
 ```
 

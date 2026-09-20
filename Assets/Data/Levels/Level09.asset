@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   displayName: MASTER STREAK
   levelId: 9
-  objective: 0
+  objective: 2
   targetScore: 2500
   firstTapTutorial: 0
   targetSizes: []
@@ -31,7 +31,9 @@ MonoBehaviour:
   timeChance: 0.10
   isBossLevel: 0
   bossHealth: 1
-  twoStarScore: 1000
+  twoStarScore: 1600
   threeStarCombo: 25
   coinReward: 175
   xpReward: 85
+  objectiveCount: 15
+  mechanicHint: Land 15 hits in a row while targets move. Expiry breaks your streak.

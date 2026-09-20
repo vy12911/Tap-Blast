@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   displayName: STREAK STARTER
   levelId: 3
-  objective: 0
+  objective: 2
   targetScore: 600
   firstTapTutorial: 0
   targetSizes: []
@@ -31,7 +31,9 @@ MonoBehaviour:
   timeChance: 0
   isBossLevel: 0
   bossHealth: 1
-  twoStarScore: 320
+  twoStarScore: 600
   threeStarCombo: 15
   coinReward: 85
   xpReward: 40
+  objectiveCount: 5
+  mechanicHint: Land 5 hits in a row. An expired target resets your current streak.

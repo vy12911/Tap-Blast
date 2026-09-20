@@ -1,124 +1,70 @@
-# Tap Blast — Levels 1 and 2
+# Tap Blast — World 1 (Levels 1–10)
 
-Unity **6000.3.17f1**, using the existing URP project, uGUI and Input System packages.
+Unity **6000.3.17f1**, URP, uGUI and Input System. Use a **9:16** Game view (720 × 1280 reference frame).
 
-## Play
+All UI text uses **TextMeshProUGUI** components and **`TMPro.TMP_Text`** script bindings. Always use TMP for new labels. Prefabs retain their saved scene references and use the shared Liberation Sans SDF font in `Assets/TextMesh Pro/`; no text UI is rebuilt at runtime.
 
-1. Let Unity finish importing and compiling the new assets.
-2. Choose **Tap Blast > Open Campaign**, then press **Play**.
-3. Select **Let's Play**. Complete Level 1, then select **Next Level** for Level 2.
+## Play and campaign flow
 
-`Assets/Scenes/Level01.unity` is the shared campaign entry scene and the only enabled build scene. It references both level configurations, reusing the UI and pool across levels. The editor assigns it as the Play Mode start scene when none is assigned. **Open Level 1** remains an alias for the shared scene.
+Open **Tap Blast > Open Campaign**, enter Play Mode and select **Let's Play**. The shared `Assets/Scenes/Level01.unity` scene references all ten level configurations directly, including in player builds. Completing a level unlocks the next one. Level selection contains ten authored buttons in `Assets/Prefabs/UI/GameCanvas.prefab`; scripts bind and update them without constructing UI.
 
-First launch opens Level 1's briefing. Later launches restore the last selected unlocked level. The briefing's back arrow, Pause and Results open level selection. Exiting a paused round abandons the attempt without rewards. Level 2 unlocks when Level 1 earns at least one star; existing completed Level 1 saves automatically unlock it. Level 2 offers replay and level selection, without an unavailable Level 3 button.
+Flow: briefing and reward preview → three-second countdown → gameplay → score/star/reward results → replay, next level or level selection. First launch opens Level 1; later launches restore the selected unlocked level. Level 10 has replay and level selection, without a nonexistent Level 11 button.
 
-The scene contains the camera, 2D light, configured GameManager and an editable **Tap Blast UI** Canvas prefab instance. HUD, menus, input, tutorial hand and pooled effects are saved in the scene/prefab hierarchy and are visible outside Play Mode. Scripts bind references, update game values and animate these elements; they do not construct the UI. The four-target pool is prewarmed from the saved NormalTarget prefab at startup.
+Level 1 starts with a non-expiring target and tap-hand tutorial. Its clock starts with the first tap and the round finishes on target 20. Levels 2–10 start the clock after countdown and continue until timeout, allowing mastery after the primary goal is met. Their briefings explain this. Expired targets reset the current streak; a previously reached best-streak objective remains earned. Empty-space taps are ignored.
 
-Use a **9:16** Game view for a phone preview. The design uses a 720 × 1280 reference frame, uniformly fitted into the screen's safe area. Wider/taller displays retain comfortable margins; mobile orientation is portrait.
+## World 1 objectives
 
-## Level 1 rules
+These use the **suggested early-level objectives in the supplied GDD v1.0, page 12**. The GDD's “5x / 10x / 15x” combo objectives mean consecutive hits, not the separate score multiplier. Durations, exact sizes, pacing, star scores and rewards are implementation tuning values.
 
-- Three-second countdown, then one non-expiring tutorial target.
-- An animated tap hand points to the first target without intercepting input. It hides after the first tap and returns on restart/replay; reduced-motion mode uses a static hand.
-- The 60-second clock and regular spawning begin with the first successful tap.
-- Tap 20 normal targets to complete immediately.
-- Normal targets live for 4.5 seconds. An expired target resets the streak, but does not directly end Level 1.
-- Empty-space taps are ignored in this introductory level.
-- Normal colors are decorative and share identical scoring and behavior.
-- Score multipliers apply to the streak after the current hit; fractional scores round to the nearest integer, with halves rounded up.
-- A clean 20-target round scores 275 points.
+| Level | Primary objective | Base time | Two-star score | Three-star streak |
+|---|---|---|---|---|
+| 1 — First Spark | Tap 20 targets | 60s | 240 | 20 |
+| 2 — Size It Up | Score 500; cycling sizes | 45s | 750 | 20 |
+| 3 — Streak Starter | Reach a 5-hit streak | 45s | 600 | 15 |
+| 4 — Precision Push | Score 1,000; small targets | 45s | 1,250 | 15 |
+| 5 — On the Move | Reach a 10-hit streak; moving targets | 45s | 800 | 15 |
+| 6 — Golden Opportunity | Tap 3 Golden targets | 45s | 1,800 | 15 |
+| 7 — Fast & Furious | Score 2,000; accelerating spawns | 40s | 2,500 | 20 |
+| 8 — Tick Tock | Collect 3 Time Bubbles | 35s | 1,400 | 20 |
+| 9 — Master Streak | Reach a 15-hit streak | 45s | 1,600 | 25 |
+| 10 — Golden Core | Destroy the 5-hit Core | 50s | 3,000 | 25 |
 
-| Stars | Requirement |
-|---|---|
-| 1 | Complete the level |
-| 2 | Complete and score at least 240 |
-| 3 | Meet the two-star goal, miss no targets, and reach a 20-hit streak |
+One star requires the primary objective. Two stars also require the configured score. Three stars additionally require zero expired targets and the listed best streak. Score alone cannot replace collection, combo or Core objectives.
 
-Pause freezes target lifetimes, spawning, feedback and the clock. Escape toggles pause on desktop. Backgrounding the app pauses it; return through Resume. Restart and Replay clear targets, effects, score, timer and tutorial progress. Results persist the highest score and highest star count independently.
+See [the World 1 guide](Assets/Design%20Doc/World1_Level_Objectives_and_Progression.md) for rewards and tuning decisions.
 
-## Level 2 rules
+## Targets and scoring
 
-The GDD introduces **target sizes** with a **500-point objective**. The authored level is **Size It Up**:
+- Normal targets award 10 base points; Level 4's small targets award 15.
+- Golden targets award **100 base points**, using the low end of the GDD's 100–1,000 range. They update actual score and collection progress, not only feedback text. `goldenPoints` is tunable per level.
+- Time Bubbles award normal tap points and add **3 seconds** through the pure round rules. A maximum of six Time Bubbles can spawn per round, limiting added time to 18 seconds with the default tuning.
+- Golden and Time lessons start with the relevant target and guarantee another opportunity every fourth spawn, subject to the Time Bubble budget. Additional specials follow the configured probabilities.
+- Moving targets bounce inside the arena on every pooled tick, including after resizing. Movement continues in reduced-motion mode because it is a gameplay mechanic.
+- The Core spawns at round start, is larger than normal targets, never expires, and displays remaining health in its ring. Every hit scores and builds combo; only the fifth hit records destruction. Other targets continue spawning for score mastery.
+- Level 7 interpolates from 0.75s to 0.5s spawn intervals during its first 20 seconds.
+- Special targets have authored GOLD, +3s and CORE labels so color is not their only identifier.
 
-- Three-second countdown, then the 45-second clock starts immediately.
-- Normal targets cycle through 144, 100 and 112 reference-pixel diameters. All give 10 base points. The separate Small target type remains reserved for a later level.
-- Spawns every 0.75 seconds, 4.5-second lifetimes, maximum four active targets. Spacing accounts for the largest target and its pulse.
-- Reach 500 before timeout. Play continues after reaching the goal to allow score mastery; results appear at timeout.
-- 1 star: 500 points. 2 stars: 750. 3 stars: 750, no expired targets, and a best streak of at least 20.
-- Below 500 at timeout fails. Replay retains Level 2's rules and resets the attempt.
+Multipliers apply after the current hit: 1–4 = 1x, 5–9 = 1.25x, 10–19 = 1.5x, 20–29 = 2x, 30–49 = 3x, 50+ = 4x. Fractional scores round to the nearest integer, halves up. A clean Level 1 round scores 275.
 
-The GDD specifies the size mechanic and 500-point primary goal. Duration, diameters, pacing and mastery thresholds are tunable implementation defaults. Scores and stars are separate for each level; wallet, XP and player level are shared.
+## Progress, rewards and controls
 
-## Rewards and result presentation
+Coins, XP, best scores and stars persist locally per level. Every 100 XP advances the player profile. Successful replays award the configured rewards again; failure and abandonment grant none. Starting a round saves a unique level-bound token; completion consumes it with the saved rewards to prevent duplicate payout. Existing progress is retained when updating this campaign.
 
-Successful Level 1 rounds award **50 coins and 25 XP**; Level 2 awards **75 coins and 35 XP**, including successful replays. Failure and abandoned rounds grant neither. Rewards are tunable defaults, not fixed GDD values. Every 100 total XP advances the player level without affecting scoring. Coins are saved for future collection/shop features; this slice has no spending screen.
+Pause freezes targets, spawning, effects and time. Escape toggles pause; losing focus or backgrounding pauses the game. Restart/replay clear score, collections, boss state, targets, tutorial and feedback. Pause settings include sound, reduced motion and vibration.
 
-The briefing previews the completion reward and existing wallet. Results count the score up, reveal the personal-best message and stars in sequence, then fade in earned coins/XP, wallet totals, player level and XP progress. Reduced-motion mode shows the final state immediately. Replay stays usable during the animation.
+## Architecture and tuning
 
-Rewards are committed before any result animation. Starting a round saves a unique active token; completion consumes it together with balances, score and stars in one JSON PlayerPrefs record. Repeated completion, stale tokens after restart and incomplete sessions cannot pay again. Interrupting the reveal cannot duplicate or lose an already-saved award. This is local persistence, not server-authoritative or tamper-proof currency. Previous Level 1 best scores/stars migrate automatically without retroactively granting coins or XP.
+`RoundSession.cs` owns scoring, collection counts, combo objectives, time bonuses and stars with no Unity dependencies. `GameManager.cs` coordinates views, round state and persistence. Level mechanics, timing, values, objective counts, star thresholds and rewards are serialized in `Assets/Data/Levels/`. Pool capacity is preallocated from the largest configured level (six targets); no per-target Update, physics, coroutines or LINQ runs in gameplay loops.
 
-## Tuning
-
-For visual changes, edit `Assets/Prefabs/UI/GameCanvas.prefab` or its scene instance, and `Assets/Prefabs/Targets/NormalTarget.prefab`. **Tap Blast > Select Game Canvas** selects the shared Canvas. See [Canvas editing guide](Documentation/Canvas-Editing.md) for the hierarchy, feedback controls and GDD mechanic boundaries.
-
-The gameplay presentation now includes a layered neon city backdrop, star-emblem normal targets, pooled tap sparks/shockwaves, score/combo punch, GDD Fever threshold labels and sounds, MISS feedback and completion confetti. Reduced motion suppresses decorative movement; pause and replay preserve/reset effects with the round.
-
-Select **Tap Blast > Select Level 1 Settings** / **Select Level 2 Settings**, or the corresponding asset in `Assets/Data/Levels/`.
-
-Duration, objective, base score, spawn interval, target lifetime, capacity, size, spacing and star goals are serialized in this ScriptableObject. Adjust them outside Play Mode. Changes to capacity take effect on the next scene start because the pool is prewarmed once.
-
-These two levels leave out Bombs, Golden targets, moving targets, power-ups and Ultimate, consistent with the early campaign. Level IDs and progression routing currently support Levels 1 and 2. Later levels require extending the supported progression records and adding configs to the scene's level list.
-
-## Structure
-
-| Location | Responsibility |
-|---|---|
-| `Assets/Scripts/GameManager.cs` | Round lifecycle and coordination |
-| `Assets/Scripts/Core/RoundSession.cs` | Pure C# scoring, combo, timer, completion and stars |
-| `Assets/Scripts/Data/` | Level configuration and versioned local progress/settings |
-| `Assets/Scripts/Targets/` | Bounded spawning, circular pointer input and fixed target pool |
-| `Assets/Scripts/UI/` | Canvas bindings, safe-area fitting, result and pooled-feedback animation |
-| `Assets/Scripts/Feedback/` | Synthesized tap/result sounds, motion preference, completion vibration |
-| `Assets/Editor/` | Editor-only scene and configuration shortcuts |
-| `Assets/Data/Levels/` | Authored level assets |
-| `Tests/` | Executable rule checks |
-| `Tools/` | Local compilation checks and isolated Unity smoke harness |
-
-Runtime and editor scripts use separate assembly definitions. Editor utilities are excluded from player builds.
-
-## Performance choices
-
-- Four preallocated targets and ten preallocated feedback objects, shared across both levels without scene reloads. Pool capacity is chosen once from the largest configured capacity; there is no runtime pool growth.
-- One coordinator ticks all target lifetimes and animations. No per-target Update methods, physics simulation, coroutines or LINQ in gameplay loops.
-- Spawn positions use bounded attempts and minimum spacing; a saturated arena skips a spawn rather than forcing overlap.
-- Static HUD, targets and feedback use separate canvas boundaries to contain frequent UI geometry rebuilds.
-- Gameplay text is refreshed for events and timer-second changes. The brief result count-up updates text only when the displayed integer changes. Small strings can allocate on these events; this is not a zero-allocation claim.
-- Five small shared sprite assets are stored in Assets/Art/UI and referenced by Canvas Images. Four short mono audio clips are generated once and released on teardown. No runtime texture generation or post-processing bloom is required.
-- Decorative graphics do not receive raycasts. Targets use circular hit testing.
-- No global time-scale changes. Pausing is explicit round state.
-- Local saves occur on round start, results and settings changes, not during every tap or frame.
-- A 60 FPS cap is configured; actual device performance must still be measured on hardware.
-
-Sound, reduced motion and vibration can be toggled from Pause. Vibration uses the device's basic vibration on successful completion and major combo milestones; it is inactive in the editor. Audio is synthesized placeholder feedback, with no music track or commercial assets.
+Edit the authored Canvas and target prefab for presentation; see [Canvas editing](Documentation/Canvas-Editing.md). The GDD's detailed campaign places Chain and Bomb introductions at Levels 11 and 16. They, power-ups, Perfect and Ultimate remain outside this World 1 implementation, despite the broader MVP wish list elsewhere in the GDD.
 
 ## Validation
 
-From the project root:
-
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Validate-Level1.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Run-UnitySmoke.ps1 -Method RunWorld1
 ```
 
-The script uses Unity's installed compiler and .NET runtime, compiles runtime and editor sources against locally installed Unity/package assemblies, then runs 24 pure C# round-rule checks covering both levels. It writes results to `Logs/Validation/round-rules.txt`. This is a compile/rules check, not a substitute for Unity play testing or mobile profiling.
+The CLI compiles runtime/editor sources and runs pure C# checks. The World 1 Unity harness uses a disposable project and a separate save identity. It checks serialized campaign references, authored selection UI, objective routing, special targets, movement, acceleration, attainable mastery, rewards and duplicate protection. It advances the actual pooled gameplay logic in deterministic time steps while tapping available targets; it is not a human difficulty or touch-feel test.
 
-`Tools/UnitySmoke.cs` is an editor harness intended for a disposable project copy. It plays through UI raycasts, tutorial, pause, expiry, restart, win, saving, replay and timeout, and requests screenshots. It changes the disposable project's product name to isolate test saves. Do not place it in the production Assets folder.
-
-`powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Run-UnitySmoke.ps1` prepares and launches that copy using the existing local package cache. The process runs asynchronously; results appear in `Temp/Level1Validation/smoke-results.txt`, and the editor log is `Logs/Validation/unity-rewards.log`. The test saves are isolated under a separate product name.
-
-For the two-level campaign use `Tools/Run-UnitySmoke.ps1 -Method RunCampaign`. This verifies unlocks, level selection, the full timed Level 2 round, size variants, pause/replay/exit, separate records and rewards. Its report is `Temp/Level1Validation/campaign-results.txt`; screenshots are captured alongside it. After it exits, use `-Method VerifyCampaignPersistence` to check the saved campaign and Level 2 startup in a new Unity process.
-
-After the Canvas migration: runtime/editor compilation, **24 rule checks**, **564 Canvas/campaign checks**, **68 tutorial/replay smoke checks**, and **2 campaign restart checks** passed. The Canvas checks include persisted sprite/reference validation, retaining a designer text edit across Play Mode, no runtime UI reconstruction, pooled burst movement, paused effects and reduced-motion suppression. The campaign test plays through Level 1 and a full timed Level 2 round, including locking/unlocking, size variants, bounds, pool reuse, scoring, stars, pause, replay, abandonment, separate saves and level-bound reward protection. Restart verification checks both saved progress and the actual restored Level 2 briefing. The new level-selection, briefing, gameplay and result screens were visually reviewed. Captures are in `Documentation/Previews/`; reports are in `Logs/Validation/`.
-
-For the persistence pass, run `Tools/Run-UnitySmoke.ps1 -Method VerifyPersistence` after a successful full smoke run; it expects the deterministic test balances from that run. Unity's optional editor search index threw an unrelated exception during isolated batch startup; the harness recorded it separately.
-
-This change has not been validated in an Android/iOS build or on a physical device. Device vibration, touch feel, background/resume behavior on hardware and on-device profiling remain unverified. These require a device test pass; editor checks do not establish mobile performance.
+CLI reports: `Logs/Validation/round-rules.txt`. Unity report/captures: `Temp/Level1Validation/world1-*`. Unity log: `Logs/Validation/unity-world1.log`. Android/iOS builds, hardware touch, vibration, performance and difficulty still require device testing.

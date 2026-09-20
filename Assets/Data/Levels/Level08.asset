@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   displayName: TICK TOCK
   levelId: 8
-  objective: 0
+  objective: 4
   targetScore: 1800
   firstTapTutorial: 0
   targetSizes: []
@@ -31,7 +31,9 @@ MonoBehaviour:
   timeChance: 0.30
   isBossLevel: 0
   bossHealth: 1
-  twoStarScore: 1100
+  twoStarScore: 1400
   threeStarCombo: 20
   coinReward: 150
   xpReward: 75
+  objectiveCount: 3
+  mechanicHint: Collect 3 +3s targets. Each adds 3 seconds; up to 6 can appear.

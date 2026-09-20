@@ -5,14 +5,13 @@ using UnityEngine.UI;
 
 namespace TapBlast
 {
-    public enum TargetKind { Normal, Golden, Time, Boss }
-
     public sealed class TargetView : MonoBehaviour, IPointerDownHandler, ICanvasRaycastFilter
     {
         [SerializeField] private RectTransform rect;
         [SerializeField] private Image lifetimeRing;
         [SerializeField] private Image hitImage;
         [SerializeField] private Image glow;
+        [SerializeField] private GameObject normalSymbol, normalOutline, normalHighlight, goldenSymbol, timeSymbol, bossSymbol;
         private Action<TargetView> tapped, expired;
         private float age, lifetime;
         private bool tutorial, interactable;
@@ -32,7 +31,13 @@ namespace TapBlast
             rect.anchoredPosition = position; rect.sizeDelta = Vector2.one * size;
             rect.localScale = Vector3.one; age = 0; lifetime = seconds; tutorial = first;
             Kind = kind; velocity = moveVelocity; Health = MaxHealth = Mathf.Max(1, health);
-            Tint = kind == TargetKind.Golden ? UIArt.Gold : kind == TargetKind.Time ? new Color32(80, 240, 220, 255) : kind == TargetKind.Boss ? new Color32(255, 90, 160, 255) : tint;
+            normalSymbol.SetActive(kind == TargetKind.Normal);
+            normalOutline.SetActive(kind == TargetKind.Normal);
+            normalHighlight.SetActive(kind == TargetKind.Normal);
+            goldenSymbol.SetActive(kind == TargetKind.Golden);
+            timeSymbol.SetActive(kind == TargetKind.Time);
+            bossSymbol.SetActive(kind == TargetKind.Boss);
+            Tint = kind == TargetKind.Golden || kind == TargetKind.Boss ? UIArt.Gold : kind == TargetKind.Time ? new Color32(80, 240, 220, 255) : tint;
             hitImage.color = new Color(Tint.r, Tint.g, Tint.b, .52f);
             lifetimeRing.color = Tint; lifetimeRing.fillAmount = 1;
             glow.color = Tint;
@@ -62,10 +67,14 @@ namespace TapBlast
         public void Bounce(Rect bounds, float margin)
         {
             Vector2 p = rect.anchoredPosition;
-            if (p.x <= bounds.xMin + margin || p.x >= bounds.xMax - margin) velocity.x = -velocity.x;
-            if (p.y <= bounds.yMin + margin || p.y >= bounds.yMax - margin) velocity.y = -velocity.y;
-            rect.anchoredPosition = new Vector2(Mathf.Clamp(p.x, bounds.xMin + margin, bounds.xMax - margin), Mathf.Clamp(p.y, bounds.yMin + margin, bounds.yMax - margin));
+            float mx = Mathf.Min(margin, bounds.width * .5f), my = Mathf.Min(margin, bounds.height * .5f);
+            if (p.x <= bounds.xMin + mx) velocity.x = Mathf.Abs(velocity.x);
+            else if (p.x >= bounds.xMax - mx) velocity.x = -Mathf.Abs(velocity.x);
+            if (p.y <= bounds.yMin + my) velocity.y = Mathf.Abs(velocity.y);
+            else if (p.y >= bounds.yMax - my) velocity.y = -Mathf.Abs(velocity.y);
+            rect.anchoredPosition = new Vector2(Mathf.Clamp(p.x, bounds.xMin + mx, bounds.xMax - mx), Mathf.Clamp(p.y, bounds.yMin + my, bounds.yMax - my));
         }
+        public void KeepInside(Rect bounds) { if (Active) Bounce(bounds, rect.rect.width * .5125f + 18); }
 
         public void SetInteractable(bool value) { interactable = value; }
         public void Release() { Active = false; interactable = false; gameObject.SetActive(false); }

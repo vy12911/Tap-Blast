@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -5,7 +6,7 @@ namespace TapBlast
 {
     public sealed partial class GameHUD
     {
-        [SerializeField] private Text fever;
+        [SerializeField] private TMP_Text fever;
         [SerializeField] private Image feverLine;
         [SerializeField] private RectTransform[] confetti;
         [SerializeField] private CanvasGroup celebration;

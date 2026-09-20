@@ -1,9 +1,10 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace TapBlast
 {
-    /// <summary>Binds authored Canvas elements. Text updates on events/seconds;
+    /// <summary>Binds authored Canvas elements. TMP_Text updates on events/seconds;
     /// target and feedback canvases isolate frequent geometry rebuilds.</summary>
     public sealed partial class GameHUD : MonoBehaviour
     {
@@ -24,12 +25,12 @@ namespace TapBlast
         [field: SerializeField] public Button LevelOne { get; private set; }
         [field: SerializeField] public Button LevelTwo { get; private set; }
         [SerializeField] private GameObject levelSelect, introHero, sizePreview;
-        [SerializeField] private Text worldLabel, levelLabel, description, countdownGoal, selectionWallet, selectionOne, selectionTwo;
+        [SerializeField] private TMP_Text worldLabel, levelLabel, description, countdownGoal, selectionWallet;
         private LevelConfig currentConfig;
         [SerializeField] private RectTransform safeArea, frame;
         [SerializeField] private GameObject intro, pausePanel, results, countdownPanel;
-        [SerializeField] private Text score, timer, objective, combo, multiplier, hint, subhint, countdownText;
-        [SerializeField] private Text introName, introGoal, introBest, starRules, resultTitle, resultSubtitle, resultScore, resultStats, resultBest, resultHint;
+        [SerializeField] private TMP_Text score, timer, objective, combo, multiplier, hint, subhint, countdownText;
+        [SerializeField] private TMP_Text introName, introGoal, introBest, starRules, resultTitle, resultSubtitle, resultScore, resultStats, resultBest, resultHint;
         [SerializeField] private Image progressFill, timerFill;
         [SerializeField] private Image[] resultStars = new Image[3];
         [SerializeField] private Popup[] popups = new Popup[10];
@@ -42,7 +43,7 @@ namespace TapBlast
         [SerializeField] private TapHandHint tapHand;
         private ResultReveal resultReveal;
         private bool reducedMotion;
-        [SerializeField] private Text rewardPreview, rewardEarned, rewardBalance, playerProgress;
+        [SerializeField] private TMP_Text rewardPreview, rewardEarned, rewardBalance, playerProgress;
         [SerializeField] private Image xpFill;
         [SerializeField] private CanvasGroup rewardGroup;
         public void Initialize() { resultReveal = new ResultReveal(resultScore, resultBest, resultStars, rewardGroup); HideOverlays(); UpdateSafeArea(); }
@@ -51,7 +52,7 @@ namespace TapBlast
         [System.Serializable] private sealed class Popup
         {
             public RectTransform Root, RingRect;
-            public Text Label;
+            public TMP_Text Label;
             public Image Ring;
             public Image Core;
             public RectTransform[] Sparks;
@@ -73,9 +74,9 @@ namespace TapBlast
             currentConfig = config;
             worldLabel.text = "WORLD 01   /   " + config.DisplayName;
             levelLabel.text = config.LevelId.ToString("00");
-            countdownGoal.text = config.Objective == ObjectiveKind.Score ? "Reach " + config.TargetScore + " points" : "Find your first spark";
+            countdownGoal.text = config.GoalText;
             introHero.SetActive(config.LevelId == 1); sizePreview.SetActive(config.LevelId == 2);
-            description.text = config.Objective == ObjectiveKind.Score ? "Different sizes. Same " + config.BasePoints + " base points.\nKeep scoring until the timer runs out." : "Tap glowing circles before they fade.\nKeep your streak to multiply your score.";
+            description.text = config.MechanicHint + (config.FirstTapTutorial ? "" : "\nKeep playing for mastery until time runs out.");
             for (int i = 0; i < 3; i++)
             {
                 ((RectTransform)sizePreview.transform.GetChild(i * 2)).sizeDelta = Vector2.one * (config.SizeAt(i) + 80);
@@ -97,9 +98,8 @@ namespace TapBlast
             score.text = session.Score.ToString("D5"); timer.text = Mathf.CeilToInt(session.RemainingTime).ToString("00");
             timerFill.fillAmount = session.RemainingTime / config.Duration;
             timerFill.color = session.RemainingTime <= 10 ? UIArt.Gold : UIArt.Cyan;
-            bool scoreGoal = config.Objective == ObjectiveKind.Score;
-            objective.text = (scoreGoal ? "SCORE GOAL  " + session.Score + " / " + config.TargetScore : "TARGETS  " + session.Hits + " / " + config.RequiredTaps);
-            progressFill.rectTransform.anchorMax = new Vector2(Mathf.Clamp01(scoreGoal ? (float)session.Score / config.TargetScore : (float)session.Hits / config.RequiredTaps), 1);
+            objective.text = config.ObjectiveLabel + "  " + session.ObjectiveProgress + " / " + session.ObjectiveTarget;
+            progressFill.rectTransform.anchorMax = new Vector2(Mathf.Clamp01((float)session.ObjectiveProgress / session.ObjectiveTarget), 1);
             combo.text = session.Combo.ToString(); multiplier.text = "x" + session.Multiplier.ToString("0.##");
         }
         public void ShowResults(RoundSession session, bool newBest, int best, ProgressStore.RewardReceipt receipt)
@@ -111,7 +111,7 @@ namespace TapBlast
             resultSubtitle.text = session.Won ? "LEVEL " + session.LevelId.ToString("00") + " COMPLETE" : "TIME UP  /  OBJECTIVE MISSED";
             bool hasNext = session.Won && session.LevelId < 10 && ProgressStore.IsUnlocked(session.LevelId + 1);
             Next.gameObject.SetActive(hasNext);
-            Replay.GetComponentInChildren<Text>().text = hasNext ? "REPLAY" : "PLAY AGAIN";
+            Replay.GetComponentInChildren<TMP_Text>().text = hasNext ? "REPLAY" : "PLAY AGAIN";
             for (int i = 0; i < 3; i++) resultStars[i].color = i < session.Stars ? UIArt.Gold : new Color32(57, 77, 90, 255);
             resultScore.text = session.Score.ToString("N0");
             resultBest.text = newBest ? "NEW PERSONAL BEST" : "PERSONAL BEST  " + best.ToString("N0");
@@ -139,9 +139,9 @@ namespace TapBlast
                 }
                 celebration.gameObject.SetActive(false);
             }
-            Sound.GetComponentInChildren<Text>().text = "SOUND  " + (sound ? "ON" : "OFF");
-            Motion.GetComponentInChildren<Text>().text = "REDUCED MOTION  " + (reducedMotion ? "ON" : "OFF");
-            Haptics.GetComponentInChildren<Text>().text = "VIBRATION  " + (haptics ? "ON" : "OFF");
+            Sound.GetComponentInChildren<TMP_Text>().text = "SOUND  " + (sound ? "ON" : "OFF");
+            Motion.GetComponentInChildren<TMP_Text>().text = "REDUCED MOTION  " + (reducedMotion ? "ON" : "OFF");
+            Haptics.GetComponentInChildren<TMP_Text>().text = "VIBRATION  " + (haptics ? "ON" : "OFF");
         }
         public void Pop(Vector2 position, int points, Color tint, bool reducedMotion)
         {
@@ -194,8 +194,8 @@ namespace TapBlast
         public void ShowTapHand() { tapHand.Show(); tapHand.Tick(0, animateFeedback, reducedMotion); }
         public void HideTapHand() { tapHand.Hide(); }
 
-        private Button[] levelButtons;
-        private Text[] selectionTexts;
+        [SerializeField] private Button[] levelButtons = new Button[10];
+        [SerializeField] private TMP_Text[] selectionTexts = new TMP_Text[10];
 
         public void ShowLevels(LevelConfig[] configs, System.Func<int, bool> onSelectLevel)
         {
@@ -204,80 +204,19 @@ namespace TapBlast
             if (selectionWallet != null)
                 selectionWallet.text = ProgressStore.Coins.ToString("N0") + " COINS   /   " + ProgressStore.XP.ToString("N0") + " XP\nPLAYER LEVEL " + (1 + ProgressStore.XP / 100);
 
-            if (levelButtons == null || levelButtons.Length < 10)
-            {
-                levelButtons = new Button[10];
-                selectionTexts = new Text[10];
-                levelButtons[0] = LevelOne; selectionTexts[0] = selectionOne;
-                levelButtons[1] = LevelTwo; selectionTexts[1] = selectionTwo;
-
-                Transform container = LevelOne != null ? LevelOne.transform.parent : null;
-                if (container != null)
-                {
-                    var layout = container.GetComponent<VerticalLayoutGroup>();
-                    if (layout == null)
-                    {
-                        layout = container.gameObject.AddComponent<VerticalLayoutGroup>();
-                        layout.childControlHeight = false;
-                        layout.childControlWidth = true;
-                        layout.childForceExpandHeight = false;
-                        layout.childForceExpandWidth = true;
-                        layout.spacing = 6;
-                    }
-                    var fitter = container.GetComponent<ContentSizeFitter>();
-                    if (fitter == null)
-                    {
-                        fitter = container.gameObject.AddComponent<ContentSizeFitter>();
-                        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-                    }
-
-                    var scrollRect = levelSelect.GetComponentInChildren<ScrollRect>();
-                    if (scrollRect == null && container.parent != null)
-                    {
-                        var scrollObj = new GameObject("ScrollArea", typeof(RectTransform), typeof(ScrollRect), typeof(Image), typeof(Mask));
-                        scrollObj.transform.SetParent(levelSelect.transform, false);
-                        var scrollRt = scrollObj.GetComponent<RectTransform>();
-                        scrollRt.anchorMin = new Vector2(0.05f, 0.15f);
-                        scrollRt.anchorMax = new Vector2(0.95f, 0.85f);
-                        scrollRt.offsetMin = Vector2.zero; scrollRt.offsetMax = Vector2.zero;
-
-                        var scroll = scrollObj.GetComponent<ScrollRect>();
-                        scrollObj.GetComponent<Image>().color = new Color(0, 0, 0, 0.01f);
-                        scrollObj.GetComponent<Mask>().showMaskGraphic = false;
-
-                        container.SetParent(scrollRt, false);
-                        scroll.content = container as RectTransform;
-                        scroll.horizontal = false;
-                        scroll.vertical = true;
-                    }
-
-                    for (int i = 2; i < 10; i++)
-                    {
-                        if (LevelOne != null && selectionOne != null)
-                        {
-                            GameObject btnObj = Instantiate(LevelOne.gameObject, container, false);
-                            GameObject subObj = Instantiate(selectionOne.gameObject, container, false);
-                            btnObj.name = "Level button " + (i + 1);
-                            subObj.name = "Selection text " + (i + 1);
-                            levelButtons[i] = btnObj.GetComponent<Button>();
-                            selectionTexts[i] = subObj.GetComponent<Text>();
-                        }
-                    }
-                }
-            }
-
             for (int i = 0; i < 10; i++)
             {
                 int levelId = i + 1;
-                LevelConfig cfg = (configs != null && i < configs.Length && configs[i] != null) ? configs[i] : null;
+                LevelConfig cfg = null;
+                if (configs != null) foreach (var c in configs) if (c != null && c.LevelId == levelId) cfg = c;
                 string nameStr = cfg != null ? cfg.DisplayName : "LEVEL " + levelId.ToString("00");
 
                 if (levelButtons[i] != null)
                 {
-                    Text mainText = levelButtons[i].GetComponentInChildren<Text>();
+                    TMP_Text mainText = levelButtons[i].GetComponentInChildren<TMP_Text>();
                     if (mainText != null) mainText.text = levelId.ToString("00") + "  /  " + nameStr;
 
-                    bool unlocked = ProgressStore.IsUnlocked(levelId);
+                    bool unlocked = cfg != null && ProgressStore.IsUnlocked(levelId);
                     int stars = ProgressStore.GetBestStars(levelId);
                     int score = ProgressStore.GetBestScore(levelId);
 
@@ -287,7 +226,7 @@ namespace TapBlast
                     {
                         if (stars > 0)
                         {
-                            selectionTexts[i].text = "✓ COMPLETED   BEST " + score.ToString("N0") + "   /   " + stars + " / 3 STARS";
+                            selectionTexts[i].text = "COMPLETED   BEST " + score.ToString("N0") + "   /   " + stars + " / 3 STARS";
                             selectionTexts[i].color = UIArt.Gold;
                         }
                         else if (unlocked)
@@ -297,7 +236,7 @@ namespace TapBlast
                         }
                         else
                         {
-                            selectionTexts[i].text = "🔒 LOCKED   Complete Level " + i + " to unlock";
+                            selectionTexts[i].text = "LOCKED   Complete Level " + i + " to unlock";
                             selectionTexts[i].color = new Color32(120, 140, 150, 255);
                         }
                     }

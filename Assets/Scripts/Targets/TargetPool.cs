@@ -7,9 +7,11 @@ namespace TapBlast
     public sealed class TargetPool
     {
         private readonly TargetView[] targets;
+        private readonly RectTransform arena;
         public int ActiveCount { get; private set; }
         public TargetPool(RectTransform parent, TargetView prefab, int capacity, Action<TargetView> tapped, Action<TargetView> expired)
         {
+            arena = parent;
             targets = new TargetView[capacity];
             for (int i = 0; i < capacity; i++)
             {
@@ -32,7 +34,11 @@ namespace TapBlast
             return true;
         }
         public void Release(TargetView target) { if (!target.Active) return; target.Release(); ActiveCount--; }
-        public void Tick(float delta, bool reducedMotion) { for (int i = 0; i < targets.Length; i++) targets[i].Tick(delta, reducedMotion); }
+        public void Tick(float delta, bool reducedMotion)
+        {
+            Rect bounds = arena.rect;
+            for (int i = 0; i < targets.Length; i++) { targets[i].Tick(delta, reducedMotion); targets[i].KeepInside(bounds); }
+        }
         public void Clear() { for (int i = 0; i < targets.Length; i++) targets[i].Release(); ActiveCount = 0; }
         public void SetInteractable(bool value) { for (int i = 0; i < targets.Length; i++) targets[i].SetInteractable(value); }
         public void ClampToArena(Rect bounds, float margin) { for (int i = 0; i < targets.Length; i++) if (targets[i].Active) targets[i].Bounce(bounds, margin); }

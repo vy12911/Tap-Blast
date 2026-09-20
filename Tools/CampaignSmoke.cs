@@ -1,3 +1,4 @@
+using TMPro;
 // Editor-only verification, copied into a disposable project by Run-UnitySmoke.ps1.
 using System;
 using System.Collections.Generic;
@@ -46,7 +47,7 @@ public static class CampaignSmoke
         SessionState.SetInt(Key + ".Graphics", authoredGraphicCount);
         foreach (var img in canvas.GetComponentsInChildren<Image>(true))
             if (img.sprite != null) Check(AssetDatabase.Contains(img.sprite), "Canvas sprite is persisted: " + img.name);
-        var wordmark = canvas.transform.Find("Device safe area/Portrait frame/Wordmark").GetComponent<Text>();
+        var wordmark = canvas.transform.Find("Device safe area/Portrait frame/Wordmark").GetComponent<TMP_Text>();
         SessionState.SetString(Key + ".Wordmark", wordmark.text); wordmark.text = "CANVAS EDIT CHECK";
         PrefabUtility.RecordPrefabInstancePropertyModifications(wordmark);
         EditorSceneManager.MarkSceneDirty(canvas.gameObject.scene); EditorSceneManager.SaveScene(canvas.gameObject.scene);
@@ -97,10 +98,10 @@ public static class CampaignSmoke
                     hud = UnityEngine.Object.FindFirstObjectByType<GameHUD>();
                     if (game == null || game.Session == null || hud == null) return;
                     checks = SessionState.GetInt(Key + ".Checks", 0);
-                    var wordmark = hud.transform.Find("Device safe area/Portrait frame/Wordmark").GetComponent<Text>();
+                    var wordmark = hud.transform.Find("Device safe area/Portrait frame/Wordmark").GetComponent<TMP_Text>();
                     Check(wordmark.text == "CANVAS EDIT CHECK", "Designer Canvas text edit survives entering Play");
                     wordmark.text = SessionState.GetString(Key + ".Wordmark", "TAP BLAST");
-                    Check(hud.GetComponentsInChildren<Graphic>(true).Length == SessionState.GetInt(Key + ".Graphics", 0) + 4 * hud.TargetPrefab.GetComponentsInChildren<Graphic>(true).Length, "Play only prewarms target prefab; it does not rebuild Canvas elements");
+                    Check(hud.GetComponentsInChildren<Graphic>(true).Length == SessionState.GetInt(Key + ".Graphics", 0) + 6 * hud.TargetPrefab.GetComponentsInChildren<Graphic>(true).Length, "Play only prewarms target prefab; it does not rebuild Canvas elements");
                     PlayerPrefs.SetString("TapBlast.v2.Progress", "{\"bestScore\":275,\"bestStars\":3,\"coins\":180,\"xp\":90,\"activeRound\":\"\"}");
                     Check(ProgressStore.IsUnlocked(2) && ProgressStore.GetBestScore(1) == 275 && ProgressStore.Coins == 180 && ProgressStore.XP == 90, "Existing Level 1 save unlocks Level 2 without losing wallet");
                     Check(ProgressStore.GetBestScore(2) == 0 && ProgressStore.GetBestStars(2) == 0, "Migration does not copy Level 1 records into Level 2");
@@ -109,7 +110,7 @@ public static class CampaignSmoke
                     Check(!ProgressStore.IsUnlocked(2) && !game.SelectLevel(2), "Fresh player cannot enter locked Level 2");
                     Check(game.SelectLevel(1), "Fresh player can select Level 1");
                     foreach (var target in Targets(true)) poolIds.Add(target.GetInstanceID());
-                    Check(poolIds.Count == 4, "Campaign prewarms one shared four-target pool");
+                    Check(poolIds.Count == 6, "Campaign prewarms one shared six-target pool");
                     Click(hud.IntroMenu.gameObject);
                     Check(!hud.LevelTwo.interactable, "Level select visibly disables locked Level 2");
                     Shot("07-level-select-locked"); Advance(1, .2); break;
@@ -136,7 +137,7 @@ public static class CampaignSmoke
                     if (game.Session.Combo == 10 && !checkedFever)
                     {
                         checkedFever = true;
-                        Check(hud.transform.Find("Device safe area/Portrait frame/Combo card/Fever state").GetComponent<Text>().text == "COMBO FEVER", "Ten-hit streak enters GDD Combo Fever presentation");
+                        Check(hud.transform.Find("Device safe area/Portrait frame/Combo card/Fever state").GetComponent<TMP_Text>().text == "COMBO FEVER", "Ten-hit streak enters GDD Combo Fever presentation");
                         Shot("16-canvas-combo-fever");
                     }
                     if (game.Session.State != RoundState.Results) break;
@@ -181,7 +182,7 @@ public static class CampaignSmoke
                     Check(ProgressStore.GetBestScore(1) == 275 && ProgressStore.GetBestStars(1) == 3, "Level 2 preserves Level 1 records");
                     Check(ProgressStore.GetBestScore(2) == game.Session.Score && ProgressStore.GetBestStars(2) == 3, "Level 2 saves separate score and stars");
                     Check(ProgressStore.Coins == 125 && ProgressStore.XP == 60, "Level 2 adds its 75-coin and 35-XP reward once");
-                    Check(!hud.Next.gameObject.activeSelf && !game.SelectLevel(3), "No unavailable Level 3 navigation");
+                    Check(hud.Next.gameObject.activeSelf && ProgressStore.IsUnlocked(3), "Level 2 unlocks the authored Level 3");
                     var token = (string)typeof(GameManager).GetField("roundId", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(game);
                     Check(!ProgressStore.CompleteRound(token, game.Session, 75, 35, out _), "Level 2 result cannot be rewarded twice");
                     string wrongToken = ProgressStore.BeginRound(1);

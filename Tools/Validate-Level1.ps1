@@ -1,6 +1,10 @@
 param([string]$UnityEditor = 'C:\Program Files\Unity\Hub\Editor\6000.3.17f1\Editor')
 $ErrorActionPreference = 'Stop'
 $workspace = Split-Path -Parent $PSScriptRoot
+# Reject legacy uGUI text before compilation; all saved labels must use TMP.
+$authoredUI = Get-ChildItem (Join-Path $workspace 'Assets') -Recurse -File | Where-Object { $_.Extension -in '.prefab', '.unity' }
+$legacyText = $authoredUI | Select-String -SimpleMatch '5f7201a12d95ffc409449d95f23cf332'
+if ($legacyText) { throw ('Legacy UI Text component found; use TextMeshProUGUI: ' + ($legacyText.Path -join ', ')) }
 $reportDir = Join-Path $workspace 'Logs/Validation'
 New-Item -ItemType Directory -Force -Path $reportDir | Out-Null
 $unityData = Join-Path $UnityEditor 'Data'
@@ -9,6 +13,7 @@ $compiler = Join-Path $unityData 'DotNetSdkRoslyn/csc.dll'
 $baseArgs = @('-nologo', '-langversion:9', '-nowarn:0649', '-nostdlib+', ('-r:' + (Join-Path $unityData 'NetStandard/ref/2.1.0/netstandard.dll')))
 $runtimeRefs = Get-ChildItem (Join-Path $unityData 'Managed/UnityEngine') -Filter '*.dll' | ForEach-Object { '-r:' + $_.FullName }
 $runtimeRefs += '-r:' + (Join-Path $workspace 'Library/ScriptAssemblies/UnityEngine.UI.dll')
+$runtimeRefs += '-r:' + (Join-Path $workspace 'Library/ScriptAssemblies/Unity.TextMeshPro.dll')
 $runtimeRefs += '-r:' + (Join-Path $workspace 'Library/ScriptAssemblies/Unity.InputSystem.dll')
 $sources = Get-ChildItem (Join-Path $workspace 'Assets/Scripts') -Recurse -Filter '*.cs' | ForEach-Object { $_.FullName }
 $runtimeOut = Join-Path $reportDir 'TapBlast.Runtime.dll'

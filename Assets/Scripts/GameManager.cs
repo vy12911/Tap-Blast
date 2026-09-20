@@ -23,7 +23,6 @@ public sealed class GameManager : MonoBehaviour
 
     private void Start()
     {
-        EnsureAllLevelsLoaded();
         if (level == null) { Debug.LogError("Assign a LevelConfig to GameManager.", this); enabled = false; return; }
         if (levels == null || levels.Length == 0) levels = new[] { level };
         foreach (var config in levels) if (config != null && config.LevelId == ProgressStore.SelectedLevel) level = config;
@@ -55,28 +54,6 @@ public sealed class GameManager : MonoBehaviour
         RefreshHUD();
     }
 
-    private void EnsureAllLevelsLoaded()
-    {
-        if (levels == null || levels.Length < 10)
-        {
-            var list = new System.Collections.Generic.List<LevelConfig>();
-            for (int i = 1; i <= 10; i++)
-            {
-                LevelConfig cfg = null;
-                if (levels != null)
-                {
-                    foreach (var c in levels) if (c != null && c.LevelId == i) cfg = c;
-                }
-#if UNITY_EDITOR
-                if (cfg == null)
-                    cfg = UnityEditor.AssetDatabase.LoadAssetAtPath<LevelConfig>(string.Format("Assets/Data/Levels/Level{0:D2}.asset", i));
-#endif
-                if (cfg != null) list.Add(cfg);
-            }
-            if (list.Count > 0) levels = list.ToArray();
-        }
-    }
-
     private void Update()
     {
         if (Session == null) return;
@@ -97,7 +74,7 @@ public sealed class GameManager : MonoBehaviour
                 if (level.FirstTapTutorial)
                 { hud.ShowTapHand(); hud.SetHint("TAP THE GLOWING TARGET", "Your first tap starts the clock"); }
                 else
-                { tutorialStarted = true; hud.SetHint("DIFFERENT SIZES, SAME POINTS", "Build a streak to reach " + level.TargetScore + " points"); }
+                { tutorialStarted = true; hud.SetHint(level.GoalText, level.MechanicHint); }
             }
             return;
         }
@@ -127,45 +104,33 @@ public sealed class GameManager : MonoBehaviour
         Vector2 position = target.Position;
         Color color = target.Tint;
 
-        if (target.Kind == TargetKind.Boss && !target.Damage())
-        {
-            feedback.PlayTap(Session.Combo);
-            hud.Pop(position, 10, color, feedback.ReducedMotion);
-            hud.HitJuice(Session.Combo);
-            hud.SetHint("BOSS HIT! (" + target.Health + "/" + target.MaxHealth + ")", "Keep tapping to destroy the Golden Core!");
-            return;
-        }
-
-        pool.Release(target);
+        TargetKind kind = target.Kind;
+        bool destroyed = kind != TargetKind.Boss || target.Damage();
+        if (destroyed) pool.Release(target);
         tutorialStarted = true;
         hud.HideTapHand();
-
-        int points = Session.Tap();
-        if (target.Kind == TargetKind.Golden)
-        {
-            int bonus = 50;
-            points += bonus;
-            hud.SetHint("GOLDEN TARGET! +" + (points), "Golden bonus awarded!");
-        }
-        else if (target.Kind == TargetKind.Time)
-        {
-            Session.Tick(-3.0f); // Add 3s back to clock
-            hud.SetHint("TIME BUBBLE! +3 SECONDS", "Extra time added to clock!");
-        }
-
+        int points = Session.Tap(kind, destroyed);
         feedback.PlayTap(Session.Combo);
         hud.Pop(position, points, color, feedback.ReducedMotion);
         hud.HitJuice(Session.Combo);
         RefreshHUD();
 
         if (Session.State == RoundState.Results) { Finish(); return; }
-        if (level.Objective == ObjectiveKind.Score)
-            hud.SetHint(Session.GoalMet ? "GOAL MET! KEEP SCORING" : "BUILD YOUR SCORE", Session.GoalMet ? "Keep your streak until time runs out" : "Reach " + level.TargetScore + " points before time runs out");
-        else if (Session.Hits < 3) hud.SetHint("NICE TAP! +" + points, "Each target adds points. Keep going!");
-        else if (Session.Hits < 5) hud.SetHint("BUILD YOUR COMBO", "Tap targets before their rings run out");
-        else hud.SetHint(Session.Combo >= 5 ? "KEEP THE STREAK ALIVE" : "YOU'VE GOT THIS", "Tap " + (level.RequiredTaps - Session.Hits) + " more to finish");
+        if (kind == TargetKind.Boss)
+            hud.SetHint(destroyed ? "GOLDEN CORE DESTROYED!" : "CORE HEALTH " + target.Health + " / " + target.MaxHealth,
+                destroyed ? "Keep scoring for mastery until time runs out" : "Every hit damages the Core and builds your combo");
+        else if (kind == TargetKind.Golden)
+            hud.SetHint("GOLDEN! +" + points, "Collected " + Session.GoldenHits + " Golden targets");
+        else if (kind == TargetKind.Time)
+            hud.SetHint("TIME BUBBLE! +" + level.TimeBonus.ToString("0.#") + " SECONDS", "Collected " + Session.TimeHits + " Time Bubbles");
+        else if (level.FirstTapTutorial && Session.Hits < 3)
+            hud.SetHint("NICE TAP! +" + points, "Each target adds points. Keep going!");
+        else if (level.FirstTapTutorial && Session.Hits < 5)
+            hud.SetHint("BUILD YOUR COMBO", "Tap targets before their rings run out");
+        else
+            hud.SetHint(Session.GoalMet ? "GOAL MET! KEEP SCORING" : level.GoalText,
+                Session.GoalMet ? "Keep your streak until time runs out" : level.MechanicHint);
     }
-
     private void OnTargetExpired(TargetView target)
     {
         pool.Release(target);

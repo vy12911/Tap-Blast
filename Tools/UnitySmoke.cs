@@ -170,7 +170,7 @@ public static class UnitySmoke
                 CheckRewards();
                 hud.ShowIntro(AssetDatabase.LoadAssetAtPath<LevelConfig>("Assets/Data/Levels/Level01.asset"), ProgressStore.BestScore);
                 Check(hud != null && manager.Session.State == RoundState.Ready, "Scene loads into level briefing");
-                Check(UnityEngine.Object.FindObjectsByType<TargetView>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length == 4, "Exactly four targets prewarmed");
+                Check(UnityEngine.Object.FindObjectsByType<TargetView>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length == 6, "Exactly six targets prewarmed");
                 Shot("01-briefing"); stage++; deadline = EditorApplication.timeSinceStartup + 1;
             }
             else if (stage == 1)
@@ -229,7 +229,7 @@ public static class UnitySmoke
                 Check(manager.Session.Won && manager.Session.Score == 275 && manager.Session.Stars == 3, "Full 20-target play-through earns three stars");
                 Check(Targets().Length == 0, "Completion clears active targets");
                 Check(ProgressStore.BestScore == 275 && ProgressStore.BestStars == 3, "Best score and stars saved");
-                Check(UnityEngine.Object.FindObjectsByType<TargetView>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length == 4, "Pool capacity unchanged after full round");
+                Check(UnityEngine.Object.FindObjectsByType<TargetView>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length == 6, "Pool capacity unchanged after full round");
                 Check(ProgressStore.Coins == coinsBefore + 50 && ProgressStore.XP == xpBefore + 25, "Gameplay win credits reward before animation");
                 Check(!hud.ResultRevealComplete, "Result count-up and star sequence begins");
                 typeof(GameManager).GetMethod("Finish", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).Invoke(manager, null);

@@ -21,7 +21,7 @@ MonoBehaviour:
   duration: 40
   requiredTaps: 20
   basePoints: 10
-  spawnInterval: 0.50
+  spawnInterval: 0.75
   targetLifetime: 3.5
   maxTargets: 6
   targetSize: 95
@@ -31,7 +31,10 @@ MonoBehaviour:
   timeChance: 0
   isBossLevel: 0
   bossHealth: 1
-  twoStarScore: 950
+  twoStarScore: 2500
   threeStarCombo: 20
   coinReward: 140
   xpReward: 70
+  accelerationSeconds: 20
+  mechanicHint: Spawns speed up during the first 20 seconds. Reach 2,000 points.
+  finalSpawnInterval: 0.50

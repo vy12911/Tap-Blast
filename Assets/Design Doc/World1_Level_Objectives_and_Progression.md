@@ -25,7 +25,7 @@ The supplied GDD v1.0 page 12 is the basis for the primary objectives below. Thi
 
 ## Mechanics
 
-Level 2 cycles 144/100/112px normal targets. Level 4 uses 85/95px targets worth 15 base points. Level 5 introduces movement, with boundaries enforced every pooled tick. Level 6 starts with a Golden target and guarantees regular Golden opportunities; Golden targets give 100 base points multiplied by combo. Level 7 accelerates from 0.75s to 0.5s spawns over 20 seconds. Level 8 starts with a Time Bubble and guarantees regular opportunities; each adds 3 seconds. At most six Time Bubbles spawn per round (up to 18 extra seconds). Level 9 combines movement and specials with a higher streak goal. Level 10 begins with a 180px, 5-hit Core whose health ring remains visible until destruction.
+Level 2 cycles 216/150/168px normal targets. Level 4 uses 127.5/142.5px targets worth 15 base points. Level 5 introduces movement, with boundaries enforced every pooled tick. Level 6 starts with a Golden target and guarantees regular Golden opportunities; Golden targets give 100 base points multiplied by combo. Level 7 accelerates from 0.75s to 0.5s spawns over 20 seconds. Level 8 starts with a Time Bubble and guarantees regular opportunities; each adds 3 seconds. At most six Time Bubbles spawn per round (up to 18 extra seconds). Level 9 combines movement and specials with a higher streak goal. Level 10 begins with a 270px, 5-hit Core whose health ring remains visible until destruction.
 
 ## Player XP and saves
 

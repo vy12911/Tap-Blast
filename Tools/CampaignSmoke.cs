@@ -163,7 +163,7 @@ public static class CampaignSmoke
                         float radius = rect.rect.width * .513f;
                         Check(hud.Arena.rect.Contains(target.Position + Vector2.one * radius) && hud.Arena.rect.Contains(target.Position - Vector2.one * radius), "Size variant stays inside arena");
                     }
-                    Check(sizes.Contains(100) && sizes.Contains(112) && sizes.Contains(144), "Level 2 spawns all three normal-target sizes");
+                    Check(sizes.Contains(150) && sizes.Contains(168) && sizes.Contains(216), "Level 2 spawns all three normal-target sizes");
                     Shot("10-level2-sizes"); Click(hud.Pause.gameObject); pausedTime = game.Session.RemainingTime; Advance(6, 1); break;
                 case 6:
                     Check(game.Session.RemainingTime == pausedTime && game.Session.State == RoundState.Paused, "Level 2 pause freezes clock");

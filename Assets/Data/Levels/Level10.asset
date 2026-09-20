@@ -24,8 +24,8 @@ MonoBehaviour:
   spawnInterval: 0.50
   targetLifetime: 4.0
   maxTargets: 6
-  targetSize: 100
-  targetSpacing: 24
+  targetSize: 150
+  targetSpacing: 36
   movingTargets: 1
   goldenChance: 0.20
   timeChance: 0.15
@@ -35,6 +35,6 @@ MonoBehaviour:
   threeStarCombo: 25
   coinReward: 250
   xpReward: 100
-  bossSize: 180
+  bossSize: 270
   mechanicHint: Hit the giant Golden Core 5 times. Its ring shows remaining health.
   objectiveCount: 1

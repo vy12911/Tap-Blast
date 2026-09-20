@@ -88,7 +88,12 @@ public static class World1Smoke
         var buttons = Field<Button[]>(hud, "levelButtons");
         var labels = Field<TMP_Text[]>(hud, "selectionTexts");
         Check(buttons.Length == 10 && labels.Length == 10, "Ten authored level buttons and progress labels");
-        var frame = Field<RectTransform>(hud, "frame");
+        var fitting = hud.GetComponent<ResponsiveCanvas>();
+        Check(fitting != null && fitting.SafeArea != null && fitting.Frame != null, "Authored responsive Canvas references");
+        var frame = fitting.Frame;
+        Check(frame.rect.size == new Vector2(1080, 1920), "Portrait frame is authored at 1080 by 1920");
+        var scaler = hud.GetComponent<CanvasScaler>();
+        Check(scaler.uiScaleMode == CanvasScaler.ScaleMode.ScaleWithScreenSize && scaler.referenceResolution == new Vector2(1080, 1920) && scaler.screenMatchMode == CanvasScaler.ScreenMatchMode.Expand, "Canvas Scaler fits phone and tablet resolutions");
         var corners = new Vector3[4];
         for (int i = 0; i < 10; i++)
         {
@@ -159,6 +164,39 @@ public static class World1Smoke
         Complete(); Check(!game.Session.Won && ProgressStore.Coins == coins, "High score without Core destruction fails and earns no rewards");
         game.ShowLevels(); Check(hud.GetComponentsInChildren<Graphic>(true).Length == count, "All campaign navigation reuses authored UI");
     }
+    static void VerifyDeviceLayouts(string screenName)
+    {
+        var sizes = new[] { new Vector2Int(1080, 1920), new Vector2Int(720, 1280), new Vector2Int(1080, 2400), new Vector2Int(1536, 2048), new Vector2Int(2048, 1536) };
+        foreach (var size in sizes)
+        {
+            Rect safe = size.y == 2400 ? new Rect(0, 84, size.x, size.y - 204) : new Rect(0, 0, size.x, size.y);
+            var fitting = hud.GetComponent<ResponsiveCanvas>();
+            int objects = hud.GetComponentsInChildren<RectTransform>(true).Length;
+            string device = size.x + "x" + size.y;
+            UnitySmoke.Capture(hud, "responsive-" + screenName + "-" + device, size.x, size.y, safe, () =>
+            {
+                var corners = new Vector3[4];
+                fitting.Frame.GetWorldCorners(corners);
+                foreach (var corner in corners)
+                {
+                    Vector2 p = RectTransformUtility.WorldToScreenPoint(Camera.main, corner);
+                    Check(p.x >= safe.xMin - 1 && p.x <= safe.xMax + 1 && p.y >= safe.yMin - 1 && p.y <= safe.yMax + 1, screenName + " frame stays inside safe area " + device);
+                }
+                foreach (var button in hud.GetComponentsInChildren<Button>())
+                {
+                    button.GetComponent<RectTransform>().GetWorldCorners(corners);
+                    foreach (var corner in corners)
+                    {
+                        Vector2 p = RectTransformUtility.WorldToScreenPoint(Camera.main, corner);
+                        Check(p.x >= safe.xMin - 1 && p.x <= safe.xMax + 1 && p.y >= safe.yMin - 1 && p.y <= safe.yMax + 1, button.name + " is reachable in " + screenName + " " + device);
+                    }
+                }
+                Check(Mathf.Approximately(fitting.Frame.lossyScale.x, fitting.Frame.lossyScale.y), "Uniform layout scale " + device);
+                Check(fitting.Frame.rect.size == new Vector2(1080, 1920), "Device fitting preserves editable reference dimensions " + device);
+                Check(hud.GetComponentsInChildren<RectTransform>(true).Length == objects, "Resizing does not create UI " + device);
+            });
+        }
+    }
     static void Step()
     {
         if (!EditorApplication.isPlaying || EditorApplication.isCompiling) return;
@@ -172,11 +210,11 @@ public static class World1Smoke
                 if (game == null || game.Session == null) return;
                 VerifyCampaign(); stage++; next = EditorApplication.timeSinceStartup + 1;
             }
-            else if (stage == 1) { UnitySmoke.Capture(hud, "world1-level-select"); stage++; next = EditorApplication.timeSinceStartup + 1; }
+            else if (stage == 1) { UnitySmoke.Capture(hud, "world1-level-select"); VerifyDeviceLayouts("levels"); stage++; next = EditorApplication.timeSinceStartup + 1; }
             else if (stage == 2) { game.SelectLevel(6); stage++; next = EditorApplication.timeSinceStartup + 1; }
-            else if (stage == 3) { UnitySmoke.Capture(hud, "world1-golden-briefing"); stage++; next = EditorApplication.timeSinceStartup + 1; }
+            else if (stage == 3) { UnitySmoke.Capture(hud, "world1-golden-briefing"); VerifyDeviceLayouts("briefing"); stage++; next = EditorApplication.timeSinceStartup + 1; }
             else if (stage == 4) { game.SelectLevel(10); Begin(); stage++; next = EditorApplication.timeSinceStartup + 1; }
-            else if (stage == 5) { UnitySmoke.Capture(hud, "world1-core"); stage++; next = EditorApplication.timeSinceStartup + 1; }
+            else if (stage == 5) { UnitySmoke.Capture(hud, "world1-core"); VerifyDeviceLayouts("gameplay"); game.Pause(); VerifyDeviceLayouts("pause"); game.Resume(); stage++; next = EditorApplication.timeSinceStartup + 1; }
             else if (stage == 6) { game.SelectLevel(8); Begin(); stage++; next = EditorApplication.timeSinceStartup + .3; }
             else if (stage == 7) { UnitySmoke.Capture(hud, "world1-time"); stage++; next = EditorApplication.timeSinceStartup + .3; }
             else if (stage == 8) { game.SelectLevel(6); Begin(); stage++; next = EditorApplication.timeSinceStartup + .3; }

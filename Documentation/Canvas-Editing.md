@@ -19,11 +19,19 @@ Inside **Device safe area / Portrait frame**:
 | Level select | Ten authored level buttons and saved progress labels |
 | Countdown | Countdown card and text |
 
+## Responsive reference layout
+
+The saved Canvas Scaler uses **Scale With Screen Size**, reference resolution **1080 × 1920**, and **Expand** screen matching. The Portrait frame is authored at 1080 × 1920. Phones and tablets keep this portrait layout proportional and centered within the device safe area; the background fills the remaining screen. Wider tablets show more background beside the frame.
+
+`ResponsiveCanvas`, wired on the Canvas prefab, adjusts only **Device safe area** anchors/offsets and **Portrait frame** scale in Edit Mode and Play Mode. Edit child RectTransforms, Images and TMP components directly in the Canvas. Keep the frame centered and retain the component's two references. Do not generate or rebuild UI from scripts. GameHUD feedback travel distances and confetti dimensions are Inspector fields.
+
+Preview the Game view at 1080 × 1920, 1080 × 2400 and 1536 × 2048 to check edits on phones and tablets. Target diameters, spacing, movement and feedback distances were increased by 1.5 when migrating from the previous 720 × 1280 reference, preserving their proportions. Level configuration sizes now use 1080-reference Canvas units.
+
 Overlays are inactive in the saved prefab so the gameplay layout can be edited. Temporarily enable the desired panel while editing and disable it when finished. Gameplay controls their visibility. Dynamic labels such as scores, objectives and wallet values are supplied by the game; change their fonts, alignment, colors and sizes in the Inspector. The controller's serialized fields hold the references, so retain those references when replacing objects. Level 2's size-preview diameters follow its level configuration.
 
 Edit target visuals in `Assets/Prefabs/Targets/NormalTarget.prefab` (also available through **Tap Blast > Select Normal Target Prefab**). Its root Image receives circular tap input; its decorative glow, lifetime ring and star Images have raycasts disabled. The pool creates six copies before play and reuses them across all ten levels. Target sizes and spacing remain in the level configuration assets.
 
-The shared sprite assets are in `Assets/Art/UI`. You can assign replacement sprites to the existing Images. **Tap Blast > Select Game Canvas** selects the UI prefab. Safe-area fitting scales the 720-by-1280 frame to the device; it does not rebuild the hierarchy.
+The shared sprite assets are in `Assets/Art/UI`. You can assign replacement sprites to the existing Images. **Tap Blast > Select Game Canvas** selects the UI prefab. Safe-area fitting scales the 1080-by-1920 frame to the device; it does not rebuild the hierarchy.
 
 ## Feedback now included
 
@@ -38,7 +46,7 @@ The supplied image guides the neon/star presentation. This is a restrained Canva
 
 ## World 1 bindings
 
-The level-select card fits all ten buttons and progress rows inside the 720 × 1280 reference frame. `GameHUD.levelButtons` and `selectionTexts` bind the saved objects; keep their ordering aligned with level IDs. No runtime layout groups, scrolling hierarchy or button clones are constructed.
+The level-select card fits all ten buttons and progress rows inside the 1080 × 1920 reference frame. `GameHUD.levelButtons` and `selectionTexts` bind the saved objects; keep their ordering aligned with level IDs. No runtime layout groups, scrolling hierarchy or button clones are constructed.
 
 The target prefab contains the normal star plus non-raycasting GOLD, +3s and CORE labels. `TargetView` toggles these authored symbols by target kind. Edit their appearance directly in the prefab. The Core's existing ring shows health rather than lifetime. Special target effects and objective-specific hints are updated through the same pooled feedback/HUD bindings.
 

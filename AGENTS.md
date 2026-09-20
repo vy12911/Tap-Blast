@@ -6,7 +6,7 @@
 
 ## 1. Game Overview
 
-**Tap Blast** is a fast-paced 2D mobile arcade tap game built with **Unity 6000.3.17f1** using Universal Render Pipeline (URP), uGUI, and the Unity Input System. Designed for mobile portrait orientation (**9:16 aspect ratio**, 720 × 1280 reference resolution).
+**Tap Blast** is a fast-paced 2D mobile arcade tap game built with **Unity 6000.3.17f1** using Universal Render Pipeline (URP), uGUI, and the Unity Input System. Designed for mobile portrait orientation (**9:16 aspect ratio**, 1080 × 1920 reference resolution).
 
 ### Core Mechanics & Gameplay Loop
 - **Target Spawning & Tapping**: Glowing circular targets spawn bounded inside an arena. Players tap targets before their lifetime timers expire (default lifetime: 4.5 seconds).
@@ -22,7 +22,7 @@
     - **Level 1 ("FIRST SPARK")**: Tap 20 targets within 60s (First-tap tutorial hand).
     - **Level 2 ("SIZE IT UP")**: Score 500 points within 45s (Cycling target diameters).
     - **Level 3 ("STREAK STARTER")**: Reach a 5-hit streak; timed mastery play.
-    - **Level 4 ("PRECISION PUSH")**: Score 1,000 points (Small target sizes 85–95px).
+    - **Level 4 ("PRECISION PUSH")**: Score 1,000 points (Small target sizes 127.5–142.5px).
     - **Level 5 ("ON THE MOVE")**: Reach a 10-hit streak (drifting/moving targets).
     - **Level 6 ("GOLDEN OPPORTUNITY")**: Tap 3 Golden targets (100 base points each before combo multiplier).
     - **Level 7 ("FAST & FURIOUS")**: Score 2,000 points (0.5s spawn acceleration).
@@ -76,7 +76,8 @@
 2. **UI Architecture Rules**:
    - **Always use `TMPro.TMP_Text` for UI text fields, parameters, arrays, and component lookups.** Author Canvas labels as `TextMeshProUGUI`, assign a TMP font asset, and wire the saved prefab/scene references. Do not introduce `UnityEngine.UI.Text` or construct replacement text objects at runtime.
    - **Do NOT reconstruct UI elements via script**. The UI is built visually in `Assets/Prefabs/UI/GameCanvas.prefab` (`Assets/Scenes/Level01.unity`). Scripts only bind fields, update text, and toggle panel visibility.
-   - Dynamic screens fit inside the 720 × 1280 reference safe area frame.
+   - Dynamic screens fit inside the 1080 × 1920 reference safe area frame.
+   - Always author UI in the Canvas prefab using TMP text and serialized scene references so designers can edit it manually. Use Canvas Scaler (Scale With Screen Size, Expand) and `ResponsiveCanvas` for phone/tablet safe-area fitting; only the safe-area container anchors and portrait-frame scale are driven at runtime.
 3. **Pure C# Logic Decoupling**:
    - Core round rules and scoring reside in [`RoundSession.cs`](file:///d:/own/tap%20blast/Tap-Blast/Assets/Scripts/Core/RoundSession.cs). Maintain pure C# separation without `UnityEngine` dependencies for core logic to allow standalone CLI testing.
 4. **Local Progress Security**:

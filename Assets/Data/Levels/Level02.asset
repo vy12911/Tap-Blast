@@ -18,17 +18,17 @@ MonoBehaviour:
   targetScore: 500
   firstTapTutorial: 0
   targetSizes:
-  - 144
-  - 100
-  - 112
+  - 216
+  - 150
+  - 168
   duration: 45
   requiredTaps: 20
   basePoints: 10
   spawnInterval: 0.75
   targetLifetime: 4.5
   maxTargets: 4
-  targetSize: 112
-  targetSpacing: 24
+  targetSize: 168
+  targetSpacing: 36
   twoStarScore: 750
   threeStarCombo: 20
   coinReward: 75

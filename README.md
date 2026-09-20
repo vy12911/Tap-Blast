@@ -1,6 +1,8 @@
 # Tap Blast — World 1 (Levels 1–10)
 
-Unity **6000.3.17f1**, URP, uGUI and Input System. Use a **9:16** Game view (720 × 1280 reference frame).
+Unity **6000.3.17f1**, URP, uGUI and Input System. Use a **9:16** Game view (1080 × 1920 reference frame).
+
+The Canvas uses Scale With Screen Size / Expand and an authored 1080 × 1920 portrait frame. `ResponsiveCanvas` fits it inside phone and tablet safe areas while the background fills the screen. Edit UI manually in `Assets/Prefabs/UI/GameCanvas.prefab`; retain TMP text and serialized references. See [Canvas editing](Documentation/Canvas-Editing.md) for layout and device-preview guidance.
 
 All UI text uses **TextMeshProUGUI** components and **`TMPro.TMP_Text`** script bindings. Always use TMP for new labels. Prefabs retain their saved scene references and use the shared Liberation Sans SDF font in `Assets/TextMesh Pro/`; no text UI is rebuilt at runtime.
 

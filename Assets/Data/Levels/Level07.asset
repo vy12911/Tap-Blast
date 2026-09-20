@@ -24,8 +24,8 @@ MonoBehaviour:
   spawnInterval: 0.75
   targetLifetime: 3.5
   maxTargets: 6
-  targetSize: 95
-  targetSpacing: 20
+  targetSize: 142.5
+  targetSpacing: 30
   movingTargets: 0
   goldenChance: 0.15
   timeChance: 0

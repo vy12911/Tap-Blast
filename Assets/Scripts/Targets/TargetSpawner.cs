@@ -18,7 +18,7 @@ namespace TapBlast
         public void SpawnTutorial(bool reducedMotion) { SpawnAt(Vector2.zero, reducedMotion, true); }
         public void Tick(float delta, bool reducedMotion)
         {
-            float margin = level.LargestTargetSize * .5f + 18;
+            float margin = level.LargestTargetSize * .5f + 27;
             Rect bounds = arena.rect;
             roundElapsed += delta;
             elapsed += delta;
@@ -51,7 +51,7 @@ namespace TapBlast
             if (level.MovingTargets && kind != TargetKind.Boss)
             {
                 float angle = (float)(random.NextDouble() * Mathf.PI * 2);
-                float speed = 65f + (float)random.NextDouble() * 55f;
+                float speed = 97.5f + (float)random.NextDouble() * 82.5f;
                 velocity = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * speed;
             }
             if (pool.Spawn(position, kind == TargetKind.Boss ? level.BossSize : level.SizeAt(colorIndex),

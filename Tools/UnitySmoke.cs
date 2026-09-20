@@ -119,30 +119,37 @@ public static class UnitySmoke
     public static void RunCampaign() { CampaignSmoke.Run(); }
     public static void VerifyCampaignPersistence() { CampaignSmoke.VerifyPersistence(); }
     private static void Shot(string name) { Capture(hud, name); }
-    public static void Capture(GameHUD hud, string name)
+    public static void Capture(GameHUD hud, string name, int width = 1080, int height = 1920, Rect? safeArea = null, Action validateLayout = null)
     {
         // Batch mode has no presented Game view; render the real UI through URP.
         var canvas = hud.GetComponent<Canvas>();
         var scaler = hud.GetComponent<CanvasScaler>();
         var camera = Camera.main;
+        var fitting = hud.GetComponent<ResponsiveCanvas>();
+        bool wasFitting = fitting.enabled;
         var portrait = (RectTransform)hud.transform.Find("Device safe area/Portrait frame");
         var oldScale = portrait.localScale;
         var oldFactor = canvas.scaleFactor;
         var oldTarget = camera.targetTexture;
-        var texture = new RenderTexture(720, 1280, 24);
+        var texture = new RenderTexture(width, height, 24);
         var previous = RenderTexture.active;
         Texture2D pixels = null;
         try
         {
             texture.Create(); camera.targetTexture = texture;
+            fitting.enabled = false;
             scaler.enabled = false; canvas.renderMode = RenderMode.ScreenSpaceCamera;
-            canvas.worldCamera = camera; canvas.planeDistance = 1; canvas.scaleFactor = 1;
+            canvas.worldCamera = camera; canvas.planeDistance = 1;
+            canvas.scaleFactor = Mathf.Min(width / scaler.referenceResolution.x, height / scaler.referenceResolution.y);
             portrait.localScale = Vector3.one; Canvas.ForceUpdateCanvases();
+            fitting.FitToViewport(new Vector2(width, height), safeArea ?? new Rect(0, 0, width, height));
+            Canvas.ForceUpdateCanvases();
+            validateLayout?.Invoke();
             var request = new UnityEngine.Rendering.RenderPipeline.StandardRequest { destination = texture };
             UnityEngine.Rendering.RenderPipeline.SubmitRenderRequest(camera, request);
             RenderTexture.active = texture;
-            pixels = new Texture2D(720, 1280, TextureFormat.RGB24, false);
-            pixels.ReadPixels(new Rect(0, 0, 720, 1280), 0, 0); pixels.Apply();
+            pixels = new Texture2D(width, height, TextureFormat.RGB24, false);
+            pixels.ReadPixels(new Rect(0, 0, width, height), 0, 0); pixels.Apply();
             File.WriteAllBytes(name + ".png", pixels.EncodeToPNG());
         }
         finally
@@ -151,6 +158,8 @@ public static class UnitySmoke
             canvas.renderMode = RenderMode.ScreenSpaceOverlay; canvas.worldCamera = null;
             canvas.scaleFactor = oldFactor; scaler.enabled = true; portrait.localScale = oldScale;
             Canvas.ForceUpdateCanvases();
+            fitting.enabled = wasFitting;
+            fitting.FitToViewport(new Vector2(Screen.width, Screen.height), Screen.safeArea);
             if (pixels != null) UnityEngine.Object.Destroy(pixels);
             texture.Release(); UnityEngine.Object.Destroy(texture);
         }

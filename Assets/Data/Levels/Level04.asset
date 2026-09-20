@@ -18,16 +18,16 @@ MonoBehaviour:
   targetScore: 1000
   firstTapTutorial: 0
   targetSizes:
-  - 85
-  - 95
+  - 127.5
+  - 142.5
   duration: 45
   requiredTaps: 20
   basePoints: 15
   spawnInterval: 0.70
   targetLifetime: 4.2
   maxTargets: 4
-  targetSize: 85
-  targetSpacing: 20
+  targetSize: 127.5
+  targetSpacing: 30
   movingTargets: 0
   goldenChance: 0
   timeChance: 0

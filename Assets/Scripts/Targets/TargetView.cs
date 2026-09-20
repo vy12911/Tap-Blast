@@ -74,7 +74,7 @@ namespace TapBlast
             else if (p.y >= bounds.yMax - my) velocity.y = -Mathf.Abs(velocity.y);
             rect.anchoredPosition = new Vector2(Mathf.Clamp(p.x, bounds.xMin + mx, bounds.xMax - mx), Mathf.Clamp(p.y, bounds.yMin + my, bounds.yMax - my));
         }
-        public void KeepInside(Rect bounds) { if (Active) Bounce(bounds, rect.rect.width * .5125f + 18); }
+        public void KeepInside(Rect bounds) { if (Active) Bounce(bounds, rect.rect.width * .5125f + 27); }
 
         public void SetInteractable(bool value) { interactable = value; }
         public void Release() { Active = false; interactable = false; gameObject.SetActive(false); }

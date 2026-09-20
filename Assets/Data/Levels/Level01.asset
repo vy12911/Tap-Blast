@@ -22,8 +22,8 @@ MonoBehaviour:
   spawnInterval: 1.1
   targetLifetime: 4.5
   maxTargets: 4
-  targetSize: 112
-  targetSpacing: 24
+  targetSize: 168
+  targetSpacing: 36
   twoStarScore: 240
   threeStarCombo: 20
   coinReward: 50

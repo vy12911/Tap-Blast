@@ -27,7 +27,6 @@ namespace TapBlast
         [SerializeField] private GameObject levelSelect, introHero, sizePreview;
         [SerializeField] private TMP_Text worldLabel, levelLabel, description, countdownGoal, selectionWallet;
         private LevelConfig currentConfig;
-        [SerializeField] private RectTransform safeArea, frame;
         [SerializeField] private GameObject intro, pausePanel, results, countdownPanel;
         [SerializeField] private TMP_Text score, timer, objective, combo, multiplier, hint, subhint, countdownText;
         [SerializeField] private TMP_Text introName, introGoal, introBest, starRules, resultTitle, resultSubtitle, resultScore, resultStats, resultBest, resultHint;
@@ -36,9 +35,6 @@ namespace TapBlast
         [SerializeField] private Popup[] popups = new Popup[10];
         private int popupCursor;
         private bool animateFeedback;
-        private Rect lastSafe;
-        private Vector2 lastScreen;
-        private Vector2 lastCanvasSize;
         private int lastCountdown = -1;
         [SerializeField] private TapHandHint tapHand;
         private ResultReveal resultReveal;
@@ -46,7 +42,9 @@ namespace TapBlast
         [SerializeField] private TMP_Text rewardPreview, rewardEarned, rewardBalance, playerProgress;
         [SerializeField] private Image xpFill;
         [SerializeField] private CanvasGroup rewardGroup;
-        public void Initialize() { resultReveal = new ResultReveal(resultScore, resultBest, resultStars, rewardGroup); HideOverlays(); UpdateSafeArea(); }
+        [Header("Feedback distances in Canvas reference pixels")]
+        [SerializeField] private float popupRise = 48, sparkStartRadius = 33, sparkTravel = 127.5f, previewGlowPadding = 120;
+        public void Initialize() { resultReveal = new ResultReveal(resultScore, resultBest, resultStars, rewardGroup); HideOverlays(); }
         public bool TutorialHandVisible => tapHand.IsVisible;
         public bool ResultRevealComplete => resultReveal.IsComplete;
         [System.Serializable] private sealed class Popup
@@ -79,7 +77,7 @@ namespace TapBlast
             description.text = config.MechanicHint + (config.FirstTapTutorial ? "" : "\nKeep playing for mastery until time runs out.");
             for (int i = 0; i < 3; i++)
             {
-                ((RectTransform)sizePreview.transform.GetChild(i * 2)).sizeDelta = Vector2.one * (config.SizeAt(i) + 80);
+                ((RectTransform)sizePreview.transform.GetChild(i * 2)).sizeDelta = Vector2.one * (config.SizeAt(i) + previewGlowPadding);
                 ((RectTransform)sizePreview.transform.GetChild(i * 2 + 1)).sizeDelta = Vector2.one * config.SizeAt(i);
             }
             introName.text = config.DisplayName;
@@ -119,7 +117,6 @@ namespace TapBlast
             resultHint.text = !session.Won ? "Tap targets as they appear.\nYou can try again immediately." : session.Stars == 3 ? "Mastery achieved! All three stars earned!" : "Chase three stars: keep a clean streak\nand aim for the score goal.";
             if (hasNext) resultHint.text = "LEVEL " + (session.LevelId + 1) + " UNLOCKED\nGet ready for the next challenge!";
             rewardEarned.text = session.Won ? "+" + receipt.Coins + " COINS     +" + receipt.XP + " XP" : "COMPLETE THE LEVEL TO EARN REWARDS";
-            rewardEarned.fontSize = session.Won ? 22 : 17;
             rewardBalance.text = "WALLET  " + receipt.TotalCoins.ToString("N0") + " COINS   /   TOTAL XP  " + receipt.TotalXP.ToString("N0");
             bool leveledUp = receipt.TotalXP / 100 > (receipt.TotalXP - receipt.XP) / 100;
             playerProgress.text = (leveledUp ? "LEVEL UP!  " : "PLAYER LEVEL ") + receipt.PlayerLevel + "   /   " + (receipt.TotalXP % 100) + " / 100 XP";
@@ -155,7 +152,6 @@ namespace TapBlast
         public void ClearFeedback() { foreach (var p in popups) { p.Active = false; p.Root.gameObject.SetActive(false); } popupCursor = 0; ResetJuice(); }
         private void Update()
         {
-            UpdateSafeArea();
             TickJuice(Time.unscaledDeltaTime);
             tapHand.Tick(Time.unscaledDeltaTime, animateFeedback, reducedMotion);
             if (results.activeSelf) resultReveal.Tick(Time.unscaledDeltaTime, reducedMotion);
@@ -166,31 +162,16 @@ namespace TapBlast
                 p.Age += Time.unscaledDeltaTime; float t = p.Age / .55f;
                 if (t >= 1) { p.Active = false; p.Root.gameObject.SetActive(false); continue; }
                 p.Alpha.alpha = 1 - t;
-                if (!p.ReducedMotion) { p.Root.anchoredPosition = p.Origin + Vector2.up * (t * 32); p.RingRect.localScale = Vector3.one * (1 + t * .8f); }
+                if (!p.ReducedMotion) { p.Root.anchoredPosition = p.Origin + Vector2.up * (t * popupRise); p.RingRect.localScale = Vector3.one * (1 + t * .8f); }
                 p.Core.rectTransform.localScale = Vector3.one * Mathf.Clamp01(1 - p.Age / .12f);
                 for (int j = 0; j < p.Sparks.Length; j++)
                 {
                     float angle = j * Mathf.PI * 2 / p.Sparks.Length;
-                    p.Sparks[j].anchoredPosition = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * (22 + 85 * (1 - Mathf.Pow(1 - t, 2)));
+                    p.Sparks[j].anchoredPosition = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * (sparkStartRadius + sparkTravel * (1 - Mathf.Pow(1 - t, 2)));
                     p.Sparks[j].localScale = Vector3.one * (1 - t);
                 }
             }
         }
-        private void UpdateSafeArea()
-        {
-            var screen = new Vector2(Screen.width, Screen.height); var safe = Screen.safeArea;
-            var canvasSize = ((RectTransform)transform).rect.size;
-            if (screen == lastScreen && safe == lastSafe && canvasSize == lastCanvasSize) return;
-            lastScreen = screen; lastSafe = safe;
-            lastCanvasSize = canvasSize;
-            if (screen.x <= 0 || screen.y <= 0) return;
-            safeArea.anchorMin = new Vector2(safe.xMin / screen.x, safe.yMin / screen.y);
-            safeArea.anchorMax = new Vector2(safe.xMax / screen.x, safe.yMax / screen.y);
-            Canvas.ForceUpdateCanvases();
-            float scale = Mathf.Min(safeArea.rect.width / 720, safeArea.rect.height / 1280);
-            frame.localScale = Vector3.one * Mathf.Max(.01f, scale);
-        }
-
         public void ShowTapHand() { tapHand.Show(); tapHand.Tick(0, animateFeedback, reducedMotion); }
         public void HideTapHand() { tapHand.Hide(); }
 

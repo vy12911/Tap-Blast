@@ -11,6 +11,8 @@ namespace TapBlast
         [SerializeField] private RectTransform[] confetti;
         [SerializeField] private CanvasGroup celebration;
         [SerializeField, Range(0, .3f)] private float punchStrength = .16f;
+        [SerializeField] private Vector2 confettiArea = new Vector2(855, 780);
+        [SerializeField] private float confettiSway = 36, confettiFallSpeed = 240, confettiSpeedStep = 36;
         private float punchAge = 1, celebrationAge = 5;
         private int juiceCombo;
         public void HitJuice(int streak)
@@ -52,7 +54,7 @@ namespace TapBlast
             for (int i = 0; i < confetti.Length; i++)
             {
                 float t = celebrationAge;
-                confetti[i].anchoredPosition = new Vector2(-285 + i * 570f / (confetti.Length - 1) + Mathf.Sin(t * 3 + i) * 24, 520 - (160 + i % 5 * 24) * t);
+                confetti[i].anchoredPosition = new Vector2(-confettiArea.x * .5f + i * confettiArea.x / Mathf.Max(1, confetti.Length - 1) + Mathf.Sin(t * 3 + i) * confettiSway, confettiArea.y - (confettiFallSpeed + i % 5 * confettiSpeedStep) * t);
                 confetti[i].localEulerAngles = new Vector3(0, 0, i * 31 + t * (i % 2 == 0 ? 170 : -130));
             }
             if (celebrationAge >= 2.8f) celebration.gameObject.SetActive(false);

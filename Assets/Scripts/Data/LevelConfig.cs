@@ -22,8 +22,8 @@ namespace TapBlast
         [SerializeField, Min(1)] private float accelerationSeconds = 20;
         [SerializeField, Min(1)] private float targetLifetime = 4.5f;
         [SerializeField, Range(1, 12)] private int maxTargets = 4;
-        [SerializeField, Range(70, 160)] private float targetSize = 112;
-        [SerializeField, Min(0)] private float targetSpacing = 24;
+        [SerializeField, Range(105, 240)] private float targetSize = 168;
+        [SerializeField, Min(0)] private float targetSpacing = 36;
         [Header("Special Target Mechanics")]
         [SerializeField] private bool movingTargets = false;
         [SerializeField, Range(0f, 1f)] private float goldenChance = 0f;
@@ -33,7 +33,7 @@ namespace TapBlast
         [SerializeField, Min(1)] private int goldenPoints = 100;
         [SerializeField, Min(0)] private float timeBonus = 3;
         [SerializeField, Min(3)] private int maxTimeTargets = 6;
-        [SerializeField, Range(144, 240)] private float bossSize = 180;
+        [SerializeField, Range(216, 360)] private float bossSize = 270;
         [Header("Stars: completion / score / score + no misses + streak")]
         [SerializeField, Min(1)] private int twoStarScore = 240;
         [SerializeField, Min(1)] private int threeStarCombo = 20;
@@ -50,7 +50,7 @@ namespace TapBlast
         public int GoldenPoints => Mathf.Max(1, goldenPoints);
         public float TimeBonus => Mathf.Max(0, timeBonus);
         public int MaxTimeTargets => Mathf.Max(objective == ObjectiveKind.Time ? ObjectiveCount : 0, maxTimeTargets);
-        public float BossSize => Mathf.Clamp(bossSize, 144, 240);
+        public float BossSize => Mathf.Clamp(bossSize, 216, 360);
         public string MechanicHint => mechanicHint;
         public string ObjectiveLabel => objective switch
         {
@@ -67,10 +67,10 @@ namespace TapBlast
             ObjectiveKind.Boss => "Destroy the " + BossHealth + "-hit Golden Core",
             _ => "Tap " + RequiredTaps + " targets"
         }) + " in " + Duration.ToString("0") + " seconds";
-        public float SizeAt(int index) => targetSizes == null || targetSizes.Length == 0 ? TargetSize : Mathf.Clamp(targetSizes[index % targetSizes.Length], 70, 160);
+        public float SizeAt(int index) => targetSizes == null || targetSizes.Length == 0 ? TargetSize : Mathf.Clamp(targetSizes[index % targetSizes.Length], 105, 240);
         public float LargestTargetSize
         {
-            get { float largest = IsBossLevel ? Mathf.Max(TargetSize, BossSize) : TargetSize; if (targetSizes != null) foreach (float size in targetSizes) largest = Mathf.Max(largest, Mathf.Clamp(size, 70, 160)); return largest; }
+            get { float largest = IsBossLevel ? Mathf.Max(TargetSize, BossSize) : TargetSize; if (targetSizes != null) foreach (float size in targetSizes) largest = Mathf.Max(largest, Mathf.Clamp(size, 105, 240)); return largest; }
         }
         public int XPReward => Mathf.Max(0, xpReward);
         public string DisplayName => displayName;
@@ -80,7 +80,7 @@ namespace TapBlast
         public float SpawnIntervalAt(float seconds) => finalSpawnInterval <= 0 ? SpawnInterval : Mathf.Lerp(SpawnInterval, Mathf.Max(.2f, finalSpawnInterval), Mathf.Clamp01(seconds / Mathf.Max(1, accelerationSeconds)));
         public float TargetLifetime => Mathf.Max(1, targetLifetime);
         public int MaxTargets => Mathf.Clamp(maxTargets, 1, 12);
-        public float TargetSize => Mathf.Clamp(targetSize, 70, 160);
+        public float TargetSize => Mathf.Clamp(targetSize, 105, 240);
         public float TargetSpacing => Mathf.Max(0, targetSpacing);
         public bool MovingTargets => movingTargets;
         public float GoldenChance => Mathf.Clamp01(goldenChance);

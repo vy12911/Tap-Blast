@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9218bab79c640ef96f356711932423c, type: 3}
+  m_Name: Level15
+  m_EditorClassIdentifier: 
+  displayName: COMBO FEVER
+  levelId: 15
+  objective: 2
+  targetScore: 3000
+  firstTapTutorial: 0
+  targetSizes: []
+  duration: 45
+  requiredTaps: 20
+  basePoints: 10
+  spawnInterval: 0.60
+  finalSpawnInterval: 0.40
+  accelerationSeconds: 20
+  targetLifetime: 3.6
+  maxTargets: 7
+  targetSize: 140
+  targetSpacing: 36
+  movingTargets: 0
+  goldenChance: 0.20
+  timeChance: 0
+  isBossLevel: 0
+  bossHealth: 1
+  twoStarScore: 5500
+  threeStarCombo: 30
+  coinReward: 300
+  xpReward: 150
+  objectiveCount: 25
+  mechanicHint: Spawn pace accelerates from 0.60s to 0.40s. Reach a 25-hit streak as the rhythm speeds up!

@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9218bab79c640ef96f356711932423c, type: 3}
+  m_Name: Level16
+  m_EditorClassIdentifier: 
+  displayName: TIME SURGE
+  levelId: 16
+  objective: 4
+  targetScore: 2500
+  firstTapTutorial: 0
+  targetSizes: []
+  duration: 40
+  requiredTaps: 20
+  basePoints: 10
+  timeBonus: 3
+  maxTimeTargets: 8
+  spawnInterval: 0.50
+  targetLifetime: 3.8
+  maxTargets: 7
+  targetSize: 150
+  targetSpacing: 36
+  movingTargets: 0
+  goldenChance: 0.15
+  timeChance: 0.25
+  isBossLevel: 0
+  bossHealth: 1
+  twoStarScore: 4000
+  threeStarCombo: 25
+  coinReward: 325
+  xpReward: 160
+  objectiveCount: 4
+  mechanicHint: Collect 4 Time Bubbles. Each adds 3 seconds to the clock to extend your run.

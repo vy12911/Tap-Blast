@@ -6,7 +6,7 @@ namespace TapBlast
     public sealed class LevelConfig : ScriptableObject
     {
         [SerializeField] private string displayName = "FIRST SPARK";
-        [SerializeField, Range(1, 10)] private int levelId = 1;
+        [SerializeField, Range(1, 100)] private int levelId = 1;
         [SerializeField] private ObjectiveKind objective = ObjectiveKind.Taps;
         [SerializeField, Min(1)] private int targetScore = 500;
         [SerializeField, Min(1)] private int objectiveCount = 1;
@@ -41,7 +41,7 @@ namespace TapBlast
         [SerializeField, Min(0)] private int coinReward = 50;
         [SerializeField, Min(0)] private int xpReward = 25;
         public int CoinReward => Mathf.Max(0, coinReward);
-        public int LevelId => Mathf.Clamp(levelId, 1, 10);
+        public int LevelId => Mathf.Clamp(levelId, 1, 100);
         public ObjectiveKind Objective => objective;
         public int TargetScore => Mathf.Max(1, targetScore);
         public int BasePoints => Mathf.Max(1, basePoints);

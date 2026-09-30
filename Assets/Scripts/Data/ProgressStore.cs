@@ -12,8 +12,8 @@ namespace TapBlast
         {
             public int bestScore, bestStars, coins, xp;
             public int level2BestScore, level2BestStars;
-            public int[] scores = new int[10];
-            public int[] stars = new int[10];
+            public int[] scores = new int[20];
+            public int[] stars = new int[20];
             public int selectedLevel = 1, activeLevel = 1;
             public string activeRound = "";
         }
@@ -32,8 +32,8 @@ namespace TapBlast
             else
                 data = new ProgressData { bestScore = PlayerPrefs.GetInt(Prefix + "Level01.Best", 0), bestStars = PlayerPrefs.GetInt(Prefix + "Level01.Stars", 0) };
 
-            if (data.scores == null || data.scores.Length < 10) Array.Resize(ref data.scores, 10);
-            if (data.stars == null || data.stars.Length < 10) Array.Resize(ref data.stars, 10);
+            if (data.scores == null || data.scores.Length < 20) Array.Resize(ref data.scores, 20);
+            if (data.stars == null || data.stars.Length < 20) Array.Resize(ref data.stars, 20);
             if (data.bestScore > data.scores[0]) data.scores[0] = data.bestScore;
             if (data.bestStars > data.stars[0]) data.stars[0] = data.bestStars;
             if (data.level2BestScore > data.scores[1]) data.scores[1] = data.level2BestScore;
@@ -48,9 +48,9 @@ namespace TapBlast
         }
         public static int BestScore => GetBestScore(1);
         public static int BestStars => GetBestStars(1);
-        public static int GetBestScore(int level) => level >= 1 && level <= 10 ? Load().scores[level - 1] : 0;
-        public static int GetBestStars(int level) => level >= 1 && level <= 10 ? Load().stars[level - 1] : 0;
-        public static bool IsUnlocked(int level) => level == 1 || (level >= 2 && level <= 10 && GetBestStars(level - 1) > 0);
+        public static int GetBestScore(int level) => level >= 1 && level <= 20 ? Load().scores[level - 1] : 0;
+        public static int GetBestStars(int level) => level >= 1 && level <= 20 ? Load().stars[level - 1] : 0;
+        public static bool IsUnlocked(int level) => level == 1 || (level >= 2 && level <= 20 && GetBestStars(level - 1) > 0);
         public static int SelectedLevel => IsUnlocked(Load().selectedLevel) ? Load().selectedLevel : 1;
         public static bool SelectLevel(int level)
         {
@@ -76,7 +76,7 @@ namespace TapBlast
             int earnedCoins = session.Won ? (int)Math.Min(Math.Max(0, coins), (long)int.MaxValue - data.coins) : 0;
             int earnedXP = session.Won ? (int)Math.Min(Math.Max(0, xp), (long)int.MaxValue - data.xp) : 0;
             data.coins += earnedCoins; data.xp += earnedXP;
-            int idx = Mathf.Clamp(session.LevelId - 1, 0, 9);
+            int idx = Mathf.Clamp(session.LevelId - 1, 0, 19);
             data.scores[idx] = Mathf.Max(session.Score, data.scores[idx]);
             data.stars[idx] = Mathf.Max(session.Stars, data.stars[idx]);
             data.activeRound = ""; Save(data);

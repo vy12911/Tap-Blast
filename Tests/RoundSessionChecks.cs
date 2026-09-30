@@ -99,6 +99,32 @@ internal static class RoundSessionChecks
             float finishedTime = s.RemainingTime; int finishedScore = s.Score;
             s.Tap(TargetKind.Time); s.Tap(TargetKind.Golden);
             Check(s.RemainingTime == finishedTime && s.Score == finishedScore && s.TimeHits == 3, "Results reject late special taps");
+            var level11 = new RoundRules(45, 20, 10, 3200, 20, ObjectiveKind.Score, 2500, 11);
+            s = new RoundSession(level11); s.Reset(); s.StartPlaying();
+            Check(s.LevelId == 11 && s.State == RoundState.Playing, "Level 11 initializes correctly");
+            while (s.Score < 2500) s.Tap();
+            Check(s.GoalMet && s.State == RoundState.Playing, "Level 11 score goal met");
+            s.Tick(45); Check(s.Won, "Level 11 completes successfully");
+            var level15 = new RoundRules(45, 20, 10, 5500, 30, ObjectiveKind.Combo, 500, 15, 25);
+            s = new RoundSession(level15); s.Reset(); s.StartPlaying();
+            for (int i = 0; i < 25; i++) s.Tap();
+            Check(s.GoalMet && s.BestCombo == 25, "Level 15 25-hit streak goal met");
+            var level16 = new RoundRules(40, 20, 10, 4000, 25, ObjectiveKind.Time, 500, 16, 4);
+            s = new RoundSession(level16); s.Reset(); s.StartPlaying();
+            for (int i = 0; i < 4; i++) s.Tap(TargetKind.Time);
+            Check(s.GoalMet && s.TimeHits == 4, "Level 16 4 Time Bubble goal met");
+            var level18 = new RoundRules(45, 20, 10, 6500, 30, ObjectiveKind.Golden, 500, 18, 5, 120);
+            s = new RoundSession(level18); s.Reset(); s.StartPlaying();
+            for (int i = 0; i < 5; i++) s.Tap(TargetKind.Golden);
+            Check(s.GoalMet && s.GoldenHits == 5, "Level 18 5 Golden target goal met");
+            var level20 = new RoundRules(55, 20, 10, 10000, 35, ObjectiveKind.Boss, 10000, 20, 1);
+            s = new RoundSession(level20); s.Reset(); s.StartPlaying();
+            Check(s.LevelId == 20 && s.State == RoundState.Playing, "Level 20 Titan Core initializes correctly");
+            for (int i = 0; i < 9; i++) s.Tap(TargetKind.Boss, false);
+            Check(s.BossesDestroyed == 0 && !s.GoalMet, "9 hits on 10-hit Titan Core does not destroy it");
+            s.Tap(TargetKind.Boss, true);
+            Check(s.BossesDestroyed == 1 && s.GoalMet, "10th hit destroys Titan Core");
+            s.Tick(55); Check(s.Won && s.Stars >= 1, "Level 20 Titan Core victory achieved");
             Console.WriteLine(checks + " round-rule checks passed."); return 0;
         }
         catch (Exception e) { Console.Error.WriteLine(e); return 1; }

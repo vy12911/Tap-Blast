@@ -25,7 +25,20 @@ public sealed class GameManager : MonoBehaviour
     {
         if (level == null) { Debug.LogError("Assign a LevelConfig to GameManager.", this); enabled = false; return; }
         if (levels == null || levels.Length == 0) levels = new[] { level };
+        // Auto-advance to World 2 (Level 11) if all World 1 levels are completed
+        if (ProgressStore.IsUnlocked(11) && ProgressStore.SelectedLevel <= 10)
+        {
+            ProgressStore.SelectLevel(11);
+        }
+
         foreach (var config in levels) if (config != null && config.LevelId == ProgressStore.SelectedLevel) level = config;
+#if UNITY_EDITOR
+        if (level == null || level.LevelId != ProgressStore.SelectedLevel)
+        {
+            var loaded = UnityEditor.AssetDatabase.LoadAssetAtPath<LevelConfig>($"Assets/Data/Levels/Level{ProgressStore.SelectedLevel:00}.asset");
+            if (loaded != null) level = loaded;
+        }
+#endif
         Application.targetFrameRate = 60;
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
         Session = new RoundSession(level.Rules);
@@ -50,7 +63,7 @@ public sealed class GameManager : MonoBehaviour
         hud.PauseMenu.onClick.AddListener(ShowLevels);
         hud.ResultMenu.onClick.AddListener(ShowLevels);
         RefreshSettings();
-        hud.ShowIntro(level, ProgressStore.GetBestScore(level.LevelId));
+        ShowLevels();
         RefreshHUD();
     }
 
@@ -166,6 +179,12 @@ public sealed class GameManager : MonoBehaviour
     {
         LevelConfig selected = null;
         foreach (var config in levels) if (config != null && config.LevelId == id) selected = config;
+#if UNITY_EDITOR
+        if (selected == null)
+        {
+            selected = UnityEditor.AssetDatabase.LoadAssetAtPath<LevelConfig>($"Assets/Data/Levels/Level{id:00}.asset");
+        }
+#endif
         if (selected == null || !ProgressStore.IsUnlocked(id)) return false;
         ProgressStore.AbandonRound(roundId); roundId = null; roundFinalized = false;
         pool.Clear(); hud.ClearFeedback(); hud.HideTapHand();
@@ -173,11 +192,26 @@ public sealed class GameManager : MonoBehaviour
         Session = new RoundSession(level.Rules); spawner = new TargetSpawner(pool, hud.Arena, level);
         tutorialStarted = false; hud.ShowIntro(level, ProgressStore.GetBestScore(id)); RefreshHUD(); return true;
     }
+    public LevelConfig[] GetAllLevels()
+    {
+        var list = new System.Collections.Generic.List<LevelConfig>(levels ?? new LevelConfig[0]);
+#if UNITY_EDITOR
+        for (int i = 1; i <= 20; i++)
+        {
+            if (!list.Exists(c => c != null && c.LevelId == i))
+            {
+                var loaded = UnityEditor.AssetDatabase.LoadAssetAtPath<LevelConfig>($"Assets/Data/Levels/Level{i:00}.asset");
+                if (loaded != null) list.Add(loaded);
+            }
+        }
+#endif
+        return list.ToArray();
+    }
     public void ShowLevels()
     {
         ProgressStore.AbandonRound(roundId); roundId = null; roundFinalized = false;
         pool.Clear(); hud.ClearFeedback(); hud.HideTapHand(); spawner.Reset();
-        Session = new RoundSession(level.Rules); tutorialStarted = false; hud.ShowLevels(levels, SelectLevel); RefreshHUD();
+        Session = new RoundSession(level.Rules); tutorialStarted = false; hud.ShowLevels(GetAllLevels(), SelectLevel); RefreshHUD();
     }
     public void NextLevel()
     {

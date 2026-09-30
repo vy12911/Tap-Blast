@@ -1,4 +1,4 @@
-# Tap Blast — World 1 (Levels 1–10)
+# Tap Blast — Campaign (Levels 1–20)
 
 Unity **6000.3.17f1**, URP, uGUI and Input System. Use a **9:16** Game view (1080 × 1920 reference frame).
 
@@ -8,16 +8,17 @@ All UI text uses **TextMeshProUGUI** components and **`TMPro.TMP_Text`** script 
 
 ## Play and campaign flow
 
-Open **Tap Blast > Open Campaign**, enter Play Mode and select **Let's Play**. The shared `Assets/Scenes/Level01.unity` scene references all ten level configurations directly, including in player builds. Completing a level unlocks the next one. Level selection contains ten authored buttons in `Assets/Prefabs/UI/GameCanvas.prefab`; scripts bind and update them without constructing UI.
+Open **Tap Blast > Open Campaign**, enter Play Mode and select **Let's Play**. Completing a level unlocks the next one up to Level 20.
 
-Flow: briefing and reward preview → three-second countdown → gameplay → score/star/reward results → replay, next level or level selection. First launch opens Level 1; later launches restore the selected unlocked level. Level 10 has replay and level selection, without a nonexistent Level 11 button.
+Flow: briefing and reward preview → three-second countdown → gameplay → score/star/reward results → replay, next level or level selection. First launch opens Level 1; later launches restore the selected unlocked level.
 
-Level 1 starts with a non-expiring target and tap-hand tutorial. Its clock starts with the first tap and the round finishes on target 20. Levels 2–10 start the clock after countdown and continue until timeout, allowing mastery after the primary goal is met. Their briefings explain this. Expired targets reset the current streak; a previously reached best-streak objective remains earned. Empty-space taps are ignored.
+Level 1 starts with a non-expiring target and tap-hand tutorial. Its clock starts with the first tap and the round finishes on target 20. Levels 2–20 start the clock after countdown and continue until timeout, allowing mastery after the primary goal is met. Their briefings explain this. Expired targets reset the current streak; a previously reached best-streak objective remains earned. Empty-space taps are ignored.
 
-## World 1 objectives
+## World 1 & World 2 objectives
 
-These use the **suggested early-level objectives in the supplied GDD v1.0, page 12**. The GDD's “5x / 10x / 15x” combo objectives mean consecutive hits, not the separate score multiplier. Durations, exact sizes, pacing, star scores and rewards are implementation tuning values.
+These use the **suggested early-level objectives in the supplied GDD v1.0, pages 12–13**. Durations, exact sizes, pacing, star scores and rewards are implementation tuning values.
 
+### World 1: Learn to Tap (Levels 1–10)
 | Level | Primary objective | Base time | Two-star score | Three-star streak |
 |---|---|---|---|---|
 | 1 — First Spark | Tap 20 targets | 60s | 240 | 20 |
@@ -31,9 +32,23 @@ These use the **suggested early-level objectives in the supplied GDD v1.0, page 
 | 9 — Master Streak | Reach a 15-hit streak | 45s | 1,600 | 25 |
 | 10 — Golden Core | Destroy the 5-hit Core | 50s | 3,000 | 25 |
 
-One star requires the primary objective. Two stars also require the configured score. Three stars additionally require zero expired targets and the listed best streak. Score alone cannot replace collection, combo or Core objectives.
+### World 2: Combo City (Levels 11–20)
+| Level | Primary objective | Base time | Two-star score | Three-star streak |
+|---|---|---|---|---|
+| 11 — Chain Spark | Score 2,500 points | 45s | 3,200 | 20 |
+| 12 — Double Impact | Reach a 20-hit streak | 45s | 3,500 | 25 |
+| 13 — Mega Burst | Score 4,000 points | 45s | 5,000 | 25 |
+| 14 — Drift Cluster | Score 4,500 points | 45s | 5,800 | 25 |
+| 15 — Combo Fever | Reach a 25-hit streak | 45s | 5,500 | 30 |
+| 16 — Time Surge | Collect 4 Time Bubbles | 40s | 4,000 | 25 |
+| 17 — Precision Master | Score 6,000 points | 45s | 7,500 | 30 |
+| 18 — Golden Strike | Tap 5 Golden targets | 45s | 6,500 | 30 |
+| 19 — Ultra Streak | Reach a 30-hit streak | 50s | 8,000 | 35 |
+| 20 — Titan Core | Destroy the 10-hit Core | 55s | 10,000 | 35 |
 
-See [the World 1 guide](Assets/Design%20Doc/World1_Level_Objectives_and_Progression.md) for rewards and tuning decisions.
+One star requires the primary objective. Two stars also require the configured score. Three stars additionally require zero expired targets and the listed best streak.
+
+See [the World 1 guide](Assets/Design%20Doc/World1_Level_Objectives_and_Progression.md) and [the World 2 guide](Assets/Design%20Doc/World2_Level_Objectives_and_Progression.md) for rewards and tuning decisions.
 
 ## Targets and scoring
 

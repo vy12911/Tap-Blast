@@ -65,12 +65,14 @@ namespace TapBlast
             resultReveal.Cancel();
             levelSelect.SetActive(false);
             intro.SetActive(false); pausePanel.SetActive(false); results.SetActive(false); countdownPanel.SetActive(false);
+            if (prevWorldBtn != null) prevWorldBtn.gameObject.SetActive(false);
+            if (nextWorldBtn != null) nextWorldBtn.gameObject.SetActive(false);
         }
         public void ShowIntro(LevelConfig config, int best)
         {
             HideOverlays(); intro.SetActive(true); Pause.interactable = false; animateFeedback = false;
             currentConfig = config;
-            worldLabel.text = "WORLD 01   /   " + config.DisplayName;
+            worldLabel.text = (config.LevelId > 10 ? "WORLD 02   /   " : "WORLD 01   /   ") + config.DisplayName;
             levelLabel.text = config.LevelId.ToString("00");
             countdownGoal.text = config.GoalText;
             introHero.SetActive(config.LevelId == 1); sizePreview.SetActive(config.LevelId == 2);
@@ -107,7 +109,7 @@ namespace TapBlast
             HideTapHand();
             resultTitle.text = session.Won ? "BRILLIANT!" : "TRY AGAIN";
             resultSubtitle.text = session.Won ? "LEVEL " + session.LevelId.ToString("00") + " COMPLETE" : "TIME UP  /  OBJECTIVE MISSED";
-            bool hasNext = session.Won && session.LevelId < 10 && ProgressStore.IsUnlocked(session.LevelId + 1);
+            bool hasNext = session.Won && session.LevelId < 20 && ProgressStore.IsUnlocked(session.LevelId + 1);
             Next.gameObject.SetActive(hasNext);
             Replay.GetComponentInChildren<TMP_Text>().text = hasNext ? "REPLAY" : "PLAY AGAIN";
             for (int i = 0; i < 3; i++) resultStars[i].color = i < session.Stars ? UIArt.Gold : new Color32(57, 77, 90, 255);
@@ -177,19 +179,128 @@ namespace TapBlast
 
         [SerializeField] private Button[] levelButtons = new Button[10];
         [SerializeField] private TMP_Text[] selectionTexts = new TMP_Text[10];
+        private int currentLevelPage = 0;
+        private LevelConfig[] cachedConfigs;
+        private System.Func<int, bool> cachedOnSelectLevel;
+
+        private Button prevWorldBtn, nextWorldBtn;
+        private Image prevWorldImg, nextWorldImg;
+        private TMP_Text prevWorldText, nextWorldText;
+
+        private void EnsureWorldButtons()
+        {
+            if (worldLabel == null || prevWorldBtn != null) return;
+            Transform parent = worldLabel.transform.parent;
+            if (parent == null) return;
+
+            GameObject leftObj = new GameObject("PrevWorldButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            leftObj.transform.SetParent(parent, false);
+            RectTransform leftRect = leftObj.GetComponent<RectTransform>();
+            leftRect.anchorMin = new Vector2(0.5f, 0.5f);
+            leftRect.anchorMax = new Vector2(0.5f, 0.5f);
+            leftRect.anchoredPosition = new Vector2(-270, 792);
+            leftRect.sizeDelta = new Vector2(110, 52);
+
+            prevWorldImg = leftObj.GetComponent<Image>();
+            prevWorldImg.color = new Color32(24, 85, 110, 240);
+
+            GameObject leftTextObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+            leftTextObj.transform.SetParent(leftObj.transform, false);
+            RectTransform ltRect = leftTextObj.GetComponent<RectTransform>();
+            ltRect.anchorMin = Vector2.zero; ltRect.anchorMax = Vector2.one; ltRect.sizeDelta = Vector2.zero;
+            prevWorldText = leftTextObj.AddComponent<TextMeshProUGUI>();
+            prevWorldText.text = "< W1";
+            prevWorldText.font = worldLabel.font;
+            prevWorldText.fontSize = 22;
+            prevWorldText.fontStyle = FontStyles.Bold;
+            prevWorldText.alignment = TextAlignmentOptions.Center;
+            prevWorldText.color = UIArt.Cyan;
+            prevWorldText.raycastTarget = false;
+
+            prevWorldBtn = leftObj.GetComponent<Button>();
+            prevWorldBtn.transition = Selectable.Transition.None;
+            prevWorldBtn.onClick.AddListener(() => ShowLevelsPage(0));
+
+            GameObject rightObj = new GameObject("NextWorldButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            rightObj.transform.SetParent(parent, false);
+            RectTransform rightRect = rightObj.GetComponent<RectTransform>();
+            rightRect.anchorMin = new Vector2(0.5f, 0.5f);
+            rightRect.anchorMax = new Vector2(0.5f, 0.5f);
+            rightRect.anchoredPosition = new Vector2(270, 792);
+            rightRect.sizeDelta = new Vector2(110, 52);
+
+            nextWorldImg = rightObj.GetComponent<Image>();
+            nextWorldImg.color = new Color32(95, 75, 24, 240);
+
+            GameObject rightTextObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+            rightTextObj.transform.SetParent(rightObj.transform, false);
+            RectTransform rtRect = rightTextObj.GetComponent<RectTransform>();
+            rtRect.anchorMin = Vector2.zero; rtRect.anchorMax = Vector2.one; rtRect.sizeDelta = Vector2.zero;
+            nextWorldText = rightTextObj.AddComponent<TextMeshProUGUI>();
+            nextWorldText.text = "W2 >";
+            nextWorldText.font = worldLabel.font;
+            nextWorldText.fontSize = 22;
+            nextWorldText.fontStyle = FontStyles.Bold;
+            nextWorldText.alignment = TextAlignmentOptions.Center;
+            nextWorldText.color = UIArt.Gold;
+            nextWorldText.raycastTarget = false;
+
+            nextWorldBtn = rightObj.GetComponent<Button>();
+            nextWorldBtn.transition = Selectable.Transition.None;
+            nextWorldBtn.onClick.AddListener(() => ShowLevelsPage(1));
+        }
 
         public void ShowLevels(LevelConfig[] configs, System.Func<int, bool> onSelectLevel)
         {
+            cachedConfigs = configs;
+            cachedOnSelectLevel = onSelectLevel;
+            int selected = currentConfig != null ? currentConfig.LevelId : ProgressStore.SelectedLevel;
+            int targetPage = selected > 10 ? 1 : 0;
+            ShowLevelsPage(targetPage);
+        }
+
+        public void ShowLevelsPage(int page)
+        {
+            currentLevelPage = Mathf.Clamp(page, 0, 1);
             HideOverlays(); levelSelect.SetActive(true); Pause.interactable = false; animateFeedback = false;
             SetHint("", "");
-            if (selectionWallet != null)
-                selectionWallet.text = ProgressStore.Coins.ToString("N0") + " COINS   /   " + ProgressStore.XP.ToString("N0") + " XP\nPLAYER LEVEL " + (1 + ProgressStore.XP / 100);
+            EnsureWorldButtons();
 
+            if (worldLabel != null)
+                worldLabel.text = currentLevelPage == 1 ? "WORLD 02   /   COMBO CITY" : "WORLD 01   /   LEARN TO TAP";
+
+            if (selectionWallet != null)
+            {
+                string switchHint = ProgressStore.IsUnlocked(11) ? (currentLevelPage == 0 ? "   •   TAP < W1 OR W2 > TO SWITCH" : "   •   TAP < W1 OR W2 > TO SWITCH") : "";
+                selectionWallet.text = ProgressStore.Coins.ToString("N0") + " COINS   /   " + ProgressStore.XP.ToString("N0") + " XP\nPLAYER LEVEL " + (1 + ProgressStore.XP / 100) + switchHint;
+            }
+
+            bool w2Unlocked = ProgressStore.IsUnlocked(11);
+
+            if (prevWorldBtn != null)
+            {
+                prevWorldBtn.gameObject.SetActive(true);
+                prevWorldBtn.interactable = currentLevelPage == 1;
+                prevWorldText.text = currentLevelPage == 1 ? "< W1" : "W1";
+                prevWorldImg.color = currentLevelPage == 1 ? new Color32(24, 85, 110, 240) : new Color32(18, 38, 52, 160);
+                prevWorldText.color = currentLevelPage == 1 ? UIArt.Cyan : new Color32(100, 130, 140, 255);
+            }
+
+            if (nextWorldBtn != null)
+            {
+                nextWorldBtn.gameObject.SetActive(true);
+                nextWorldBtn.interactable = w2Unlocked && currentLevelPage == 0;
+                nextWorldText.text = !w2Unlocked ? "LOCK" : (currentLevelPage == 0 ? "W2 >" : "W2");
+                nextWorldImg.color = (w2Unlocked && currentLevelPage == 0) ? new Color32(95, 75, 24, 240) : new Color32(18, 38, 52, 160);
+                nextWorldText.color = (w2Unlocked && currentLevelPage == 0) ? UIArt.Gold : new Color32(120, 130, 140, 255);
+            }
+
+            int startLevel = currentLevelPage * 10 + 1;
             for (int i = 0; i < 10; i++)
             {
-                int levelId = i + 1;
+                int levelId = startLevel + i;
                 LevelConfig cfg = null;
-                if (configs != null) foreach (var c in configs) if (c != null && c.LevelId == levelId) cfg = c;
+                if (cachedConfigs != null) foreach (var c in cachedConfigs) if (c != null && c.LevelId == levelId) cfg = c;
                 string nameStr = cfg != null ? cfg.DisplayName : "LEVEL " + levelId.ToString("00");
 
                 if (levelButtons[i] != null)
@@ -217,17 +328,44 @@ namespace TapBlast
                         }
                         else
                         {
-                            selectionTexts[i].text = "LOCKED   Complete Level " + i + " to unlock";
+                            selectionTexts[i].text = "LOCKED   Complete Level " + (levelId - 1) + " to unlock";
                             selectionTexts[i].color = new Color32(120, 140, 150, 255);
                         }
                     }
 
                     int id = levelId;
                     levelButtons[i].onClick.RemoveAllListeners();
-                    levelButtons[i].onClick.AddListener(() => onSelectLevel(id));
+                    levelButtons[i].onClick.AddListener(() => cachedOnSelectLevel(id));
+                }
+            }
+
+            if (w2Unlocked)
+            {
+                if (worldLabel != null)
+                {
+                    worldLabel.raycastTarget = true;
+                    var wBtn = worldLabel.GetComponent<Button>() ?? worldLabel.gameObject.AddComponent<Button>();
+                    wBtn.onClick.RemoveAllListeners();
+                    wBtn.onClick.AddListener(ToggleLevelPage);
+                }
+                if (selectionWallet != null)
+                {
+                    selectionWallet.raycastTarget = true;
+                    var wletBtn = selectionWallet.GetComponent<Button>() ?? selectionWallet.gameObject.AddComponent<Button>();
+                    wletBtn.onClick.RemoveAllListeners();
+                    wletBtn.onClick.AddListener(ToggleLevelPage);
                 }
             }
         }
+
+        public void ToggleLevelPage()
+        {
+            if (ProgressStore.IsUnlocked(11))
+            {
+                ShowLevelsPage(1 - currentLevelPage);
+            }
+        }
+
         public void ShowLevels() { ShowLevels(null, (id) => false); }
     }
 }

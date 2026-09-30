@@ -1,0 +1,1265 @@
+Tap Blast — Full Game Design Document  Page 1
+ TAP BLAST
+ FULL GAME DESIGN DOCUMENT (GDD)
+Mobile Casual Arcade  One-Touch Reaction  Tap / Combo / Chain / Risk & Reward
+Version 1.0  Production Design
+Document Purpose
+This document defines the complete gameplay, progression, UX, economy, monetization, content, audio/visual direction, analytics,
+technical architecture and production requirements for Tap Blast. It is intended to be usable as a working reference for a Unity
+development team.
+1. High Concept
+Tap Blast is a fast one-touch arcade game in which players tap glowing targets, build combo multipliers, avoid hazards, execute
+timing-perfect taps, create chain reactions, activate power-ups and chase increasingly difficult level objectives. A round is short
+enough for casual play but deep enough to reward mastery.
+2. Design Pillars
+ Instant understanding: the first interaction should teach the game without a long tutorial.
+ 
+ Juicy feedback: every tap communicates success through motion, sound, score popups and particles.
+ 
+ Risk and reward: valuable targets should sometimes require the player to take a calculated risk.
+ 
+ Mastery: players can improve accuracy, timing, combo management and route selection.
+ 
+ Progression: new mechanics appear throughout the campaign instead of only increasing speed.
+ 
+ Short-session replayability: a failed round should naturally produce the desire for another attempt.
+ 
+ Readable chaos: difficulty may become intense, but target identity must remain clear.
+ 
+3. Core Player Experience
+The intended emotional sequence:
+See target -> Tap -> Pop -> Combo rises -> More targets appear -> Risk appears -> Player makes a decision -> Chain/Power
+activates -> Score explodes -> Reward -> 'One more try'
+The player should feel increasingly powerful as the combo grows, while the presence of Bombs, timing targets and disappearing
+high-value targets prevents mindless tapping.
+4. Game Modes
+MVP recommendation: launch with Campaign + Daily Challenge. Add Endless and event modes after core retention is proven.
+5. Core Round Flow
+ Load level configuration.
+ 
+ Show objective and reward preview for a brief moment.
+ 
+ Start countdown / immediate play.
+ 
+ Spawn targets according to the level pattern.
+ 
+ Track taps, misses, hazards, combo, score, power-ups and objectives.
+ 
+ Trigger scripted or probability-based events.
+ 
+ Allow Ultimate Blast when meter reaches 100%.
+ 
+ Run Final Blast phase where configured.
+ 
+ Stop spawning when time expires or the level's completion condition is met.
+ 
+ Calculate stars, rewards, mission progress and high-score status.
+ 
+---PAGE---
+Tap Blast — Full Game Design Document  Page 2
+ Present result screen with replay / next level / optional reward actions.
+ 
+6. Target System
+7. Target Spawn Rules
+ Targets must not spawn directly under critical HUD elements.
+ 
+ Maintain minimum spacing between simultaneous targets unless a Chain opportunity is intentionally created.
+ 
+ Avoid impossible overlaps between Bombs and required targets.
+ 
+ Spawn probability is controlled per level so designers can author difficulty.
+ 
+ Target lifetime prevents the arena from becoming permanently saturated.
+ 
+ A difficulty curve can modify spawn rate, lifetime, size, movement speed and hazard probability independently.
+ 
+8. Scoring System
+Suggested base formula:
+Final Tap Score = Base Target Value x Combo Multiplier x Temporary Score Multiplier + Bonuses
+Designers should be able to tune these values per mode without changing gameplay code.
+9. Combo System
+ Every valid target tap increments the combo.
+ 
+ A missed required target can reset or reduce combo depending on the level rule.
+ 
+ Bomb taps immediately break combo in standard mode.
+ 
+ Optional Shield can protect the combo once.
+ 
+ Combo thresholds trigger increasingly strong audiovisual feedback.
+ 
+ A combo should be visually obvious in the HUD at all times.
+ 
+10. Chain Blast
+Chain Blast is a signature system. Designers deliberately create clusters in which fast, accurate tapping can cause cascading
+explosions. The player is rewarded for recognizing spatial relationships.
+11. Perfect Tap
+ Target transitions: BIG -> MEDIUM -> SMALL -> PERFECT.
+ 
+ The perfect window is visually highlighted.
+ 
+ Perfect timing gives maximum score and Ultimate charge.
+ 
+ Early/late taps may give reduced rewards in beginner levels.
+ 
+ Advanced levels can require multiple Perfect Taps consecutively.
+ 
+ Moving Perfect targets combine timing and reaction skill.
+ 
+12. Bomb & Hazard System
+ Bombs are visually distinct enough to be fair but should create tension.
+ 
+ Bomb probability rises slowly through the campaign.
+ 
+ Bombs can move, hide among clusters or appear during Frenzy in advanced levels.
+ 
+ A bomb hit normally resets combo and may subtract a small score amount.
+ 
+ Never create a required path that forces an unavoidable bomb tap.
+ 
+13. Power-Up System
+
+---PAGE---
+Tap Blast — Full Game Design Document  Page 3
+14. Ultimate Meter
+The Ultimate Meter fills through successful taps, Perfect Taps, Chain Blasts and selected bonuses. At 100%, the player may activate
+Ultimate Blast. The button should become visually prominent without blocking targets.
+ Valid tap: small charge
+ 
+ Perfect: larger charge
+ 
+ Chain: major charge
+ 
+ Golden/Diamond: bonus charge
+ 
+ Bomb: no charge
+ 
+ Ultimate clears eligible normal/special targets according to level rules
+ 
+15. Special Events
+16. Level Design Rules
+ Each level should have a clear primary objective.
+ 
+ Most levels should have one secondary mastery condition.
+ 
+ Introduce one new mechanic at a time.
+ 
+ After introducing a mechanic, provide at least one level where it is the main focus before combining it with others.
+ 
+ Boss levels should test a mechanic combination rather than simply multiplying speed.
+ 
+ Difficulty spikes should be preceded by a learning level.
+ 
+ The final 5–10 seconds of many levels should feel more intense than the opening.
+ 
+17. 100-Level Campaign
+18. Detailed Early Levels (1–20)
+19. Levels 21–100: Progression Summary
+Levels 21–100 should progressively combine the systems described above. Difficulty should be tuned using spawn rate, target
+lifetime, target size, movement speed, hazard chance, Perfect window, event frequency and objective requirements rather than only
+increasing speed.
+20. Boss / Challenge Design
+ Mini Boss: one giant target with a visible health/progress ring.
+ 
+ Chain Master: requires several successful chain reactions.
+ 
+ Danger Boss: bomb patterns must be navigated safely.
+ 
+ Power Boss: power-up timing is central.
+ 
+ Perfect Boss: multiple timing windows.
+ 
+ Frenzy Boss: high-speed target waves.
+ 
+ Chaos Boss: multiple mechanics simultaneously.
+ 
+ Master Trial: strict accuracy and combo requirements.
+ 
+ Ultimate Challenge: multi-phase 60-second finale.
+ 
+21. Level 100 Ultimate Challenge
+Result screen should display Score, Best Combo, Perfect Taps, Chain Count, Coins, Gems, Stars and a 'Personal Best' indicator.
+22. Objectives
+
+---PAGE---
+Tap Blast — Full Game Design Document  Page 4
+23. Star Rating
+ 1 Star: complete the level.
+ 
+ 2 Stars: exceed the score or secondary objective.
+ 
+ 3 Stars: complete the mastery condition.
+ 
+ Stars permanently contribute to campaign completion percentage.
+ 
+24. Player Progression
+Recommended progression layers:
+ Campaign level unlocks
+ 
+ Stars
+ 
+ Player level / XP
+ 
+ Coins
+ 
+ Gems
+ 
+ Cosmetic collection
+ 
+ Daily missions
+ 
+ Achievements
+ 
+ High scores / personal records
+ 
+25. Economy
+Keep score progression independent from paid power so competitive or leaderboard results remain credible.
+26. Cosmetic Collection
+ Bubble skins: Neon, Fire, Ice, Galaxy, Plasma, Toxic, Rainbow, Diamond, Shadow.
+ 
+ Blast effects: Basic, Lightning, Shockwave, Black Hole, Rainbow, Galaxy.
+ 
+ Trails: Spark, Fire, Rainbow, Electric.
+ 
+ Arena themes: Neon City, Deep Space, Ocean, Cyber, Candy, Galaxy.
+ 
+ UI themes can be added later.
+ 
+ Cosmetics should provide visual personalization, not unfair scoring advantages.
+ 
+27. Treasure Box System
+Treasure Boxes provide a collection/reward layer. Boxes can contain Coins, Gems, cosmetic fragments, complete cosmetics or
+temporary boosters.
+ Common Box: frequent, mostly Coins.
+ 
+ Rare Box: Coins + Gems + cosmetic chance.
+ 
+ Epic Box: stronger cosmetic odds.
+ 
+ Event Box: limited-time themed cosmetics.
+ 
+ Avoid confusing or deceptive reward presentation; show clear reward categories and probabilities where required.
+ 
+28. Daily Missions
+ Tap 100 targets
+ 
+ Reach 20x combo
+ 
+ Perform 10 Perfect Taps
+ 
+ Create 5 Chain Blasts
+ 
+ Collect 5 Diamonds
+ 
+---PAGE---
+Tap Blast — Full Game Design Document  Page 5
+ Finish one round without a Bomb hit
+ 
+Reward example: Coins + Gems + mission XP. Rotate missions daily.
+29. Daily Challenge
+Every day, one curated level uses a fixed seed and rule set so players can compare their performance with their own previous
+attempt and, if implemented later, a leaderboard.
+ Fixed target sequence/seed
+ 
+ One special modifier
+ 
+ Daily reward for completion
+ 
+ Personal-best tracking
+ 
+ Optional leaderboard after backend infrastructure is available
+ 
+30. Endless / Survival Mode
+ No fixed level goal.
+ 
+ Difficulty continuously increases.
+ 
+ Three mistakes can end the run.
+ 
+ Best score becomes the main progression metric.
+ 
+ Milestones can award Coins/Gems.
+ 
+ Ideal for later retention content.
+ 
+31. UI / Screen List
+32. Gameplay HUD
+Top: Score | Timer. Center: gameplay arena. Bottom: Combo and Ultimate Meter. Power-up buttons should appear only when
+relevant. Pause should remain accessible but not distract from targets.
+33. UX Principles
+ Tap targets must be large enough for comfortable mobile interaction.
+ 
+ Critical targets must have distinct shapes as well as colors so color alone is not the only identifier.
+ 
+ Avoid placing targets under system gesture zones.
+ 
+ Use short animations that never hide the next target for too long.
+ 
+ Provide haptic feedback for major events where supported.
+ 
+ Use clear result messaging: NEW BEST, PERFECT, COMBO, GREAT, MISS, BOMB, etc.
+ 
+34. Accessibility
+ Do not rely on color alone to distinguish Bombs and valid targets.
+ 
+ Offer reduced-motion mode.
+ 
+ Offer vibration toggle.
+ 
+ Use readable HUD typography.
+ 
+ Maintain adequate contrast between targets and arena.
+ 
+ Support device aspect ratios safely using responsive UI anchors.
+ 
+35. Art Direction
+Visual identity: dark or rich background with luminous targets, soft bloom/glow, clean HUD panels and energetic particle effects. The
+target should remain the visual focal point.
+ Use a small controlled color family for target categories.
+ 
+---PAGE---
+Tap Blast — Full Game Design Document  Page 6
+ Give every special target a unique silhouette/icon.
+ 
+ Use particle bursts, rings, shockwaves and score popups to make successful play feel physical.
+ 
+ Avoid permanent excessive glow that reduces readability.
+ 
+36. Animation Requirements
+37. Audio Design
+ Every target type gets a recognizable sound family.
+ 
+ Combo thresholds increase musical intensity.
+ 
+ Perfect Tap gets a distinct high-pitch confirmation.
+ 
+ Bomb gets a warning/error sound.
+ 
+ Chain Blast uses layered impacts.
+ 
+ Ultimate Blast gets the strongest audio event.
+ 
+ Separate Music, SFX and Haptics volume controls.
+ 
+38. Monetization Strategy
+Do not interrupt active gameplay with ads. Rewarded ads should be clearly optional and should not punish players who decline.
+39. Retention Design
+ Daily missions
+ 
+ Daily Challenge
+ 
+ Streak rewards
+ 
+ Personal best notifications
+ 
+ Level stars
+ 
+ Collection completion
+ 
+ New mechanic unlocks
+ 
+ Limited-time cosmetic events
+ 
+ Achievement milestones
+ 
+ Endless score chasing
+ 
+40. Streak System
+Players can complete at least one daily mission to maintain a streak. Streak rewards should increase modestly and reset after a
+missed day. Avoid overly punishing long-term players.
+41. Achievements
+ First 10x Combo
+ 
+ First Mega Chain
+ 
+ 100 Perfect Taps
+ 
+ No Bomb Master
+ 
+ 50x Combo
+ 
+ 10,000 Total Taps
+ 
+ 100 Levels Complete
+ 
+ All World 3 Stars
+ 
+ Ultimate Blast Master
+ 
+ Personal Best Champion
+ 
+---PAGE---
+Tap Blast — Full Game Design Document  Page 7
+42. Analytics Events
+Recommended event instrumentation:
+ game_start
+ 
+ level_start
+ 
+ level_complete
+ 
+ level_fail
+ 
+ level_restart
+ 
+ tap_target
+ 
+ tap_bomb
+ 
+ miss_target
+ 
+ combo_threshold
+ 
+ chain_created
+ 
+ perfect_tap
+ 
+ powerup_used
+ 
+ ultimate_used
+ 
+ daily_challenge_start
+ 
+ daily_challenge_complete
+ 
+ mission_complete
+ 
+ rewarded_ad_started
+ 
+ rewarded_ad_completed
+ 
+ iap_started
+ 
+ iap_completed
+ 
+ cosmetic_unlocked
+ 
+43. Important Metrics
+44. Unity Technical Architecture
+45. Data-Driven Level Configuration
+Use ScriptableObjects or serialized configuration assets so designers can create and balance levels without code changes.
+46. Object Pooling & Performance
+ Pool target objects instead of repeatedly Instantiate/Destroy during active play.
+ 
+ Pool particles for frequent tap/explosion effects.
+ 
+ Limit simultaneous VFX.
+ 
+ Use simple colliders and avoid unnecessary physics.
+ 
+ Avoid per-frame allocations in target movement and scoring.
+ 
+ Test on low/mid-range Android devices before polishing high-end effects.
+ 
+47. Save Data
+ Current unlocked level
+ 
+ Stars per level
+ 
+ Best score per level
+ 
+ Highest combo
+ 
+---PAGE---
+Tap Blast — Full Game Design Document  Page 8
+ Coins
+ 
+ Gems
+ 
+ XP/player level
+ 
+ Unlocked cosmetics
+ 
+ Equipped cosmetics
+ 
+ Mission progress
+ 
+ Achievements
+ 
+ Settings
+ 
+48. Game States
+Recommended state machine:
+Boot -> Home -> PreLevel -> Countdown -> Playing -> Paused -> Resuming -> Results -> NextLevel / Replay -> Home
+Failure can transition to Results or an optional Continue flow before Results.
+49. Tutorial
+ Level 1: show a single glowing target and animated tap hint.
+ 
+ After first tap: explain score.
+ 
+ After several taps: introduce Combo.
+ 
+ Level 6: introduce Golden target.
+ 
+ Level 8: introduce Time Bubble.
+ 
+ Level 11: introduce Chain Blast.
+ 
+ Level 16: introduce Bomb with a safe example.
+ 
+ Later systems should be introduced contextually rather than through long tutorial screens.
+ 
+50. Difficulty Formula
+Difficulty should be a weighted combination rather than a single speed value.
+Difficulty ≈ Spawn Pressure + Movement + Target Size Reduction + Hazard Density + Timing Precision + Objective Pressure
+ Early worlds emphasize learning.
+ 
+ Middle worlds emphasize combinations.
+ 
+ Late worlds emphasize decision-making and mastery.
+ 
+ When adding a difficult mechanic, temporarily reduce another difficulty dimension to keep the level fair.
+ 
+51. Example 60-Second Level Timeline
+52. Failure & Recovery
+ Failure should be quick and understandable.
+ 
+ Show the reason: TIME UP, BOMB HIT, OBJECTIVE MISSED, etc.
+ 
+ Offer Replay immediately.
+ 
+ Optional rewarded Continue may restore a portion of the round state.
+ 
+ Never require watching an ad to continue.
+ 
+53. Reward Presentation
+Result order:
+ Final score count-up
+ 
+ Personal Best indicator
+ 
+---PAGE---
+Tap Blast — Full Game Design Document  Page 9
+ Star reveal
+ 
+ Coins / Gems
+ 
+ Mission progress
+ 
+ Achievement progress
+ 
+ Next level unlock
+ 
+ Optional rewarded bonus
+ 
+54. Launch Content Plan
+55. Production Milestones
+ Prototype: tapping, spawning, score and timer.
+ 
+ Vertical slice: polished Level 1–10 experience.
+ 
+ Core systems: combo, hazards, chain, power-ups, objectives.
+ 
+ Content production: 100 level configurations.
+ 
+ Meta: currency, missions, collection, progression.
+ 
+ Monetization: rewarded ads, interstitial rules, IAP.
+ 
+ Polish: VFX, SFX, haptics, animation and UX.
+ 
+ QA: device compatibility, performance, edge cases and save integrity.
+ 
+ Soft launch: measure retention and difficulty.
+ 
+ Global launch: optimize content and monetization from real data.
+ 
+56. QA Checklist
+ Targets never spawn off-screen.
+ 
+ Required target never becomes impossible to tap.
+ 
+ Bomb is always visually distinguishable.
+ 
+ Combo resets correctly.
+ 
+ Ultimate meter cannot exceed 100%.
+ 
+ Power-up timers stop/reset correctly.
+ 
+ Pause freezes gameplay state correctly.
+ 
+ Restart clears all active targets, timers and effects.
+ 
+ Level completion cannot trigger twice.
+ 
+ Rewards cannot be granted twice for one completion.
+ 
+ Save data survives app restart.
+ 
+ Ads do not appear during active gameplay.
+ 
+ All screen aspect ratios remain usable.
+ 
+57. Example Level Specification
+58. What Makes Tap Blast Addictive (Design Summary)
+ Immediate tactile feedback.
+ 
+ Visible combo escalation.
+ 
+ High-value targets create risk decisions.
+ 
+ Bombs punish careless tapping.
+ 
+ Chain reactions reward spatial awareness.
+ 
+---PAGE---
+Tap Blast — Full Game Design Document  Page 10
+ Perfect Tap rewards timing skill.
+ 
+ Frenzy creates short bursts of intensity.
+ 
+ Ultimate Blast creates a power fantasy.
+ 
+ Stars and missions create completion goals.
+ 
+ Cosmetics create long-term collection goals.
+ 
+ Daily Challenges create a reason to return.
+ 
+ Short rounds make replay friction extremely low.
+ 
+59. Recommended MVP Scope
+For the first playable version, do NOT build all 100 levels and all meta systems immediately. Build a polished 10-level vertical slice
+first.
+ Normal + Golden + Bomb + Time targets
+ 
+ Combo system
+ 
+ Basic Chain Blast
+ 
+ One power-up: Freeze
+ 
+ Score and timer
+ 
+ Three-star result screen
+ 
+ 10 handcrafted levels
+ 
+ Basic sound/VFX/haptics
+ 
+ Restart/replay flow
+ 
+If players enjoy replaying the 10-level slice, expand to Perfect, Frenzy, Ultimate, missions, collection and the remaining campaign.
+60. Final Product Vision
+Tap Blast should be extremely easy to start but progressively difficult to master. The player should always have a visible next goal:
+beat the score, protect the combo, create a bigger chain, hit a Perfect window, earn three stars, complete a mission, unlock a
+cosmetic, or beat a personal best. The strongest version of the game is not simply faster tapping—it is a readable arcade system
+where every tap represents a small decision and every successful sequence builds toward a spectacular payoff.
+
+---PAGE---
+Tap Blast — Full Game Design Document  Page 11
+Appendix — Design Tables
+Element
+Definition
+Genre
+Casual arcade / reaction / score-chasing
+Platform
+Android and iOS
+Orientation
+Portrait
+Input
+Single tap
+Session
+30–60 seconds per normal level
+Audience
+Broad casual audience; easy for children, satisfying for adults
+Primary KPI
+Retention and repeat rounds, supported by fair monetization
+Core fantasy
+Tap fast, stay accurate, build an enormous combo and cause spectacular
+blasts
+Mode
+Purpose
+Duration
+Campaign
+Primary 100-level progression
+30–60 sec
+Daily Challenge
+Fixed challenge with rotating rules
+30–60 sec
+Endless / Survival
+Continue until three mistakes or failure condition
+Variable
+Frenzy Rush
+High-speed scoring mode
+30 sec
+Treasure Rush
+Collect Coins/Gems/boxes
+30 sec
+Master Trial
+High-skill challenge
+45–60 sec
+Target
+Visual / Behavior
+Tap Result
+Default Score
+Normal
+Stable glowing ring/circle
+Adds combo
+10
+Small
+Smaller hit area
+Adds combo
+15
+Bonus
+Distinct high-value glow
+Adds combo
+25
+Golden
+Rare, limited lifetime
+Large score
+100–1,000
+Time
+Clock indicator
+Adds time
+10 + 3 sec
+Diamond
+Rare collectible
+Adds Gems/progress
+50
+Rainbow
+Area-effect target
+Blast nearby targets
+50
+Perfect
+Shrinks through timing states
+Timing-scaled reward
+50–500
+Bomb
+Danger target
+Combo/score penalty
+0
+Decoy
+Looks similar to a valid target in
+advanced levels
+Penalty or no reward
+0
+Combo
+Suggested Multiplier
+Feedback
+1–4
+1.0x
+Normal
+5–9
+1.25x
+Small pulse
+10–19
+1.5x
+Combo Fever
+20–29
+2.0x
+Super Fever
+30–49
+3.0x
+Ultra Fever
+50+
+4.0x+
+Mastery state
+Chain
+Requirement
+Effect
+Chain 1
+3 linked targets
+Small area blast
+Chain 2
+5 linked targets
+Larger blast + score bonus
+Mega Chain
+8+ linked targets
+Large blast + strong feedback
+Ultra Chain
+12+ linked targets
+Major score burst + Ultimate charge
+Power-Up
+Duration
+Effect
+Balance Rule
+Frenzy
+5–8 sec
+Higher spawn rate / scoring
+opportunity
+Short, high-risk window
+
+---PAGE---
+Tap Blast — Full Game Design Document  Page 12
+Power-Up
+Duration
+Effect
+Balance Rule
+Freeze
+3 sec
+Stops target movement
+Does not stop timer
+Shield
+Until hit
+Absorbs one Bomb mistake
+One active shield max
+Double Score
+5 sec
+2x score
+Rare
+Rainbow Blast
+Instant
+Destroys eligible nearby targets
+Limited spawn rate
+Time Boost
+Instant
+Adds 3–5 sec
+Used more often in timed levels
+Ultimate Blast
+Instant
+Large screen clear
+Requires meter charge
+Event
+Trigger
+Player Experience
+Frenzy
+Timer / combo threshold
+Rapid target spawning
+Dark Mode
+Scripted event
+Arena darkens; targets glow
+Freeze
+Random/scripted
+Targets pause temporarily
+Mega Wave
+Scripted
+Large simultaneous target wave
+Rainbow Rush
+Scripted
+Rainbow targets dominate
+Treasure Rush
+Special level
+Collect as much currency as possible
+Final Blast
+Final 3–5 sec
+High-value rapid-tap finale
+World
+Levels
+Primary Content
+Finale
+World 1: Learn to Tap
+1–10
+Basic targets, sizes, combo, moving
+targets, Golden, Time Bubble
+Mini Boss
+World 2: Combo City
+11–20
+Chain Blast, clusters, combo
+mastery, Bomb introduction
+Chain Master
+World 3: Danger
+21–30
+Bombs, Decoys, Dark Mode,
+safe-zone play
+Danger Boss
+World 4: Power
+31–40
+Freeze, Frenzy, Shield, Double
+Score, Rainbow Blast
+Power Boss
+World 5: Perfect
+41–50
+Perfect Tap and increasingly strict
+timing
+Perfect Boss
+World 6: Frenzy
+51–60
+High-speed waves and hazard
+combinations
+Frenzy Boss
+World 7: Chaos
+61–70
+Mixed target types and combined
+mechanics
+Chaos Boss
+World 8: Treasure
+71–80
+Coins, Gems, Stars, Treasure
+Boxes
+Treasure Rush
+World 9: Master
+81–90
+No-miss, high-combo, collection
+and timing trials
+Master Trial
+World 10: Legend
+91–100
+Full system combinations and
+Ultimate mastery
+Ultimate Challenge
+Level
+Main Mechanic
+Suggested Objective
+1
+Normal targets
+Tap 20
+2
+Target sizes
+Score 500
+3
+Combo
+Reach 5x
+4
+Small targets
+Score 1,000
+5
+Movement
+Reach 10x
+6
+Golden
+Tap 3 Golden
+7
+Spawn acceleration
+Score 2,000
+8
+Time Bubble
+Collect 3
+9
+Combo challenge
+Reach 15x
+10
+Mini Boss
+Destroy Golden Core
+11
+Chain Blast
+Create 2 chains
+12
+2-chain
+Create 3 chains
+
+---PAGE---
+Tap Blast — Full Game Design Document  Page 13
+Level
+Main Mechanic
+Suggested Objective
+13
+3-chain
+Create 1 Mega Chain
+14
+Moving clusters
+Score 3,000
+15
+Combo x3
+Reach 20x
+16
+Bomb
+Avoid all Bombs
+17
+Shield
+Use Shield correctly
+18
+Chain + Bomb
+Create 3 chains without Bomb hit
+19
+Mega Chain
+Create 2 Mega Chains
+20
+Boss
+30x combo + 5 chains
+Phase
+Time
+Gameplay
+Warm-up
+0–20 sec
+Normal + Golden
+Danger
+20–35 sec
+Moving + Bomb
+Frenzy
+35–45 sec
+Rapid spawn
+Precision
+45–55 sec
+Perfect Tap sequence
+Final Blast
+55–60 sec
+High-value rapid-tap wave
+Objective Type
+Example
+Score
+Reach 10,000
+Combo
+Reach 30x
+Accuracy
+Finish with 90%+ accuracy
+No Miss
+Do not miss a required target
+No Bomb
+Finish without Bomb hit
+Perfect
+Perform 10 Perfect Taps
+Chain
+Create 5 Chain Blasts
+Collection
+Collect 10 Diamonds
+Time
+Finish before timer expires
+Hybrid
+Reach 20x while collecting 5 Diamonds
+Currency
+Source
+Uses
+Coins
+Levels, missions, ads, boxes
+Common cosmetics / upgrades
+Gems
+Rare rewards, missions, purchases
+Premium cosmetics, continues, boxes
+Stars
+Level performance
+Campaign completion / milestone rewards
+XP
+Gameplay and missions
+Player level / progression rewards
+Screen
+Purpose
+Splash
+Brand/logo and loading
+Home
+Play, progression, currency, missions, collection
+World Map / Level Select
+100-level campaign and stars
+Pre-Level
+Objective, reward and optional booster
+Gameplay
+Score, timer, combo, Ultimate meter, pause
+Pause
+Resume, restart, settings
+Result
+Score, stars, rewards, missions, next/replay
+Collection
+Bubble skins, blasts, trails, arenas
+Shop
+Cosmetics, Gems, bundles, Remove Ads
+Daily Challenge
+Daily rule and result
+Settings
+Sound, music, vibration, language, support
+Event
+Animation
+Tap
+Scale down -> pop -> ring burst
+
+---PAGE---
+Tap Blast — Full Game Design Document  Page 14
+Event
+Animation
+Combo increase
+HUD punch / number bounce
+Golden
+Pulse + rotating/radiating ring
+Bomb
+Warning pulse; strong but fair visual cue
+Perfect
+Slow micro-freeze + precision ring
+Chain
+Sequential blast wave
+Ultimate
+Short time-stretch + full-screen blast
+Level complete
+Confetti/particles + reward reveal
+Placement
+Implementation
+Purpose
+Rewarded Continue
+After failed level
+Optional revive
+Rewarded Double Reward
+Result screen
+Double Coins
+Rewarded Treasure
+Optional box opening
+Extra collection
+Interstitial
+After suitable completed rounds
+Ad revenue
+Remove Ads
+IAP
+Improve paid experience
+Cosmetic Packs
+IAP
+Visual collection
+Gem Packs
+IAP
+Premium currency
+Starter Bundle
+IAP
+Early conversion offer
+Day
+Reward Example
+1
+Coins
+2
+Coins + XP
+3
+Gems
+4
+Treasure Box
+5
+Gems + cosmetic fragment
+7
+Rare Box / cosmetic
+14+
+Rotating milestone rewards
+Metric
+Why It Matters
+D1/D7/D30 retention
+Measures return behavior
+Average session length
+Measures engagement
+Rounds per session
+Measures replayability
+Level completion rate
+Finds difficulty spikes
+Level restart rate
+Finds frustrating levels
+Average combo
+Measures mastery
+Bomb hit rate
+Measures hazard fairness
+Rewarded ad opt-in
+Measures monetization value
+IAP conversion
+Measures paid appeal
+Cosmetic unlock rate
+Measures collection engagement
+System
+Responsibility
+GameManager
+Overall game state and round lifecycle
+LevelManager
+Loads level data and controls objectives
+TargetSpawner
+Target creation, patterns and spawn timing
+TargetController
+Target behavior, movement and tap handling
+TargetPool
+Object pooling for performance
+ScoreManager
+Scoring and multiplier calculations
+ComboManager
+Combo state and Fever thresholds
+ChainBlastManager
+Chain detection and blast resolution
+
+---PAGE---
+Tap Blast — Full Game Design Document  Page 15
+System
+Responsibility
+PowerUpManager
+Power-up activation and duration
+UltimateManager
+Ultimate meter and activation
+ObjectiveManager
+Level objective tracking
+CurrencyManager
+Coins/Gems/XP
+ProgressionManager
+Unlocks, stars and campaign
+MissionManager
+Daily missions
+SaveManager
+Local/cloud save abstraction
+AudioManager
+Music/SFX/haptics
+VFXManager
+Particles and screen effects
+UIManager
+HUD, menus and result screens
+AnalyticsManager
+Event tracking
+AdManager
+Rewarded/interstitial logic
+IAPManager
+Store purchases
+Field
+Example
+LevelID
+42
+Duration
+45
+TargetScore
+12000
+SpawnRate
+0.65 sec
+MaxTargets
+10
+TargetTypes
+Normal, Golden, Bomb, Perfect
+MovementSpeed
+1.5
+BombChance
+0.08
+GoldenChance
+0.05
+PerfectChance
+0.10
+PowerUps
+Freeze, Shield
+Events
+Frenzy at 30 sec
+Objectives
+12k score + 20x combo
+CoinReward
+250
+GemReward
+2
+Time
+Event
+0–10 sec
+Easy targets; establish combo
+10–20 sec
+Moving targets + specials
+20–30 sec
+Chain opportunity
+30–40 sec
+Difficulty increase / power-up
+40–50 sec
+Frenzy
+50–57 sec
+Rare high-value targets
+57–60 sec
+Final Blast
+Phase
+Content
+MVP
+30 levels, basic targets, combo, Bomb, Golden, 3 power-ups
+Soft Launch
+50 levels, Chain, Perfect, missions, ads, cosmetics
+Global Launch
+100 levels, full economy, daily challenge, collection
+Post Launch
+Endless, events, seasonal cosmetics, new worlds
+Parameter
+Example
+Level
+35
+
+---PAGE---
+Tap Blast — Full Game Design Document  Page 16
+Parameter
+Example
+Duration
+45 sec
+Goal
+8,000 score
+Secondary
+Reach 20x combo
+Targets
+Normal 65%, Golden 8%, Bomb 7%, Time 5%, Rainbow 5%, Perfect 10%
+Spawn
+0.75 sec
+Max active
+9
+Movement
+Medium
+Event
+Frenzy from 32–38 sec
+Power-ups
+Freeze + Double Score
+3-Star condition
+8,000 score + 20x + 2 chains
+Reward
+250 Coins + 2 Gems

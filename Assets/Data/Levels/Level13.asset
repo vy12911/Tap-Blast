@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9218bab79c640ef96f356711932423c, type: 3}
+  m_Name: Level13
+  m_EditorClassIdentifier: 
+  displayName: MEGA BURST
+  levelId: 13
+  objective: 1
+  targetScore: 4000
+  firstTapTutorial: 0
+  targetSizes: []
+  duration: 45
+  requiredTaps: 20
+  basePoints: 10
+  goldenPoints: 100
+  spawnInterval: 0.45
+  targetLifetime: 3.8
+  maxTargets: 7
+  targetSize: 150
+  targetSpacing: 36
+  movingTargets: 0
+  goldenChance: 0.30
+  timeChance: 0
+  isBossLevel: 0
+  bossHealth: 1
+  twoStarScore: 5000
+  threeStarCombo: 25
+  coinReward: 250
+  xpReward: 130
+  objectiveCount: 1
+  mechanicHint: High-density Golden opportunities spawn frequently. Tap them during high combo multipliers!

@@ -101,7 +101,7 @@ public static class CampaignSmoke
                     var wordmark = hud.transform.Find("Device safe area/Portrait frame/Wordmark").GetComponent<TMP_Text>();
                     Check(wordmark.text == "CANVAS EDIT CHECK", "Designer Canvas text edit survives entering Play");
                     wordmark.text = SessionState.GetString(Key + ".Wordmark", "TAP BLAST");
-                    Check(hud.GetComponentsInChildren<Graphic>(true).Length == SessionState.GetInt(Key + ".Graphics", 0) + 6 * hud.TargetPrefab.GetComponentsInChildren<Graphic>(true).Length, "Play only prewarms target prefab; it does not rebuild Canvas elements");
+                    Check(hud.GetComponentsInChildren<Graphic>(true).Length == SessionState.GetInt(Key + ".Graphics", 0) + 12 * hud.TargetPrefab.GetComponentsInChildren<Graphic>(true).Length, "Play only prewarms target prefab; it does not rebuild Canvas elements");
                     PlayerPrefs.SetString("TapBlast.v2.Progress", "{\"bestScore\":275,\"bestStars\":3,\"coins\":180,\"xp\":90,\"activeRound\":\"\"}");
                     Check(ProgressStore.IsUnlocked(2) && ProgressStore.GetBestScore(1) == 275 && ProgressStore.Coins == 180 && ProgressStore.XP == 90, "Existing Level 1 save unlocks Level 2 without losing wallet");
                     Check(ProgressStore.GetBestScore(2) == 0 && ProgressStore.GetBestStars(2) == 0, "Migration does not copy Level 1 records into Level 2");
@@ -110,7 +110,7 @@ public static class CampaignSmoke
                     Check(!ProgressStore.IsUnlocked(2) && !game.SelectLevel(2), "Fresh player cannot enter locked Level 2");
                     Check(game.SelectLevel(1), "Fresh player can select Level 1");
                     foreach (var target in Targets(true)) poolIds.Add(target.GetInstanceID());
-                    Check(poolIds.Count == 6, "Campaign prewarms one shared six-target pool");
+                    Check(poolIds.Count == 12, "Campaign prewarms one shared twelve-target pool");
                     Click(hud.IntroMenu.gameObject);
                     Check(!hud.LevelTwo.interactable, "Level select visibly disables locked Level 2");
                     Shot("07-level-select-locked"); Advance(1, .2); break;

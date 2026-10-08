@@ -19,6 +19,8 @@ namespace TapBlast
         [field: SerializeField] public Button Motion { get; private set; }
         [field: SerializeField] public Button Haptics { get; private set; }
         [field: SerializeField] public Button Next { get; private set; }
+        [field: SerializeField] public Button Shield { get; private set; }
+        [SerializeField] private TMP_Text shieldLabel, mechanicStatus;
         [field: SerializeField] public Button IntroMenu { get; private set; }
         [field: SerializeField] public Button PauseMenu { get; private set; }
         [field: SerializeField] public Button ResultMenu { get; private set; }
@@ -26,6 +28,7 @@ namespace TapBlast
         [field: SerializeField] public Button LevelTwo { get; private set; }
         [SerializeField] private GameObject levelSelect, introHero, sizePreview;
         [SerializeField] private TMP_Text worldLabel, levelLabel, description, countdownGoal, selectionWallet;
+        [SerializeField] private TMP_Text introWorld, selectionWorld, selectionTitle;
         private LevelConfig currentConfig;
         [SerializeField] private GameObject intro, pausePanel, results, countdownPanel;
         [SerializeField] private TMP_Text score, timer, objective, combo, multiplier, hint, subhint, countdownText;
@@ -44,7 +47,13 @@ namespace TapBlast
         [SerializeField] private CanvasGroup rewardGroup;
         [Header("Feedback distances in Canvas reference pixels")]
         [SerializeField] private float popupRise = 48, sparkStartRadius = 33, sparkTravel = 127.5f, previewGlowPadding = 120;
-        public void Initialize() { resultReveal = new ResultReveal(resultScore, resultBest, resultStars, rewardGroup); HideOverlays(); }
+        public void Initialize()
+        {
+            resultReveal = new ResultReveal(resultScore, resultBest, resultStars, rewardGroup);
+            prevWorldBtn.onClick.AddListener(() => ShowLevelsPage(0));
+            nextWorldBtn.onClick.AddListener(() => ShowLevelsPage(1));
+            HideOverlays();
+        }
         public bool TutorialHandVisible => tapHand.IsVisible;
         public bool ResultRevealComplete => resultReveal.IsComplete;
         [System.Serializable] private sealed class Popup
@@ -56,7 +65,7 @@ namespace TapBlast
             public RectTransform[] Sparks;
             public CanvasGroup Alpha;
             public Vector2 Origin;
-            public float Age;
+            public float Age, BlastScale = 1;
             public bool Active, ReducedMotion;
         }
 
@@ -67,11 +76,14 @@ namespace TapBlast
             intro.SetActive(false); pausePanel.SetActive(false); results.SetActive(false); countdownPanel.SetActive(false);
             if (prevWorldBtn != null) prevWorldBtn.gameObject.SetActive(false);
             if (nextWorldBtn != null) nextWorldBtn.gameObject.SetActive(false);
+            Shield.gameObject.SetActive(false);
+            mechanicStatus.gameObject.SetActive(false);
         }
         public void ShowIntro(LevelConfig config, int best)
         {
             HideOverlays(); intro.SetActive(true); Pause.interactable = false; animateFeedback = false;
             currentConfig = config;
+            introWorld.text = config.LevelId > 10 ? "COMBO CITY" : "LEARN TO TAP";
             worldLabel.text = (config.LevelId > 10 ? "WORLD 02   /   " : "WORLD 01   /   ") + config.DisplayName;
             levelLabel.text = config.LevelId.ToString("00");
             countdownGoal.text = config.GoalText;
@@ -84,7 +96,7 @@ namespace TapBlast
             }
             introName.text = config.DisplayName;
             introGoal.text = config.GoalText;
-            starRules.text = "1 STAR   Complete the level\n2 STARS   Complete + score " + config.TwoStarScore + "+\n3 STARS   Both + no misses + " + config.ThreeStarCombo + " combo";
+            starRules.text = "1 STAR   Complete the level\n2 STARS   Complete + score " + config.TwoStarScore + "+\n3 STARS   Both + no mistakes + " + config.ThreeStarCombo + " combo";
             rewardPreview.text = "COMPLETE:  +" + config.CoinReward + " COINS   +" + config.XPReward + " XP";
             introBest.text = "WALLET  " + ProgressStore.Coins.ToString("N0") + " COINS   /   " + ProgressStore.XP.ToString("N0") + " XP\n" + (best > 0 ? "BEST  " + best.ToString("N0") + "   /   " + ProgressStore.GetBestStars(config.LevelId) + " STARS" : "A new personal best starts here");
         }
@@ -99,8 +111,17 @@ namespace TapBlast
             timerFill.fillAmount = session.RemainingTime / config.Duration;
             timerFill.color = session.RemainingTime <= 10 ? UIArt.Gold : UIArt.Cyan;
             objective.text = config.ObjectiveLabel + "  " + session.ObjectiveProgress + " / " + session.ObjectiveTarget;
+            if (session.BombObjectiveFailed) objective.text = "BOMB HIT - REPLAY TO RETRY";
             progressFill.rectTransform.anchorMax = new Vector2(Mathf.Clamp01((float)session.ObjectiveProgress / session.ObjectiveTarget), 1);
             combo.text = session.Combo.ToString(); multiplier.text = "x" + session.Multiplier.ToString("0.##");
+            bool playing = session.State == RoundState.Playing;
+            Shield.gameObject.SetActive(playing && config.ShieldCharges > 0);
+            Shield.interactable = playing && !session.ShieldActive && session.ShieldsRemaining > 0;
+            shieldActive = session.ShieldActive;
+            shieldLabel.text = session.ShieldActive ? "SHIELD ACTIVE" : session.ShieldsRemaining > 0 ? "SHIELD  " + session.ShieldsRemaining : "SHIELD USED";
+            mechanicStatus.gameObject.SetActive(playing && config.LevelId > 10);
+            mechanicStatus.text = "CHAINS " + session.Chains + "   MEGA " + session.MegaChains + "   BOMBS " + session.BombHits +
+                (config.RequiredCombo > 0 ? "   BEST " + session.BestCombo + "/" + config.RequiredCombo : "");
         }
         public void ShowResults(RoundSession session, bool newBest, int best, ProgressStore.RewardReceipt receipt)
         {
@@ -108,7 +129,7 @@ namespace TapBlast
             SetHint("", "");
             HideTapHand();
             resultTitle.text = session.Won ? "BRILLIANT!" : "TRY AGAIN";
-            resultSubtitle.text = session.Won ? "LEVEL " + session.LevelId.ToString("00") + " COMPLETE" : "TIME UP  /  OBJECTIVE MISSED";
+            resultSubtitle.text = session.Won ? "LEVEL " + session.LevelId.ToString("00") + " COMPLETE" : session.BombObjectiveFailed ? "BOMB HIT  /  OBJECTIVE MISSED" : "TIME UP  /  OBJECTIVE MISSED";
             bool hasNext = session.Won && session.LevelId < 20 && ProgressStore.IsUnlocked(session.LevelId + 1);
             Next.gameObject.SetActive(hasNext);
             Replay.GetComponentInChildren<TMP_Text>().text = hasNext ? "REPLAY" : "PLAY AGAIN";
@@ -116,8 +137,11 @@ namespace TapBlast
             resultScore.text = session.Score.ToString("N0");
             resultBest.text = newBest ? "NEW PERSONAL BEST" : "PERSONAL BEST  " + best.ToString("N0");
             resultStats.text = "Targets tapped     " + session.Hits + "\nBest combo          " + session.BestCombo + "\nTargets missed     " + session.Misses;
+            if (session.LevelId > 10)
+                resultStats.text = "BEST COMBO " + session.BestCombo + "   MISSES " + session.Misses + "\nCHAINS " + session.Chains + "   MEGA " + session.MegaChains + "\nBOMBS " + session.BombHits + "   SHIELD BLOCKS " + session.ShieldBlocks;
             resultHint.text = !session.Won ? "Tap targets as they appear.\nYou can try again immediately." : session.Stars == 3 ? "Mastery achieved! All three stars earned!" : "Chase three stars: keep a clean streak\nand aim for the score goal.";
             if (hasNext) resultHint.text = "LEVEL " + (session.LevelId + 1) + " UNLOCKED\nGet ready for the next challenge!";
+            else if (session.Won && session.LevelId == 20) resultHint.text = "WORLD 2 COMPLETE!\nReplay levels to earn every star.";
             rewardEarned.text = session.Won ? "+" + receipt.Coins + " COINS     +" + receipt.XP + " XP" : "COMPLETE THE LEVEL TO EARN REWARDS";
             rewardBalance.text = "WALLET  " + receipt.TotalCoins.ToString("N0") + " COINS   /   TOTAL XP  " + receipt.TotalXP.ToString("N0");
             bool leveledUp = receipt.TotalXP / 100 > (receipt.TotalXP - receipt.XP) / 100;
@@ -134,37 +158,52 @@ namespace TapBlast
                 foreach (var p in popups)
                 {
                     p.ReducedMotion = true; p.Ring.enabled = false; p.Core.enabled = false;
+                    p.Age = Mathf.Max(0, p.Age); p.Root.anchoredPosition = p.Origin;
+                    if (p.Active) p.Alpha.alpha = Mathf.Clamp01(1 - p.Age / .55f);
                     foreach (var spark in p.Sparks) spark.gameObject.SetActive(false);
                 }
                 celebration.gameObject.SetActive(false);
+                TickJuice(0);
             }
             Sound.GetComponentInChildren<TMP_Text>().text = "SOUND  " + (sound ? "ON" : "OFF");
             Motion.GetComponentInChildren<TMP_Text>().text = "REDUCED MOTION  " + (reducedMotion ? "ON" : "OFF");
             Haptics.GetComponentInChildren<TMP_Text>().text = "VIBRATION  " + (haptics ? "ON" : "OFF");
         }
-        public void Pop(Vector2 position, int points, Color tint, bool reducedMotion)
+        public void Pop(Vector2 position, int points, Color tint, bool reducedMotion, float delay = 0, float blastScale = 1)
         {
-            var p = popups[popupCursor++ % popups.Length]; p.Age = 0; p.Active = true;
-            p.ReducedMotion = reducedMotion; p.Origin = position; p.Root.anchoredPosition = position;
-            p.Label.text = "+" + points; p.Ring.color = tint; p.RingRect.localScale = Vector3.one;
-            p.Ring.enabled = !reducedMotion; p.Alpha.alpha = 1; p.Root.gameObject.SetActive(true);
-            p.Core.enabled = !reducedMotion; p.Core.rectTransform.localScale = Vector3.one;
+            var p = popups[popupCursor++ % popups.Length]; p.Age = reducedMotion ? 0 : -delay; p.Active = true;
+            p.ReducedMotion = reducedMotion; p.BlastScale = blastScale; p.Origin = position; p.Root.anchoredPosition = position;
+            p.Label.text = "+" + points;
+            p.Ring.color = new Color(tint.r, tint.g, tint.b, tint.a * (blastScale > 1 ? .55f : 1));
+            p.RingRect.localScale = Vector3.one;
+            p.Ring.enabled = !reducedMotion; p.Alpha.alpha = p.Age < 0 ? 0 : 1; p.Root.gameObject.SetActive(true);
+            p.Core.enabled = !reducedMotion; p.Core.color = tint; p.Core.rectTransform.localScale = Vector3.one;
+            p.Ring.enabled = false; // The shrinking tap core leads the ring burst.
             for (int i = 0; i < p.Sparks.Length; i++) { p.Sparks[i].gameObject.SetActive(!reducedMotion); p.Sparks[i].anchoredPosition = Vector2.zero; p.Sparks[i].localScale = Vector3.one; }
         }
-        public void ClearFeedback() { foreach (var p in popups) { p.Active = false; p.Root.gameObject.SetActive(false); } popupCursor = 0; ResetJuice(); }
-        private void Update()
+        public void MessagePop(Vector2 position, string text, Color tint, bool reducedMotion)
         {
-            TickJuice(Time.unscaledDeltaTime);
-            tapHand.Tick(Time.unscaledDeltaTime, animateFeedback, reducedMotion);
-            if (results.activeSelf) resultReveal.Tick(Time.unscaledDeltaTime, reducedMotion);
+            Pop(position, 0, tint, reducedMotion);
+            popups[(popupCursor - 1) % popups.Length].Label.text = text;
+            popups[(popupCursor - 1) % popups.Length].Core.enabled = false;
+        }
+        public void ClearFeedback() { foreach (var p in popups) { p.Active = false; p.Root.gameObject.SetActive(false); } popupCursor = 0; ResetJuice(); }
+        private void Update() { TickFeedback(Time.unscaledDeltaTime); }
+        private void TickFeedback(float delta)
+        {
+            TickJuice(delta);
+            tapHand.Tick(delta, animateFeedback, reducedMotion);
+            if (results.activeSelf) resultReveal.Tick(delta, reducedMotion);
             if (!animateFeedback) return;
             for (int i = 0; i < popups.Length; i++)
             {
                 var p = popups[i]; if (!p.Active) continue;
-                p.Age += Time.unscaledDeltaTime; float t = p.Age / .55f;
+                p.Age += delta; float t = p.Age / .55f;
+                if (p.Age < 0) continue;
                 if (t >= 1) { p.Active = false; p.Root.gameObject.SetActive(false); continue; }
                 p.Alpha.alpha = 1 - t;
-                if (!p.ReducedMotion) { p.Root.anchoredPosition = p.Origin + Vector2.up * (t * popupRise); p.RingRect.localScale = Vector3.one * (1 + t * .8f); }
+                p.Ring.enabled = !p.ReducedMotion && p.Age >= .08f;
+                if (!p.ReducedMotion) { p.Root.anchoredPosition = p.Origin + Vector2.up * (t * popupRise); p.RingRect.localScale = Vector3.one * (1 + t * .8f) * p.BlastScale; }
                 p.Core.rectTransform.localScale = Vector3.one * Mathf.Clamp01(1 - p.Age / .12f);
                 for (int j = 0; j < p.Sparks.Length; j++)
                 {
@@ -183,73 +222,9 @@ namespace TapBlast
         private LevelConfig[] cachedConfigs;
         private System.Func<int, bool> cachedOnSelectLevel;
 
-        private Button prevWorldBtn, nextWorldBtn;
-        private Image prevWorldImg, nextWorldImg;
-        private TMP_Text prevWorldText, nextWorldText;
-
-        private void EnsureWorldButtons()
-        {
-            if (worldLabel == null || prevWorldBtn != null) return;
-            Transform parent = worldLabel.transform.parent;
-            if (parent == null) return;
-
-            GameObject leftObj = new GameObject("PrevWorldButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-            leftObj.transform.SetParent(parent, false);
-            RectTransform leftRect = leftObj.GetComponent<RectTransform>();
-            leftRect.anchorMin = new Vector2(0.5f, 0.5f);
-            leftRect.anchorMax = new Vector2(0.5f, 0.5f);
-            leftRect.anchoredPosition = new Vector2(-270, 792);
-            leftRect.sizeDelta = new Vector2(110, 52);
-
-            prevWorldImg = leftObj.GetComponent<Image>();
-            prevWorldImg.color = new Color32(24, 85, 110, 240);
-
-            GameObject leftTextObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
-            leftTextObj.transform.SetParent(leftObj.transform, false);
-            RectTransform ltRect = leftTextObj.GetComponent<RectTransform>();
-            ltRect.anchorMin = Vector2.zero; ltRect.anchorMax = Vector2.one; ltRect.sizeDelta = Vector2.zero;
-            prevWorldText = leftTextObj.AddComponent<TextMeshProUGUI>();
-            prevWorldText.text = "< W1";
-            prevWorldText.font = worldLabel.font;
-            prevWorldText.fontSize = 22;
-            prevWorldText.fontStyle = FontStyles.Bold;
-            prevWorldText.alignment = TextAlignmentOptions.Center;
-            prevWorldText.color = UIArt.Cyan;
-            prevWorldText.raycastTarget = false;
-
-            prevWorldBtn = leftObj.GetComponent<Button>();
-            prevWorldBtn.transition = Selectable.Transition.None;
-            prevWorldBtn.onClick.AddListener(() => ShowLevelsPage(0));
-
-            GameObject rightObj = new GameObject("NextWorldButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-            rightObj.transform.SetParent(parent, false);
-            RectTransform rightRect = rightObj.GetComponent<RectTransform>();
-            rightRect.anchorMin = new Vector2(0.5f, 0.5f);
-            rightRect.anchorMax = new Vector2(0.5f, 0.5f);
-            rightRect.anchoredPosition = new Vector2(270, 792);
-            rightRect.sizeDelta = new Vector2(110, 52);
-
-            nextWorldImg = rightObj.GetComponent<Image>();
-            nextWorldImg.color = new Color32(95, 75, 24, 240);
-
-            GameObject rightTextObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
-            rightTextObj.transform.SetParent(rightObj.transform, false);
-            RectTransform rtRect = rightTextObj.GetComponent<RectTransform>();
-            rtRect.anchorMin = Vector2.zero; rtRect.anchorMax = Vector2.one; rtRect.sizeDelta = Vector2.zero;
-            nextWorldText = rightTextObj.AddComponent<TextMeshProUGUI>();
-            nextWorldText.text = "W2 >";
-            nextWorldText.font = worldLabel.font;
-            nextWorldText.fontSize = 22;
-            nextWorldText.fontStyle = FontStyles.Bold;
-            nextWorldText.alignment = TextAlignmentOptions.Center;
-            nextWorldText.color = UIArt.Gold;
-            nextWorldText.raycastTarget = false;
-
-            nextWorldBtn = rightObj.GetComponent<Button>();
-            nextWorldBtn.transition = Selectable.Transition.None;
-            nextWorldBtn.onClick.AddListener(() => ShowLevelsPage(1));
-        }
-
+        [SerializeField] private Button prevWorldBtn, nextWorldBtn;
+        [SerializeField] private Image prevWorldImg, nextWorldImg;
+        [SerializeField] private TMP_Text prevWorldText, nextWorldText;
         public void ShowLevels(LevelConfig[] configs, System.Func<int, bool> onSelectLevel)
         {
             cachedConfigs = configs;
@@ -264,15 +239,16 @@ namespace TapBlast
             currentLevelPage = Mathf.Clamp(page, 0, 1);
             HideOverlays(); levelSelect.SetActive(true); Pause.interactable = false; animateFeedback = false;
             SetHint("", "");
-            EnsureWorldButtons();
+
 
             if (worldLabel != null)
                 worldLabel.text = currentLevelPage == 1 ? "WORLD 02   /   COMBO CITY" : "WORLD 01   /   LEARN TO TAP";
+            selectionWorld.text = currentLevelPage == 1 ? "WORLD 02" : "WORLD 01";
+            selectionTitle.text = currentLevelPage == 1 ? "COMBO CITY" : "LEARN TO TAP";
 
             if (selectionWallet != null)
             {
-                string switchHint = ProgressStore.IsUnlocked(11) ? (currentLevelPage == 0 ? "   •   TAP < W1 OR W2 > TO SWITCH" : "   •   TAP < W1 OR W2 > TO SWITCH") : "";
-                selectionWallet.text = ProgressStore.Coins.ToString("N0") + " COINS   /   " + ProgressStore.XP.ToString("N0") + " XP\nPLAYER LEVEL " + (1 + ProgressStore.XP / 100) + switchHint;
+                selectionWallet.text = ProgressStore.Coins.ToString("N0") + " COINS   /   " + ProgressStore.XP.ToString("N0") + " XP\nPLAYER LEVEL " + (1 + ProgressStore.XP / 100);
             }
 
             bool w2Unlocked = ProgressStore.IsUnlocked(11);
@@ -339,23 +315,6 @@ namespace TapBlast
                 }
             }
 
-            if (w2Unlocked)
-            {
-                if (worldLabel != null)
-                {
-                    worldLabel.raycastTarget = true;
-                    var wBtn = worldLabel.GetComponent<Button>() ?? worldLabel.gameObject.AddComponent<Button>();
-                    wBtn.onClick.RemoveAllListeners();
-                    wBtn.onClick.AddListener(ToggleLevelPage);
-                }
-                if (selectionWallet != null)
-                {
-                    selectionWallet.raycastTarget = true;
-                    var wletBtn = selectionWallet.GetComponent<Button>() ?? selectionWallet.gameObject.AddComponent<Button>();
-                    wletBtn.onClick.RemoveAllListeners();
-                    wletBtn.onClick.AddListener(ToggleLevelPage);
-                }
-            }
         }
 
         public void ToggleLevelPage()

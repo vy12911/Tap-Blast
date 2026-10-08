@@ -1,6 +1,20 @@
 param([string]$UnityEditor = 'C:\Program Files\Unity\Hub\Editor\6000.3.17f1\Editor')
 $ErrorActionPreference = 'Stop'
 $workspace = Split-Path -Parent $PSScriptRoot
+# Player builds can only route to levels referenced by the saved campaign scene.
+$campaignScene = Get-Content (Join-Path $workspace 'Assets/Scenes/Level01.unity') -Raw
+$levelReferences = [regex]::Match($campaignScene, '(?m)^  levels:\r?\n(?:  - [^\r\n]+\r?\n)+').Value
+for ($levelId = 1; $levelId -le 20; $levelId++) {
+    $assetPath = Join-Path $workspace ('Assets/Data/Levels/Level{0:00}.asset' -f $levelId)
+    $asset = Get-Content $assetPath -Raw
+    $meta = Get-Content ($assetPath + '.meta') -Raw
+    $assetGuid = [regex]::Match($meta, '(?m)^guid: ([a-f0-9]{32})\r?$').Groups[1].Value
+    if (!$assetGuid -or !$levelReferences.Contains('guid: ' + $assetGuid + ',') -or
+        $asset -notmatch ('(?m)^  levelId: ' + $levelId + '\r?$')) {
+        throw ('Missing or invalid serialized campaign reference for Level ' + $levelId)
+    }
+}
+Write-Output 'All 20 campaign levels are referenced by the build scene.'
 # Reject legacy uGUI text before compilation; all saved labels must use TMP.
 $authoredUI = Get-ChildItem (Join-Path $workspace 'Assets') -Recurse -File | Where-Object { $_.Extension -in '.prefab', '.unity' }
 $legacyText = $authoredUI | Select-String -SimpleMatch '5f7201a12d95ffc409449d95f23cf332'

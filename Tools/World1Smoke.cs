@@ -81,8 +81,8 @@ public static class World1Smoke
                 "TMP component has font and material: " + label.name);
             Check(!label.raycastTarget, "Decorative TMP label does not intercept taps: " + label.name);
         }
-        Check(configs.Length == 10, "All ten levels are serialized into the scene without editor loading");
-        for (int i = 0; i < 10; i++) Check(configs[i] != null && configs[i].LevelId == i + 1, "Scene level reference " + (i + 1));
+        Check(configs.Length == 20, "All twenty levels are serialized into the scene without editor loading");
+        for (int i = 0; i < 20; i++) Check(configs[i] != null && configs[i].LevelId == i + 1, "Scene level reference " + (i + 1));
         int count = hud.GetComponentsInChildren<Graphic>(true).Length;
         game.ShowLevels(); Canvas.ForceUpdateCanvases();
         var buttons = Field<Button[]>(hud, "levelButtons");

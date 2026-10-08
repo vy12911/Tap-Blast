@@ -29,10 +29,11 @@
     - **Level 8 ("TICK TOCK")**: Collect 3 Time Bubbles (+3s each; at most six spawn per round).
     - **Level 9 ("MASTER STREAK")**: Reach a 15-hit streak (advanced combo challenge).
     - **Level 10 ("GOLDEN CORE")**: Destroy the 5-hit Golden Core; continue timed play for score mastery.
+  - **World 2 (Levels 11–20 Implemented)**: 11: two chains; 12: three chains; 13: one Mega Chain; 14: moving clusters / 3,000 score; 15: 20-hit streak; 16: avoid Bombs / 20 safe targets; 17: block one Bomb with Shield; 18: three chains without Bomb damage; 19: two Mega Chains; 20: Chain Master / 30 best combo plus five chains. See the World 2 guide for tuning and rules.
 - **Star Rating (1–3 Stars per Level)**:
   - 1 Star: Complete level / meet primary goal.
   - 2 Stars: Reach higher score threshold.
-  - 3 Stars: Meet 2-star threshold + zero target misses + streak goal.
+  - 3 Stars: Meet 2-star threshold + zero target misses + zero unprotected Bomb hits + streak goal.
 - **Player Economy & Progression**:
   - Unlocked levels, earned coins, and XP persist locally.
   - Every 100 XP levels up the player profile.
@@ -47,8 +48,8 @@
   1. [`README.md`](file:///d:/own/tap%20blast/Tap-Blast/README.md) — World 1 active rules, scoring formulas, rewards, performance standards, and tuning instructions.
   2. [`Documentation/Canvas-Editing.md`](file:///d:/own/tap%20blast/Tap-Blast/Documentation/Canvas-Editing.md) — Canvas object hierarchy, visual feedback rules, and UI prefab boundaries.
 - **Future GDD Features (Reserved for Higher Levels)**:
-  - Targets: Chain targets (L11), Bombs (L16), and later Perfect/Rainbow target types.
-  - Systems: Power-ups, Perfect bonuses, Ultimate meter.
+  - Targets reserved for later worlds: Perfect, Rainbow and Decoy. Chain (L11) and Bombs (L16) are implemented.
+  - Systems reserved for later worlds: other power-ups, Perfect bonuses and Ultimate meter. Shield (L17) is implemented.
 
 ---
 
@@ -63,7 +64,7 @@
 | [`Assets/Scripts/Targets/`](file:///d:/own/tap%20blast/Tap-Blast/Assets/Scripts/Targets/) | `TargetPool` (fixed preallocated target pool), `TargetSpawner` (positioning/spacing), `TargetView` (view & hit testing). |
 | [`Assets/Scripts/UI/`](file:///d:/own/tap%20blast/Tap-Blast/Assets/Scripts/UI/) | `GameHUD.cs`, `GameHUD.Juice.cs`, `ResultReveal.cs`, `TapHandHint.cs` — Canvas bindings and animation. |
 | [`Assets/Scripts/Feedback/FeedbackPlayer.cs`](file:///d:/own/tap%20blast/Tap-Blast/Assets/Scripts/Feedback/FeedbackPlayer.cs) | Audio synthesis, screen shake, haptics/vibration, reduced-motion preferences. |
-| [`Assets/Data/Levels/`](file:///d:/own/tap%20blast/Tap-Blast/Assets/Data/Levels/) | Authored level configs (`Level01.asset` through `Level10.asset`). |
+| [`Assets/Data/Levels/`](file:///d:/own/tap%20blast/Tap-Blast/Assets/Data/Levels/) | Authored level configs (`Level01.asset` through `Level20.asset`). |
 | [`Tools/`](file:///d:/own/tap%20blast/Tap-Blast/Tools/) | PowerShell validation scripts and automated Unity editor smoke test harness. |
 
 ---
@@ -90,8 +91,10 @@
 Before concluding any work, verify your changes by running the CLI validation suite from PowerShell:
 
 ```powershell
-# Run pure C# round-rules validation (48 rule checks):
+# Run pure C# round-rules validation and build-scene reference checks:
 powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Validate-Level1.ps1
 ```
 
 ---
+
+Full campaign validation: `Tools/Run-Campaign20.ps1 -Mode Smoke`; after it finishes, `-Mode Persistence` verifies a fresh process. These use a disposable Unity project and separate save identity.

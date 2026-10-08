@@ -33,20 +33,21 @@ These use the **suggested early-level objectives in the supplied GDD v1.0, pages
 | 10 — Golden Core | Destroy the 5-hit Core | 50s | 3,000 | 25 |
 
 ### World 2: Combo City (Levels 11–20)
+
 | Level | Primary objective | Base time | Two-star score | Three-star streak |
 |---|---|---|---|---|
-| 11 — Chain Spark | Score 2,500 points | 45s | 3,200 | 20 |
-| 12 — Double Impact | Reach a 20-hit streak | 45s | 3,500 | 25 |
-| 13 — Mega Burst | Score 4,000 points | 45s | 5,000 | 25 |
-| 14 — Drift Cluster | Score 4,500 points | 45s | 5,800 | 25 |
-| 15 — Combo Fever | Reach a 25-hit streak | 45s | 5,500 | 30 |
-| 16 — Time Surge | Collect 4 Time Bubbles | 40s | 4,000 | 25 |
-| 17 — Precision Master | Score 6,000 points | 45s | 7,500 | 30 |
-| 18 — Golden Strike | Tap 5 Golden targets | 45s | 6,500 | 30 |
-| 19 — Ultra Streak | Reach a 30-hit streak | 50s | 8,000 | 35 |
-| 20 — Titan Core | Destroy the 10-hit Core | 55s | 10,000 | 35 |
+| 11 — Chain Spark | Create 2 chains | 45s | 900 | 12 |
+| 12 — Double Impact | Create 3 chains; five-target groups | 45s | 1,500 | 20 |
+| 13 — Mega Burst | Create 1 Mega Chain | 45s | 2,500 | 24 |
+| 14 — Drift Cluster | Score 3,000; moving clusters | 45s | 3,800 | 25 |
+| 15 — Combo City | Reach a 20-hit streak | 45s | 2,200 | 30 |
+| 16 — Danger Signs | Avoid all Bombs and tap 20 safe targets | 45s | 650 | 15 |
+| 17 — Shield School | Block 1 Bomb using Shield | 45s | 700 | 15 |
+| 18 — Safe Chain | Create 3 chains without an unprotected Bomb hit | 45s | 1,800 | 25 |
+| 19 — Mega Mastery | Create 2 Mega Chains | 45s | 3,200 | 32 |
+| 20 — Chain Master | Reach 30 best combo AND create 5 chains | 55s | 4,500 | 40 |
 
-One star requires the primary objective. Two stars also require the configured score. Three stars additionally require zero expired targets and the listed best streak.
+One star requires the complete primary objective at timeout. Two also require the configured score. Three additionally require zero expired valid targets, zero unprotected Bomb hits, and the listed best streak.
 
 See [the World 1 guide](Assets/Design%20Doc/World1_Level_Objectives_and_Progression.md) and [the World 2 guide](Assets/Design%20Doc/World2_Level_Objectives_and_Progression.md) for rewards and tuning decisions.
 
@@ -63,25 +64,34 @@ See [the World 1 guide](Assets/Design%20Doc/World1_Level_Objectives_and_Progress
 
 Multipliers apply after the current hit: 1–4 = 1x, 5–9 = 1.25x, 10–19 = 1.5x, 20–29 = 2x, 30–49 = 3x, 50+ = 4x. Fractional scores round to the nearest integer, halves up. A clean Level 1 round scores 275.
 
+## World 2 chains, Bombs and Shield
+
+From level 11, ordinary colored targets appear gradually across the board. Tap one when at least three share its color to detonate every matching target, regardless of distance. Other colors and Bombs remain. Fewer than three matches give a single tap. The reaction proceeds one target at a time with colored bursts and explosion sounds. Five matches make Chain 2; eight make Mega. This user-requested rule replaces the earlier spatial LINK/area-blast interpretation. See the World 2 guide for spawning and tuning.
+
+Red X/BOMB targets spawn at random safe positions and move in random directions. They bounce at arena edges and reverse before overlapping valid targets. Ignoring them is safe; tapping one breaks combo and subtracts up to 50 points. Chain blasts exclude Bombs. From level 17, the authored Shield button grants one protection per round; activation alone does not satisfy the Shield lesson until a Bomb is blocked. No-Bomb objectives remain at risk until time expires.
+
+World navigation uses saved Canvas buttons, and both Editor and Android use the same 20 serialized configs. Next opens World 2 after level 10; level 20 reports World 2 completion without offering an unavailable level 21.
+
 ## Progress, rewards and controls
 
-Coins, XP, best scores and stars persist locally per level. Every 100 XP advances the player profile. Successful replays award the configured rewards again; failure and abandonment grant none. Starting a round saves a unique level-bound token; completion consumes it with the saved rewards to prevent duplicate payout. Existing progress is retained when updating this campaign.
+Coins, XP, best scores and stars persist locally per level. Every 100 XP advances the player profile. Successful replays award the configured rewards again; failure and abandonment grant none. Starting a round saves a unique level-bound token; completion consumes it with the saved rewards to prevent duplicate payout. Existing progress is retained when updating this campaign, including historical World 2 records from earlier placeholder objectives. New attempts use the GDD objectives. Best combo is now saved per level alongside scores and stars.
 
 Pause freezes targets, spawning, effects and time. Escape toggles pause; losing focus or backgrounding pauses the game. Restart/replay clear score, collections, boss state, targets, tutorial and feedback. Pause settings include sound, reduced motion and vibration.
 
 ## Architecture and tuning
 
-`RoundSession.cs` owns scoring, collection counts, combo objectives, time bonuses and stars with no Unity dependencies. `GameManager.cs` coordinates views, round state and persistence. Level mechanics, timing, values, objective counts, star thresholds and rewards are serialized in `Assets/Data/Levels/`. Pool capacity is preallocated from the largest configured level (six targets); no per-target Update, physics, coroutines or LINQ runs in gameplay loops.
+`RoundSession.cs` owns scoring, collection counts, combo objectives, time bonuses and stars with no Unity dependencies. `GameManager.cs` coordinates views, round state and persistence. Level mechanics, timing, values, objective counts, star thresholds and rewards are serialized in `Assets/Data/Levels/`. Pool capacity is preallocated from the largest configured level (12 targets); no per-target Update, physics, coroutines or LINQ runs in gameplay loops.
 
-Edit the authored Canvas and target prefab for presentation; see [Canvas editing](Documentation/Canvas-Editing.md). The GDD's detailed campaign places Chain and Bomb introductions at Levels 11 and 16. They, power-ups, Perfect and Ultimate remain outside this World 1 implementation, despite the broader MVP wish list elsewhere in the GDD.
+Edit the authored Canvas and target prefab for presentation; see [Canvas editing](Documentation/Canvas-Editing.md). The detailed GDD campaign is implemented through level 20, including Chain at 11, Bombs at 16 and Shield at 17. Later power-ups, Perfect, Ultimate and other modes/meta systems remain outside this first-20-level scope. See the World 2 guide for tuning decisions and the distinction from the GDD's broader MVP recommendations.
 
 ## Validation
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Validate-Level1.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Run-UnitySmoke.ps1 -Method RunWorld1
+powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Run-Campaign20.ps1 -Mode Smoke
+powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Run-Campaign20.ps1 -Mode Persistence
 ```
 
-The CLI compiles runtime/editor sources and runs pure C# checks. The World 1 Unity harness uses a disposable project and a separate save identity. It checks serialized campaign references, authored selection UI, objective routing, special targets, movement, acceleration, attainable mastery, rewards and duplicate protection. It advances the actual pooled gameplay logic in deterministic time steps while tapping available targets; it is not a human difficulty or touch-feel test.
+The CLI validates all 20 serialized scene references, compiles runtime/editor sources and runs pure C# rule checks. The Unity harness uses a disposable project and separate save identity. It simulates all 20 authored levels and verifies reachable three-star scores, navigation, board-wide color matching, Bomb spacing, Shield, pause/replay, UI bindings/text fit, records, rewards and duplicate protection. The persistence mode checks records in a fresh Unity process after a successful smoke run. Runners start Unity asynchronously: inspect the final report and process exit before starting another run.
 
-CLI reports: `Logs/Validation/round-rules.txt`. Unity report/captures: `Temp/Level1Validation/world1-*`. Unity log: `Logs/Validation/unity-world1.log`. Android/iOS builds, hardware touch, vibration, performance and difficulty still require device testing.
+CLI report: `Logs/Validation/round-rules.txt`. Unity reports and phone/tall-phone/tablet captures: `Temp/Campaign20Validation/`. Unity logs: `Logs/Validation/campaign20-*.log`. Android/iOS builds, hardware touch, vibration, performance and human difficulty still require device testing.

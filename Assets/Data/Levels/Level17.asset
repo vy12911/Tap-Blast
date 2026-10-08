@@ -12,30 +12,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9218bab79c640ef96f356711932423c, type: 3}
   m_Name: Level17
   m_EditorClassIdentifier: 
-  displayName: PRECISION MASTER
+  displayName: SHIELD SCHOOL
   levelId: 17
-  objective: 1
-  targetScore: 6000
+  objective: 9
+  targetScore: 500
   firstTapTutorial: 0
   targetSizes:
   - 120
   - 135
   duration: 45
   requiredTaps: 20
-  basePoints: 15
+  basePoints: 10
   spawnInterval: 0.45
   targetLifetime: 3.5
-  maxTargets: 8
-  targetSize: 135
+  maxTargets: 12
+  targetSize: 150
   targetSpacing: 36
-  movingTargets: 1
-  goldenChance: 0.20
+  movingTargets: 0
+  goldenChance: 0
   timeChance: 0
   isBossLevel: 0
   bossHealth: 1
-  twoStarScore: 7500
-  threeStarCombo: 30
+  twoStarScore: 700
+  threeStarCombo: 15
   coinReward: 350
   xpReward: 170
   objectiveCount: 1
-  mechanicHint: Small moving targets (120px–135px) award 15 base points. Precision tapping yields high scores.
+  mechanicHint: Press SHIELD, then tap one Bomb. Match colors to score.
+  targetSizes: []
+  clusterSize: 3
+  clusterInterval: 2.4
+  movementSpeed: 70
+  bombChance: 0.3
+  shieldCharges: 1
+  requiredCombo: 0
+  bombPenalty: 50
+  chainBonus: 25

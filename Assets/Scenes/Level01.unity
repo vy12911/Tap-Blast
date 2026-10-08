@@ -396,6 +396,16 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 81074a1743034d6aa08e34da6a990708, type: 2}
   - {fileID: 11400000, guid: 81074a1743034d6aa08e34da6a990709, type: 2}
   - {fileID: 11400000, guid: 81074a1743034d6aa08e34da6a990710, type: 2}
+  - {fileID: 11400000, guid: 5b80ad9be3454ef49babf80af3aba8f4, type: 2}
+  - {fileID: 11400000, guid: 14e2fd0f1f7dc8c4fb7c466daa41667e, type: 2}
+  - {fileID: 11400000, guid: 943356fac734b9949aa615b11614ed0b, type: 2}
+  - {fileID: 11400000, guid: 10fbac1e6d9c6f649aa9a1f139d2a2ca, type: 2}
+  - {fileID: 11400000, guid: aa64d470948a9c9478ce3cb29221da09, type: 2}
+  - {fileID: 11400000, guid: a2abd9debfa63d744ae690382a2f2853, type: 2}
+  - {fileID: 11400000, guid: 88d5cf5dd14be5c4a805d678d4bd55a6, type: 2}
+  - {fileID: 11400000, guid: 35dc4a6114e37b049b2d1b23db4649b2, type: 2}
+  - {fileID: 11400000, guid: 146000c89b3232f419909fe56404578f, type: 2}
+  - {fileID: 11400000, guid: e66d05385dced0e448ad399de0a3ac81, type: 2}
   hud: {fileID: 6339784537448326398}
 --- !u!1001 &6339784537448326397
 PrefabInstance:

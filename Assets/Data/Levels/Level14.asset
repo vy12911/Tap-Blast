@@ -15,7 +15,7 @@ MonoBehaviour:
   displayName: DRIFT CLUSTER
   levelId: 14
   objective: 1
-  targetScore: 4500
+  targetScore: 3000
   firstTapTutorial: 0
   targetSizes:
   - 135
@@ -25,18 +25,27 @@ MonoBehaviour:
   requiredTaps: 20
   basePoints: 10
   spawnInterval: 0.50
-  targetLifetime: 3.8
-  maxTargets: 7
+  targetLifetime: 4.5
+  maxTargets: 12
   targetSize: 150
   targetSpacing: 36
   movingTargets: 1
-  goldenChance: 0.20
-  timeChance: 0.10
+  goldenChance: 0
+  timeChance: 0
   isBossLevel: 0
   bossHealth: 1
-  twoStarScore: 5800
+  twoStarScore: 3800
   threeStarCombo: 25
   coinReward: 275
   xpReward: 140
   objectiveCount: 1
-  mechanicHint: Moving targets cycle between 135px, 150px, and 165px sizes. Stay sharp!
+  mechanicHint: Match colors anywhere on the moving board. Score 3000.
+  targetSizes: []
+  clusterSize: 5
+  clusterInterval: 2.4
+  movementSpeed: 70
+  bombChance: 0
+  shieldCharges: 0
+  requiredCombo: 0
+  bombPenalty: 50
+  chainBonus: 25

@@ -14,6 +14,7 @@ namespace TapBlast
             public int level2BestScore, level2BestStars;
             public int[] scores = new int[20];
             public int[] stars = new int[20];
+            public int[] bestCombos = new int[20];
             public int selectedLevel = 1, activeLevel = 1;
             public string activeRound = "";
         }
@@ -34,6 +35,7 @@ namespace TapBlast
 
             if (data.scores == null || data.scores.Length < 20) Array.Resize(ref data.scores, 20);
             if (data.stars == null || data.stars.Length < 20) Array.Resize(ref data.stars, 20);
+            if (data.bestCombos == null || data.bestCombos.Length < 20) Array.Resize(ref data.bestCombos, 20);
             if (data.bestScore > data.scores[0]) data.scores[0] = data.bestScore;
             if (data.bestStars > data.stars[0]) data.stars[0] = data.bestStars;
             if (data.level2BestScore > data.scores[1]) data.scores[1] = data.level2BestScore;
@@ -50,6 +52,7 @@ namespace TapBlast
         public static int BestStars => GetBestStars(1);
         public static int GetBestScore(int level) => level >= 1 && level <= 20 ? Load().scores[level - 1] : 0;
         public static int GetBestStars(int level) => level >= 1 && level <= 20 ? Load().stars[level - 1] : 0;
+        public static int GetBestCombo(int level) => level >= 1 && level <= 20 ? Load().bestCombos[level - 1] : 0;
         public static bool IsUnlocked(int level) => level == 1 || (level >= 2 && level <= 20 && GetBestStars(level - 1) > 0);
         public static int SelectedLevel => IsUnlocked(Load().selectedLevel) ? Load().selectedLevel : 1;
         public static bool SelectLevel(int level)
@@ -79,6 +82,7 @@ namespace TapBlast
             int idx = Mathf.Clamp(session.LevelId - 1, 0, 19);
             data.scores[idx] = Mathf.Max(session.Score, data.scores[idx]);
             data.stars[idx] = Mathf.Max(session.Stars, data.stars[idx]);
+            data.bestCombos[idx] = Mathf.Max(session.BestCombo, data.bestCombos[idx]);
             data.activeRound = ""; Save(data);
             receipt = new RewardReceipt(earnedCoins, earnedXP, data.coins, data.xp); return true;
         }

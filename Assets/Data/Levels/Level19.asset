@@ -12,30 +12,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9218bab79c640ef96f356711932423c, type: 3}
   m_Name: Level19
   m_EditorClassIdentifier: 
-  displayName: ULTRA STREAK
+  displayName: MEGA MASTERY
   levelId: 19
-  objective: 2
-  targetScore: 4000
+  objective: 7
+  targetScore: 500
   firstTapTutorial: 0
   targetSizes: []
-  duration: 50
+  duration: 45
   requiredTaps: 20
   basePoints: 10
   spawnInterval: 0.50
   finalSpawnInterval: 0.35
   accelerationSeconds: 20
-  targetLifetime: 3.5
-  maxTargets: 8
-  targetSize: 140
+  targetLifetime: 4.5
+  maxTargets: 12
+  targetSize: 150
   targetSpacing: 36
   movingTargets: 1
-  goldenChance: 0.20
-  timeChance: 0.10
+  goldenChance: 0
+  timeChance: 0
   isBossLevel: 0
   bossHealth: 1
-  twoStarScore: 8000
-  threeStarCombo: 35
+  twoStarScore: 3200
+  threeStarCombo: 32
   coinReward: 400
   xpReward: 190
-  objectiveCount: 30
-  mechanicHint: Fast-moving accelerating spawns (down to 0.35s). Reach a 30-hit streak for World 2 mastery!
+  objectiveCount: 2
+  mechanicHint: Wait for 8 of one color per Mega Chain. Make 2.
+  clusterSize: 8
+  clusterInterval: 2.4
+  movementSpeed: 70
+  bombChance: 0.5
+  shieldCharges: 1
+  requiredCombo: 0
+  bombPenalty: 50
+  chainBonus: 25

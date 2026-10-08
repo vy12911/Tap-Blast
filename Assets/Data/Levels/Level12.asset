@@ -14,26 +14,34 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayName: DOUBLE IMPACT
   levelId: 12
-  objective: 2
-  targetScore: 2000
+  objective: 6
+  targetScore: 500
   firstTapTutorial: 0
   targetSizes: []
   duration: 45
   requiredTaps: 20
   basePoints: 10
   spawnInterval: 0.50
-  targetLifetime: 4.0
-  maxTargets: 6
+  targetLifetime: 4.5
+  maxTargets: 12
   targetSize: 150
   targetSpacing: 36
-  movingTargets: 1
-  goldenChance: 0.20
+  movingTargets: 0
+  goldenChance: 0
   timeChance: 0
   isBossLevel: 0
   bossHealth: 1
-  twoStarScore: 3500
-  threeStarCombo: 25
+  twoStarScore: 1500
+  threeStarCombo: 20
   coinReward: 225
   xpReward: 120
-  objectiveCount: 20
-  mechanicHint: Targets now move across the arena. Time your taps carefully to reach a 20-hit streak.
+  objectiveCount: 3
+  mechanicHint: Match 3 or more of one color. Make 3 chains.
+  clusterSize: 5
+  clusterInterval: 2.4
+  movementSpeed: 70
+  bombChance: 0
+  shieldCharges: 0
+  requiredCombo: 0
+  bombPenalty: 50
+  chainBonus: 25

@@ -12,30 +12,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9218bab79c640ef96f356711932423c, type: 3}
   m_Name: Level16
   m_EditorClassIdentifier: 
-  displayName: TIME SURGE
+  displayName: DANGER SIGNS
   levelId: 16
-  objective: 4
-  targetScore: 2500
+  objective: 8
+  targetScore: 500
   firstTapTutorial: 0
   targetSizes: []
-  duration: 40
+  duration: 45
   requiredTaps: 20
   basePoints: 10
   timeBonus: 3
   maxTimeTargets: 8
   spawnInterval: 0.50
-  targetLifetime: 3.8
-  maxTargets: 7
+  targetLifetime: 3.5
+  maxTargets: 12
   targetSize: 150
   targetSpacing: 36
   movingTargets: 0
-  goldenChance: 0.15
-  timeChance: 0.25
+  goldenChance: 0
+  timeChance: 0
   isBossLevel: 0
   bossHealth: 1
-  twoStarScore: 4000
-  threeStarCombo: 25
+  twoStarScore: 650
+  threeStarCombo: 15
   coinReward: 325
   xpReward: 160
-  objectiveCount: 4
-  mechanicHint: Collect 4 Time Bubbles. Each adds 3 seconds to the clock to extend your run.
+  objectiveCount: 1
+  mechanicHint: Match colors and avoid red X BOMBs. Tap 20 safe targets.
+  clusterSize: 3
+  clusterInterval: 2.4
+  movementSpeed: 70
+  bombChance: 0.2
+  shieldCharges: 0
+  requiredCombo: 0
+  bombPenalty: 50
+  chainBonus: 25

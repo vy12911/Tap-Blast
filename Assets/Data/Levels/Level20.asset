@@ -12,32 +12,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9218bab79c640ef96f356711932423c, type: 3}
   m_Name: Level20
   m_EditorClassIdentifier: 
-  displayName: TITAN CORE
+  displayName: CHAIN MASTER
   levelId: 20
-  objective: 5
-  targetScore: 10000
+  objective: 11
+  targetScore: 500
   firstTapTutorial: 0
   targetSizes: []
   duration: 55
   requiredTaps: 20
   basePoints: 10
   spawnInterval: 0.45
-  targetLifetime: 3.5
-  maxTargets: 8
-  targetSize: 145
+  targetLifetime: 4.5
+  maxTargets: 12
+  targetSize: 150
   targetSpacing: 36
   movingTargets: 1
-  goldenChance: 0.25
-  timeChance: 0.15
-  isBossLevel: 1
+  goldenChance: 0
+  timeChance: 0
+  isBossLevel: 0
   bossHealth: 10
   bossSize: 300
   goldenPoints: 120
   timeBonus: 3
   maxTimeTargets: 6
-  twoStarScore: 10000
-  threeStarCombo: 35
+  twoStarScore: 4500
+  threeStarCombo: 40
   coinReward: 500
   xpReward: 200
-  objectiveCount: 1
-  mechanicHint: Hit the giant 10-hit Titan Core 10 times to destroy it while clearing moving target waves!
+  objectiveCount: 5
+  mechanicHint: Build 30 best combo and 5 same-color chains. Avoid Bombs.
+  clusterSize: 8
+  clusterInterval: 2.4
+  movementSpeed: 100
+  bombChance: 0.6
+  shieldCharges: 1
+  requiredCombo: 30
+  bombPenalty: 50
+  chainBonus: 25

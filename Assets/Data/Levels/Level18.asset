@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9218bab79c640ef96f356711932423c, type: 3}
   m_Name: Level18
   m_EditorClassIdentifier: 
-  displayName: GOLDEN STRIKE
+  displayName: SAFE CHAIN
   levelId: 18
-  objective: 3
-  targetScore: 3500
+  objective: 10
+  targetScore: 500
   firstTapTutorial: 0
   targetSizes: []
   duration: 45
@@ -23,18 +23,26 @@ MonoBehaviour:
   basePoints: 10
   goldenPoints: 120
   spawnInterval: 0.45
-  targetLifetime: 3.6
-  maxTargets: 8
-  targetSize: 145
+  targetLifetime: 4.5
+  maxTargets: 12
+  targetSize: 150
   targetSpacing: 36
   movingTargets: 1
-  goldenChance: 0.35
-  timeChance: 0.10
+  goldenChance: 0
+  timeChance: 0
   isBossLevel: 0
   bossHealth: 1
-  twoStarScore: 6500
-  threeStarCombo: 30
+  twoStarScore: 1800
+  threeStarCombo: 25
   coinReward: 375
   xpReward: 180
-  objectiveCount: 5
-  mechanicHint: Tap 5 Golden targets. Each awards 120 base points multiplied by your combo streak!
+  objectiveCount: 3
+  mechanicHint: Make 3 same-color chains without a Bomb hit.
+  clusterSize: 5
+  clusterInterval: 2.4
+  movementSpeed: 70
+  bombChance: 0.4
+  shieldCharges: 1
+  requiredCombo: 0
+  bombPenalty: 50
+  chainBonus: 25

@@ -34,6 +34,14 @@ namespace TapBlast
         [SerializeField, Min(0)] private float timeBonus = 3;
         [SerializeField, Min(3)] private int maxTimeTargets = 6;
         [SerializeField, Range(216, 360)] private float bossSize = 270;
+        [Header("World 2: clusters, hazards and Shield")]
+        [Tooltip("Same-color opportunity per wave in World 2; two other colors also spawn. Zero keeps World 1 spawning.")]
+        [SerializeField, Range(0, 10)] private int clusterSize = 0;
+        [SerializeField, Min(.5f)] private float clusterInterval = 2.4f;
+        [SerializeField, Min(0)] private float movementSpeed = 100;
+        [SerializeField, Range(0, 1)] private float bombChance = 0;
+        [SerializeField, Min(0)] private int shieldCharges = 0;
+        [SerializeField, Min(0)] private int bombPenalty = 50, chainBonus = 25, requiredCombo = 0;
         [Header("Stars: completion / score / score + no misses + streak")]
         [SerializeField, Min(1)] private int twoStarScore = 240;
         [SerializeField, Min(1)] private int threeStarCombo = 20;
@@ -51,12 +59,20 @@ namespace TapBlast
         public float TimeBonus => Mathf.Max(0, timeBonus);
         public int MaxTimeTargets => Mathf.Max(objective == ObjectiveKind.Time ? ObjectiveCount : 0, maxTimeTargets);
         public float BossSize => Mathf.Clamp(bossSize, 216, 360);
+        public int ClusterSize => Mathf.Clamp(clusterSize, 0, Mathf.Max(0, MaxTargets - 2 - (BombChance > 0 ? 1 : 0)));
+        public float ClusterInterval => Mathf.Max(.5f, clusterInterval);
+        public float MovementSpeed => Mathf.Max(0, movementSpeed);
+        public float BombChance => Mathf.Clamp01(bombChance);
+        public int ShieldCharges => Mathf.Max(0, shieldCharges);
+        public int RequiredCombo => Mathf.Max(0, requiredCombo);
         public string MechanicHint => mechanicHint;
         public string ObjectiveLabel => objective switch
         {
             ObjectiveKind.Score => "SCORE", ObjectiveKind.Combo => "BEST STREAK",
             ObjectiveKind.Golden => "GOLDEN", ObjectiveKind.Time => "TIME BUBBLES",
-            ObjectiveKind.Boss => "CORE DESTROYED", _ => "TARGETS"
+            ObjectiveKind.Boss => "CORE DESTROYED", ObjectiveKind.MegaChains => "MEGA CHAINS",
+            ObjectiveKind.Chains or ObjectiveKind.ChainsNoBombs or ObjectiveKind.ChainMaster => "CHAINS",
+            ObjectiveKind.NoBombs => "SAFE TARGETS", ObjectiveKind.Shield => "SHIELD BLOCKS", _ => "TARGETS"
         };
         public string GoalText => (objective switch
         {
@@ -65,6 +81,12 @@ namespace TapBlast
             ObjectiveKind.Golden => "Tap " + ObjectiveCount + " Golden targets",
             ObjectiveKind.Time => "Collect " + ObjectiveCount + " Time Bubbles",
             ObjectiveKind.Boss => "Destroy the " + BossHealth + "-hit Golden Core",
+            ObjectiveKind.Chains => "Create " + ObjectiveCount + " chains",
+            ObjectiveKind.MegaChains => "Create " + ObjectiveCount + " Mega Chain" + (ObjectiveCount == 1 ? "" : "s") + " (8+ targets)",
+            ObjectiveKind.NoBombs => "Tap " + RequiredTaps + " targets and avoid all Bombs",
+            ObjectiveKind.Shield => "Block " + ObjectiveCount + " Bomb with Shield",
+            ObjectiveKind.ChainsNoBombs => "Create " + ObjectiveCount + " chains without a Bomb hit",
+            ObjectiveKind.ChainMaster => "Reach a " + RequiredCombo + "-hit streak and create " + ObjectiveCount + " chains",
             _ => "Tap " + RequiredTaps + " targets"
         }) + " in " + Duration.ToString("0") + " seconds";
         public float SizeAt(int index) => targetSizes == null || targetSizes.Length == 0 ? TargetSize : Mathf.Clamp(targetSizes[index % targetSizes.Length], 105, 240);
@@ -89,6 +111,6 @@ namespace TapBlast
         public int BossHealth => Mathf.Max(1, bossHealth);
         public int TwoStarScore => Mathf.Max(1, twoStarScore);
         public int ThreeStarCombo => Mathf.Max(1, threeStarCombo);
-        public RoundRules Rules => new RoundRules(Duration, RequiredTaps, basePoints, TwoStarScore, ThreeStarCombo, objective, TargetScore, LevelId, ObjectiveCount, GoldenPoints, TimeBonus);
+        public RoundRules Rules => new RoundRules(Duration, RequiredTaps, basePoints, TwoStarScore, ThreeStarCombo, objective, TargetScore, LevelId, ObjectiveCount, GoldenPoints, TimeBonus, RequiredCombo, ShieldCharges, bombPenalty, chainBonus);
     }
 }

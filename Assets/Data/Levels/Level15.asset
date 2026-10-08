@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9218bab79c640ef96f356711932423c, type: 3}
   m_Name: Level15
   m_EditorClassIdentifier: 
-  displayName: COMBO FEVER
+  displayName: COMBO CITY
   levelId: 15
   objective: 2
-  targetScore: 3000
+  targetScore: 500
   firstTapTutorial: 0
   targetSizes: []
   duration: 45
@@ -24,18 +24,26 @@ MonoBehaviour:
   spawnInterval: 0.60
   finalSpawnInterval: 0.40
   accelerationSeconds: 20
-  targetLifetime: 3.6
-  maxTargets: 7
-  targetSize: 140
+  targetLifetime: 4.5
+  maxTargets: 12
+  targetSize: 150
   targetSpacing: 36
-  movingTargets: 0
-  goldenChance: 0.20
+  movingTargets: 1
+  goldenChance: 0
   timeChance: 0
   isBossLevel: 0
   bossHealth: 1
-  twoStarScore: 5500
+  twoStarScore: 2200
   threeStarCombo: 30
   coinReward: 300
   xpReward: 150
-  objectiveCount: 25
-  mechanicHint: Spawn pace accelerates from 0.60s to 0.40s. Reach a 25-hit streak as the rhythm speeds up!
+  objectiveCount: 20
+  mechanicHint: Same-color chains build combo. Expiry breaks your streak.
+  clusterSize: 5
+  clusterInterval: 2.4
+  movementSpeed: 70
+  bombChance: 0
+  shieldCharges: 0
+  requiredCombo: 0
+  bombPenalty: 50
+  chainBonus: 25

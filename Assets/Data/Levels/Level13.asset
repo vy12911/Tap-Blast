@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayName: MEGA BURST
   levelId: 13
-  objective: 1
-  targetScore: 4000
+  objective: 7
+  targetScore: 500
   firstTapTutorial: 0
   targetSizes: []
   duration: 45
@@ -23,18 +23,26 @@ MonoBehaviour:
   basePoints: 10
   goldenPoints: 100
   spawnInterval: 0.45
-  targetLifetime: 3.8
-  maxTargets: 7
+  targetLifetime: 4.5
+  maxTargets: 12
   targetSize: 150
   targetSpacing: 36
   movingTargets: 0
-  goldenChance: 0.30
+  goldenChance: 0
   timeChance: 0
   isBossLevel: 0
   bossHealth: 1
-  twoStarScore: 5000
-  threeStarCombo: 25
+  twoStarScore: 2500
+  threeStarCombo: 24
   coinReward: 250
   xpReward: 130
   objectiveCount: 1
-  mechanicHint: High-density Golden opportunities spawn frequently. Tap them during high combo multipliers!
+  mechanicHint: Wait for 8 targets of one color to make a Mega Chain.
+  clusterSize: 8
+  clusterInterval: 2.4
+  movementSpeed: 70
+  bombChance: 0
+  shieldCharges: 0
+  requiredCombo: 0
+  bombPenalty: 50
+  chainBonus: 25

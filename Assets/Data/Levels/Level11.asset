@@ -14,26 +14,34 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayName: CHAIN SPARK
   levelId: 11
-  objective: 1
-  targetScore: 2500
+  objective: 6
+  targetScore: 500
   firstTapTutorial: 0
   targetSizes: []
   duration: 45
   requiredTaps: 20
   basePoints: 10
   spawnInterval: 0.55
-  targetLifetime: 4.0
-  maxTargets: 6
+  targetLifetime: 4.5
+  maxTargets: 12
   targetSize: 150
   targetSpacing: 36
   movingTargets: 0
-  goldenChance: 0.15
+  goldenChance: 0
   timeChance: 0
   isBossLevel: 0
   bossHealth: 1
-  twoStarScore: 3200
-  threeStarCombo: 20
+  twoStarScore: 900
+  threeStarCombo: 12
   coinReward: 200
   xpReward: 110
-  objectiveCount: 1
-  mechanicHint: Rapid circular spawns build explosive score chains. Keep your multiplier high.
+  objectiveCount: 2
+  mechanicHint: Wait for 3 of one color, then tap one to blast them all.
+  clusterSize: 3
+  clusterInterval: 2.4
+  movementSpeed: 70
+  bombChance: 0
+  shieldCharges: 0
+  requiredCombo: 0
+  bombPenalty: 50
+  chainBonus: 25

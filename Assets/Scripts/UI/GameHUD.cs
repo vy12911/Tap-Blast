@@ -36,6 +36,7 @@ namespace TapBlast
         [SerializeField] private Image progressFill, timerFill;
         [SerializeField] private Image[] resultStars = new Image[3];
         [SerializeField] private Popup[] popups = new Popup[10];
+        [field: SerializeField] public World2Effects WorldEffects { get; private set; }
         private int popupCursor;
         private bool animateFeedback;
         private int lastCountdown = -1;
@@ -66,6 +67,7 @@ namespace TapBlast
             public CanvasGroup Alpha;
             public Vector2 Origin;
             public float Age, BlastScale = 1;
+            public int ReactionStyle;
             public bool Active, ReducedMotion;
         }
 
@@ -107,6 +109,7 @@ namespace TapBlast
         public void SetHint(string title, string detail) { hint.text = title; subhint.text = detail; }
         public void Refresh(RoundSession session, LevelConfig config)
         {
+            WorldEffects.Configure(config.LevelId, session.ShieldActive);
             score.text = session.Score.ToString("D5"); timer.text = Mathf.CeilToInt(session.RemainingTime).ToString("00");
             timerFill.fillAmount = session.RemainingTime / config.Duration;
             timerFill.color = session.RemainingTime <= 10 ? UIArt.Gold : UIArt.Cyan;
@@ -153,6 +156,7 @@ namespace TapBlast
         public void SetSettings(bool sound, bool reducedMotion, bool haptics)
         {
             this.reducedMotion = reducedMotion;
+            WorldEffects.SetMotion(reducedMotion);
             if (reducedMotion)
             {
                 foreach (var p in popups)
@@ -169,17 +173,17 @@ namespace TapBlast
             Motion.GetComponentInChildren<TMP_Text>().text = "REDUCED MOTION  " + (reducedMotion ? "ON" : "OFF");
             Haptics.GetComponentInChildren<TMP_Text>().text = "VIBRATION  " + (haptics ? "ON" : "OFF");
         }
-        public void Pop(Vector2 position, int points, Color tint, bool reducedMotion, float delay = 0, float blastScale = 1)
+        public void Pop(Vector2 position, int points, Color tint, bool reducedMotion, float delay = 0, float blastScale = 1, int reactionStyle = 0)
         {
             var p = popups[popupCursor++ % popups.Length]; p.Age = reducedMotion ? 0 : -delay; p.Active = true;
-            p.ReducedMotion = reducedMotion; p.BlastScale = blastScale; p.Origin = position; p.Root.anchoredPosition = position;
+            p.ReducedMotion = reducedMotion; p.BlastScale = blastScale; p.ReactionStyle = reactionStyle; p.Origin = position; p.Root.anchoredPosition = position;
             p.Label.text = "+" + points;
             p.Ring.color = new Color(tint.r, tint.g, tint.b, tint.a * (blastScale > 1 ? .55f : 1));
             p.RingRect.localScale = Vector3.one;
             p.Ring.enabled = !reducedMotion; p.Alpha.alpha = p.Age < 0 ? 0 : 1; p.Root.gameObject.SetActive(true);
             p.Core.enabled = !reducedMotion; p.Core.color = tint; p.Core.rectTransform.localScale = Vector3.one;
             p.Ring.enabled = false; // The shrinking tap core leads the ring burst.
-            for (int i = 0; i < p.Sparks.Length; i++) { p.Sparks[i].gameObject.SetActive(!reducedMotion); p.Sparks[i].anchoredPosition = Vector2.zero; p.Sparks[i].localScale = Vector3.one; }
+            for (int i = 0; i < p.Sparks.Length; i++) { p.Sparks[i].gameObject.SetActive(!reducedMotion && reactionStyle == 0); p.Sparks[i].anchoredPosition = Vector2.zero; p.Sparks[i].localScale = Vector3.one; }
         }
         public void MessagePop(Vector2 position, string text, Color tint, bool reducedMotion)
         {
@@ -187,7 +191,7 @@ namespace TapBlast
             popups[(popupCursor - 1) % popups.Length].Label.text = text;
             popups[(popupCursor - 1) % popups.Length].Core.enabled = false;
         }
-        public void ClearFeedback() { foreach (var p in popups) { p.Active = false; p.Root.gameObject.SetActive(false); } popupCursor = 0; ResetJuice(); }
+        public void ClearFeedback() { WorldEffects.Clear(); foreach (var p in popups) { p.Active = false; p.Root.gameObject.SetActive(false); } popupCursor = 0; ResetJuice(); }
         private void Update() { TickFeedback(Time.unscaledDeltaTime); }
         private void TickFeedback(float delta)
         {
@@ -195,6 +199,7 @@ namespace TapBlast
             tapHand.Tick(delta, animateFeedback, reducedMotion);
             if (results.activeSelf) resultReveal.Tick(delta, reducedMotion);
             if (!animateFeedback) return;
+            WorldEffects.Tick(delta);
             for (int i = 0; i < popups.Length; i++)
             {
                 var p = popups[i]; if (!p.Active) continue;
@@ -202,7 +207,7 @@ namespace TapBlast
                 if (p.Age < 0) continue;
                 if (t >= 1) { p.Active = false; p.Root.gameObject.SetActive(false); continue; }
                 p.Alpha.alpha = 1 - t;
-                p.Ring.enabled = !p.ReducedMotion && p.Age >= .08f;
+                p.Ring.enabled = !p.ReducedMotion && p.ReactionStyle == 0 && p.Age >= .08f;
                 if (!p.ReducedMotion) { p.Root.anchoredPosition = p.Origin + Vector2.up * (t * popupRise); p.RingRect.localScale = Vector3.one * (1 + t * .8f) * p.BlastScale; }
                 p.Core.rectTransform.localScale = Vector3.one * Mathf.Clamp01(1 - p.Age / .12f);
                 for (int j = 0; j < p.Sparks.Length; j++)

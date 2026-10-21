@@ -63,3 +63,5 @@ The target prefab retains the legacy `chainSymbol` child but color-chain targets
 Long objective, description, countdown and result labels use authored TMP autosizing with a 20-reference-pixel minimum. Do not remove font assignments or saved references. The level-20 briefing checks both 30 best combo and five chains; its results show World 2 completion. Results include chain/Mega/Bomb/Shield statistics.
 
 `Tools/World2Authoring.cs` is a one-time editor utility run in the disposable project by `Tools/Run-Campaign20.ps1 -Mode Author`. It saves prefab assets; it is not a runtime UI builder. The saved prefabs in Assets are authoritative.
+
+World 2 now includes a saved **World 2 chain energy** Graphic under Pooled feedback. Tune intensity, link width and burst radius on that component; keep its GameHUD reference wired. See [level-specific effects](Animations-Level01-20.md#world-2-effects-by-level). Its fixed geometry pool draws travelling chain links, readiness halos, level-specific bursts and hazard/Shield indicators without creating UI objects.

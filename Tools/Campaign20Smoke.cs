@@ -412,6 +412,108 @@ public static class Campaign20Smoke
         Check(Field<TMP_Text>(hud, "timer").rectTransform.localScale == Vector3.one && hud.Shield.transform.localScale == Vector3.one, "Replay resets animation transforms");
         Check(hud.GetComponentsInChildren<RectTransform>(true).Length == objects, "Animation playback creates no new Canvas or target objects");
     }
+    static void VerifyWorldEffects()
+    {
+        var fx = hud.WorldEffects;
+        Check(fx != null && !fx.raycastTarget && fx.GetComponentInParent<RectMask2D>() != null,
+            "World 2 effect graphic is authored, clipped and cannot intercept taps");
+        var pool = Field<TargetPool>(game, "pool");
+        int objects = hud.GetComponentsInChildren<RectTransform>(true).Length;
+        for (int id = 11; id <= 20; id++)
+        {
+            game.SelectLevel(id); Begin();
+            Check(fx.ActiveEffectCount == 0, "Level " + id + " starts without queued effects");
+            if (id == 17)
+            {
+                game.ActivateShield();
+                TickHUD(.18f);
+                UnitySmoke.Capture(hud, "vfx-17-shield-active");
+                foreach (var t in Targets()) if (t.Kind == TargetKind.Bomb) { Tap(t); break; }
+            }
+            else
+            {
+                if (id == 15) for (int i = 0; i < 9; i++) game.Session.Tap();
+                Tap(ChainTarget());
+            }
+            Check(fx.ActiveEffectCount > 0, "Level " + id + " emits themed feedback");
+            TickHUD(.08f); pool.Tick(.08f, false);
+            UnitySmoke.Capture(hud, "vfx-" + id + "-impact");
+            game.Pause(); float before = Field<float>(fx, "clock"); TickHUD(.5f);
+            Check(Field<float>(fx, "clock") == before, "Level " + id + " freezes effects on pause");
+            game.Resume(); TickHUD(.4f); pool.Tick(.4f, false);
+            UnitySmoke.Capture(hud, "vfx-" + id + "-cascade");
+            TickHUD(1); pool.Tick(1, false);
+            if (id == 13 || id == 19 || id == 20) UnitySmoke.Capture(hud, "vfx-" + id + "-finale");
+            TickHUD(4); pool.Tick(4, false);
+            Check(fx.ActiveEffectCount == 0, "Level " + id + " releases all transient effects");
+        }
+        game.SelectLevel(15); Begin(); fx.Clear();
+        fx.Hit(Vector2.zero, UIArt.Cyan, 9, 12);
+        Check(fx.ActiveEffectCount > 1, "Crossing a combo milestone within a chain launches the skyline");
+        fx.Clear(); fx.Hit(Vector2.zero, UIArt.Cyan, 12, 15);
+        Check(fx.ActiveEffectCount == 1, "Hits within the same combo tier do not repeat the skyline");
+        game.SelectLevel(13); Begin(); Tap(ChainTarget());
+        hud.SetSettings(true, true, false);
+        Check(fx.ActiveEffectCount == 0, "Reduced motion clears queued travelling links and explosions immediately");
+        Begin(); Tap(ChainTarget());
+        Check(fx.ActiveEffectCount == 0, "Reduced motion does not enqueue new animated effects");
+        hud.SetSettings(true, false, false);
+        Begin(); Tap(ChainTarget()); game.BeginCountdown();
+        Check(fx.ActiveEffectCount == 0, "Replay cancels queued World 2 feedback");
+        Check(hud.GetComponentsInChildren<RectTransform>(true).Length == objects,
+            "All ten World 2 effects reuse the authored Canvas without creating objects");
+        game.SelectLevel(13);
+    }
+    static void VerifyReactionVariety()
+    {
+        game.SelectLevel(13); Begin();
+        var fx = hud.WorldEffects;
+        var pool = Field<TargetPool>(game, "pool");
+        var members = new TargetView[pool.Capacity];
+        int count = pool.FindChain(ChainTarget(), members);
+        int score = game.Session.Score, hits = game.Session.Hits;
+        int objects = hud.GetComponentsInChildren<RectTransform>(true).Length;
+        for (int style = 0; style < 3; style++)
+        {
+            int chosen = fx.Chain(members, count);
+            Check(chosen == style, "Chain reactions cycle without repeats: style " + style);
+            TickHUD(.08f);
+            UnitySmoke.Capture(hud, "reaction-" + style + "-travel");
+            game.Pause(); float time = Field<float>(fx, "clock"); TickHUD(.5f);
+            Check(time == Field<float>(fx, "clock"), "Reaction style " + style + " freezes on pause");
+            game.Resume(); TickHUD(.25f);
+            UnitySmoke.Capture(hud, "reaction-" + style + "-burst");
+            TickHUD(3);
+            Check(fx.ActiveEffectCount == 0, "Reaction style " + style + " drains its fixed pool");
+        }
+        Check(fx.Chain(members, count) == 0, "Fourth chain wraps to the electric reaction");
+        Check(game.Session.Score == score && game.Session.Hits == hits,
+            "Presentation variations cannot grant score or extra hits");
+        hud.SetSettings(true, true, false);
+        fx.Chain(members, count);
+        Check(fx.ActiveEffectCount == 0, "Alternate reactions obey reduced motion");
+        hud.SetSettings(true, false, false);
+        game.BeginCountdown();
+        Check(fx.LastReactionStyle == 0 && fx.ActiveEffectCount == 0, "Replay resets reaction rotation and effects");
+        Check(hud.GetComponentsInChildren<RectTransform>(true).Length == objects, "Reaction variety creates no UI objects");
+        for (int style = 0; style < 3; style++)
+        {
+            Begin(); count = pool.FindChain(ChainTarget(), members);
+            for (int prime = 0; prime < style; prime++) { fx.Chain(members, count); fx.Tick(3); }
+            Tap(ChainTarget());
+            Check(fx.LastReactionStyle == style && game.Session.Hits == count && game.Session.Chains == 1,
+                "Real tap resolves the same chain once with reaction style " + style);
+            TickHUD(.08f); pool.Tick(.08f, false);
+            UnitySmoke.Capture(hud, "reaction-" + style + "-travel");
+            TickHUD(.25f); pool.Tick(.25f, false);
+            UnitySmoke.Capture(hud, "reaction-" + style + "-burst");
+            var popup = Field<Array>(hud, "popups").GetValue(0);
+            Check(PopupPart<Image>(popup, "Ring").enabled == (style == 0),
+                "Reaction style " + style + " uses its own impact silhouette");
+        }
+
+        game.SelectLevel(13);
+    }
     static void Step()
     {
         if (!EditorApplication.isPlaying || EditorApplication.isCompiling) return;
@@ -430,7 +532,7 @@ public static class Campaign20Smoke
             {
                 VerifyInputRouting(); inputLevel++;
                 if (inputLevel <= 20) { game.SelectLevel(inputLevel); Begin(); }
-                else { VerifyAnimations(); game.SelectLevel(20); stage = 1; }
+                else { VerifyAnimations(); VerifyWorldEffects(); VerifyReactionVariety(); game.SelectLevel(20); stage = 1; }
                 next = EditorApplication.timeSinceStartup + .1;
             }
             else if (stage == 1) { Capture("campaign20-briefing"); game.SelectLevel(17); Begin(); game.ActivateShield(); stage++; next = EditorApplication.timeSinceStartup + .3; }

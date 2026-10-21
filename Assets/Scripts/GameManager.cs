@@ -38,6 +38,7 @@ public sealed class GameManager : MonoBehaviour
         foreach (var config in levels) if (config != null) capacity = Mathf.Max(capacity, config.MaxTargets);
         pool = new TargetPool(hud.Arena, hud.TargetPrefab, capacity, OnTargetTapped, OnTargetExpired, OnChainImpact);
         chainTargets = new TargetView[capacity];
+        hud.WorldEffects.Bind(pool);
         spawner = new TargetSpawner(pool, hud.Arena, level);
         hud.Play.onClick.AddListener(BeginCountdown);
         hud.Pause.onClick.AddListener(Pause);
@@ -112,6 +113,7 @@ public sealed class GameManager : MonoBehaviour
             pool.Release(target);
             int penalty = Session.Tap(TargetKind.Bomb);
             feedback.PlayHazard(protectedTap);
+            hud.WorldEffects.Hazard(bombPosition, protectedTap);
             if (protectedTap) hud.ShieldJuice();
             hud.MessagePop(bombPosition, protectedTap ? "SHIELD!" : "BOMB " + penalty, target.Tint, feedback.ReducedMotion);
             hud.HitJuice(Session.Combo);
@@ -122,6 +124,10 @@ public sealed class GameManager : MonoBehaviour
         int chainCount = pool.FindChain(target, chainTargets);
         if (chainCount >= 3)
         {
+            int previousCombo = Session.Combo;
+            Vector2 chainOrigin = target.Position;
+            Color chainTint = target.Tint;
+            int reactionStyle = hud.WorldEffects.Chain(chainTargets, chainCount);
             int total = 0;
             int blastCount = chainCount;
             for (int i = 0; i < blastCount; i++)
@@ -129,11 +135,12 @@ public sealed class GameManager : MonoBehaviour
                 var member = chainTargets[i];
                 int memberPoints = Session.Tap(member.Kind); total += memberPoints;
                 hud.Pop(member.Position, memberPoints, member.Tint, feedback.ReducedMotion, i * TargetView.ChainStepSeconds,
-                    chainCount >= 8 ? 1.65f : chainCount >= 5 ? 1.35f : 1.15f);
+                    chainCount >= 8 ? 1.65f : chainCount >= 5 ? 1.35f : 1.15f, reactionStyle);
                 if (member.Kind == TargetKind.Time) hud.TimeJuice();
                 member.BeginBlast(i * TargetView.ChainStepSeconds, feedback.ReducedMotion, i); chainTargets[i] = null;
             }
             total += Session.RecordChain(chainCount);
+            hud.WorldEffects.Hit(chainOrigin, chainTint, previousCombo, Session.Combo);
             feedback.PlayTap(Session.Combo); feedback.PlayChain(chainCount); hud.HitJuice(Session.Combo);
             hud.SetHint((chainCount >= 8 ? "MEGA CHAIN! " : chainCount >= 5 ? "CHAIN 2! " : "CHAIN! ") + chainCount + " TARGETS  +" + total,
                 level.GoalText);
@@ -147,7 +154,9 @@ public sealed class GameManager : MonoBehaviour
         if (destroyed) pool.Release(target);
         tutorialStarted = true;
         hud.HideTapHand();
+        int priorCombo = Session.Combo;
         int points = Session.Tap(kind, destroyed);
+        hud.WorldEffects.Hit(position, color, priorCombo, Session.Combo);
         feedback.PlayTap(Session.Combo);
         hud.Pop(position, points, color, feedback.ReducedMotion);
         hud.HitJuice(Session.Combo);
@@ -239,6 +248,7 @@ public sealed class GameManager : MonoBehaviour
     {
         if (Session == null || !Session.ActivateShield()) return;
         hud.ShieldJuice();
+        hud.WorldEffects.ShieldActivate();
         hud.SetHint("SHIELD ACTIVE", "One Bomb hit is protected. Your combo and score are safe.");
         RefreshHUD();
     }

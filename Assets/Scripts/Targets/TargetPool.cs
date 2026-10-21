@@ -16,6 +16,8 @@ namespace TapBlast
         {
             get { int count = 0; for (int i = 0; i < targets.Length; i++) if (targets[i].Active && targets[i].Kind == TargetKind.Bomb) count++; return count; }
         }
+        public int Capacity => targets.Length;
+        public TargetView At(int index) => targets[index];
         public int FreeCount => targets.Length - ActiveCount;
         public TargetPool(RectTransform parent, TargetView prefab, int capacity, Action<TargetView> tapped, Action<TargetView> expired, Action<TargetView> onBlastImpact = null)
         {

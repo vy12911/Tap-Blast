@@ -27,13 +27,16 @@ namespace TapBlast
         [field: SerializeField] public Button LevelOne { get; private set; }
         [field: SerializeField] public Button LevelTwo { get; private set; }
         [SerializeField] private GameObject levelSelect, introHero, sizePreview;
-        [SerializeField] private TMP_Text worldLabel, levelLabel, description, countdownGoal, selectionWallet;
+        [SerializeField] private ScrollRect selectionScroll;
+        [SerializeField] private GameObject hintPlate;
+        [SerializeField] private TMP_Text worldLabel, levelLabel, description, countdownGoal, selectionWallet, selectionExperience;
         [SerializeField] private TMP_Text introWorld, selectionWorld, selectionTitle;
         private LevelConfig currentConfig;
         [SerializeField] private GameObject intro, pausePanel, results, countdownPanel;
         [SerializeField] private TMP_Text score, timer, objective, combo, multiplier, hint, subhint, countdownText;
         [SerializeField] private TMP_Text introName, introGoal, introBest, starRules, resultTitle, resultSubtitle, resultScore, resultStats, resultBest, resultHint;
         [SerializeField] private Image progressFill, timerFill;
+        [SerializeField] private Image[] objectiveStars = new Image[0];
         [SerializeField] private Image[] resultStars = new Image[3];
         [SerializeField] private Popup[] popups = new Popup[10];
         [field: SerializeField] public World2Effects WorldEffects { get; private set; }
@@ -89,24 +92,34 @@ namespace TapBlast
             worldLabel.text = (config.LevelId > 10 ? "WORLD 02   /   " : "WORLD 01   /   ") + config.DisplayName;
             levelLabel.text = config.LevelId.ToString("00");
             countdownGoal.text = config.GoalText;
-            introHero.SetActive(config.LevelId == 1); sizePreview.SetActive(config.LevelId == 2);
+            introHero.SetActive(config.LevelId != 2); sizePreview.SetActive(config.LevelId == 2);
             description.text = config.MechanicHint + (config.FirstTapTutorial ? "" : "\nKeep playing for mastery until time runs out.");
             for (int i = 0; i < 3; i++)
             {
                 ((RectTransform)sizePreview.transform.GetChild(i * 2)).sizeDelta = Vector2.one * (config.SizeAt(i) + previewGlowPadding);
                 ((RectTransform)sizePreview.transform.GetChild(i * 2 + 1)).sizeDelta = Vector2.one * config.SizeAt(i);
             }
-            introName.text = config.DisplayName;
-            introGoal.text = config.GoalText;
+            int titleSplit = config.DisplayName.IndexOf(' ');
+            introName.text = titleSplit > 0 ? config.DisplayName.Substring(0,titleSplit) + " <color=#EAF8FF>" + config.DisplayName.Substring(titleSplit+1) + "</color>" : config.DisplayName;
+            introGoal.text = config.LevelId == 1 ? "Tap <color=#FFA500>" + config.RequiredTaps + "</color> targets in <color=#FFA500>" + config.Duration.ToString("0") + "</color> seconds" : config.GoalText;
+            countdownGoal.text = introGoal.text;
+            if(config.FirstTapTutorial) description.text = "Tap glowing circles before they fade.\nYour first tap starts the clock.";
             starRules.text = "1 STAR   Complete the level\n2 STARS   Complete + score " + config.TwoStarScore + "+\n3 STARS   Both + no mistakes + " + config.ThreeStarCombo + " combo";
             rewardPreview.text = "COMPLETE:  +" + config.CoinReward + " COINS   +" + config.XPReward + " XP";
-            introBest.text = "WALLET  " + ProgressStore.Coins.ToString("N0") + " COINS   /   " + ProgressStore.XP.ToString("N0") + " XP\n" + (best > 0 ? "BEST  " + best.ToString("N0") + "   /   " + ProgressStore.GetBestStars(config.LevelId) + " STARS" : "A new personal best starts here");
+            introBest.text = (best > 0 ? "BEST  " + best.ToString("N0") + "   /   " + ProgressStore.GetBestStars(config.LevelId) + " STARS" : "A new personal best starts here");
+            GetComponent<GuiBriefing>()?.Refresh(config);
+            GetComponent<GuiArenaTheme>()?.Refresh(config.LevelId);
+            GetComponent<GuiScreenVisibility>()?.Refresh();
         }
-        public void ShowCountdown() { HideOverlays(); countdownPanel.SetActive(true); Pause.interactable = false; animateFeedback = false; }
+        public void ShowCountdown() { HideOverlays(); countdownPanel.SetActive(true); Pause.interactable = false; animateFeedback = false; GetComponent<GuiScreenVisibility>()?.Refresh(); }
         public void SetCountdown(int count) { if (count == lastCountdown) return; lastCountdown = count; countdownText.text = count.ToString(); }
-        public void ShowPlaying() { HideOverlays(); Pause.interactable = true; animateFeedback = true; }
-        public void ShowPause() { HideOverlays(); pausePanel.SetActive(true); Pause.interactable = false; animateFeedback = false; }
-        public void SetHint(string title, string detail) { hint.text = title; subhint.text = detail; }
+        public void ShowPlaying() { HideOverlays(); Pause.interactable = true; animateFeedback = true; GetComponent<GuiScreenVisibility>()?.Refresh(); }
+        public void ShowPause() { HideOverlays(); pausePanel.SetActive(true); Pause.interactable = false; animateFeedback = false; GetComponent<GuiScreenVisibility>()?.Refresh(); }
+        public void SetHint(string title, string detail) {
+            hint.text = title; subhint.text = detail;
+            hintPlate.SetActive(!string.IsNullOrEmpty(title) || !string.IsNullOrEmpty(detail));
+            hint.color = title.StartsWith("TARGET MISSED") ? new Color32(255,47,122,255) : new Color32(5,32,108,255);
+        }
         public void Refresh(RoundSession session, LevelConfig config)
         {
             WorldEffects.Configure(config.LevelId, session.ShieldActive);
@@ -115,7 +128,9 @@ namespace TapBlast
             timerFill.color = session.RemainingTime <= 10 ? UIArt.Gold : UIArt.Cyan;
             objective.text = config.ObjectiveLabel + "  " + session.ObjectiveProgress + " / " + session.ObjectiveTarget;
             if (session.BombObjectiveFailed) objective.text = "BOMB HIT - REPLAY TO RETRY";
-            progressFill.rectTransform.anchorMax = new Vector2(Mathf.Clamp01((float)session.ObjectiveProgress / session.ObjectiveTarget), 1);
+            progressFill.fillAmount = Mathf.Clamp01((float)session.ObjectiveProgress / session.ObjectiveTarget);
+            int projectedStars = !session.GoalMet ? 0 : session.Score < config.TwoStarScore ? 1 : session.Misses == 0 && session.BombHits == 0 && session.BestCombo >= config.ThreeStarCombo ? 3 : 2;
+            for (int i = 0; i < objectiveStars.Length; i++) objectiveStars[i].color = i < projectedStars ? Color.white : new Color(.38f, .48f, .58f, .6f);
             combo.text = session.Combo.ToString(); multiplier.text = "x" + session.Multiplier.ToString("0.##");
             bool playing = session.State == RoundState.Playing;
             Shield.gameObject.SetActive(playing && config.ShieldCharges > 0);
@@ -136,7 +151,7 @@ namespace TapBlast
             bool hasNext = session.Won && session.LevelId < 20 && ProgressStore.IsUnlocked(session.LevelId + 1);
             Next.gameObject.SetActive(hasNext);
             Replay.GetComponentInChildren<TMP_Text>().text = hasNext ? "REPLAY" : "PLAY AGAIN";
-            for (int i = 0; i < 3; i++) resultStars[i].color = i < session.Stars ? UIArt.Gold : new Color32(57, 77, 90, 255);
+            for (int i = 0; i < 3; i++) resultStars[i].color = i < session.Stars ? Color.white : new Color(.38f, .48f, .58f, .45f);
             resultScore.text = session.Score.ToString("N0");
             resultBest.text = newBest ? "NEW PERSONAL BEST" : "PERSONAL BEST  " + best.ToString("N0");
             resultStats.text = "Targets tapped     " + session.Hits + "\nBest combo          " + session.BestCombo + "\nTargets missed     " + session.Misses;
@@ -152,6 +167,7 @@ namespace TapBlast
             xpFill.rectTransform.anchorMax = new Vector2(receipt.TotalXP % 100 / 100f, 1);
             resultReveal.Begin(session.Score, session.Stars, reducedMotion);
             Celebrate(session.Won);
+            GetComponent<GuiScreenVisibility>()?.Refresh();
         }
         public void SetSettings(bool sound, bool reducedMotion, bool haptics)
         {
@@ -241,19 +257,23 @@ namespace TapBlast
 
         public void ShowLevelsPage(int page)
         {
+            selectionScroll.StopMovement();
+            selectionScroll.content.anchoredPosition = Vector2.zero;
             currentLevelPage = Mathf.Clamp(page, 0, 1);
             HideOverlays(); levelSelect.SetActive(true); Pause.interactable = false; animateFeedback = false;
+            GetComponent<GuiScreenVisibility>()?.Refresh();
             SetHint("", "");
 
 
             if (worldLabel != null)
                 worldLabel.text = currentLevelPage == 1 ? "WORLD 02   /   COMBO CITY" : "WORLD 01   /   LEARN TO TAP";
             selectionWorld.text = currentLevelPage == 1 ? "WORLD 02" : "WORLD 01";
-            selectionTitle.text = currentLevelPage == 1 ? "COMBO CITY" : "LEARN TO TAP";
+            selectionTitle.text = currentLevelPage == 1 ? "COMBO <color=#EAF8FF>CITY</color>" : "LEARN <color=#EAF8FF>TO TAP</color>";
 
             if (selectionWallet != null)
             {
-                selectionWallet.text = ProgressStore.Coins.ToString("N0") + " COINS   /   " + ProgressStore.XP.ToString("N0") + " XP\nPLAYER LEVEL " + (1 + ProgressStore.XP / 100);
+                selectionWallet.text = ProgressStore.Coins.ToString("N0") + " <size=30><color=#0878BA>COINS</color></size>";
+                selectionExperience.text = ProgressStore.XP.ToString("N0") + " XP\n<size=25><color=#0878BA>PLAYER LEVEL " + (1 + ProgressStore.XP / 100) + "</color></size>";
             }
 
             bool w2Unlocked = ProgressStore.IsUnlocked(11);
@@ -263,17 +283,17 @@ namespace TapBlast
                 prevWorldBtn.gameObject.SetActive(true);
                 prevWorldBtn.interactable = currentLevelPage == 1;
                 prevWorldText.text = currentLevelPage == 1 ? "< W1" : "W1";
-                prevWorldImg.color = currentLevelPage == 1 ? new Color32(24, 85, 110, 240) : new Color32(18, 38, 52, 160);
-                prevWorldText.color = currentLevelPage == 1 ? UIArt.Cyan : new Color32(100, 130, 140, 255);
+                prevWorldImg.color = currentLevelPage == 0 ? Color.white : new Color32(25, 103, 181, 255);
+                prevWorldText.color = currentLevelPage == 0 ? new Color32(5, 37, 115, 255) : new Color32(255, 224, 60, 255);
             }
 
             if (nextWorldBtn != null)
             {
                 nextWorldBtn.gameObject.SetActive(true);
                 nextWorldBtn.interactable = w2Unlocked && currentLevelPage == 0;
-                nextWorldText.text = !w2Unlocked ? "LOCK" : (currentLevelPage == 0 ? "W2 >" : "W2");
-                nextWorldImg.color = (w2Unlocked && currentLevelPage == 0) ? new Color32(95, 75, 24, 240) : new Color32(18, 38, 52, 160);
-                nextWorldText.color = (w2Unlocked && currentLevelPage == 0) ? UIArt.Gold : new Color32(120, 130, 140, 255);
+                nextWorldText.text = currentLevelPage == 0 ? "W2 >" : "W2";
+                nextWorldImg.color = currentLevelPage == 1 ? Color.white : new Color32(25, 103, 181, 255);
+                nextWorldText.color = currentLevelPage == 1 ? new Color32(5, 37, 115, 255) : new Color32(255, 224, 60, 255);
             }
 
             int startLevel = currentLevelPage * 10 + 1;
@@ -287,29 +307,30 @@ namespace TapBlast
                 if (levelButtons[i] != null)
                 {
                     TMP_Text mainText = levelButtons[i].GetComponentInChildren<TMP_Text>();
-                    if (mainText != null) mainText.text = levelId.ToString("00") + "  /  " + nameStr;
+                    if (mainText != null) mainText.text = nameStr;
 
                     bool unlocked = cfg != null && ProgressStore.IsUnlocked(levelId);
                     int stars = ProgressStore.GetBestStars(levelId);
                     int score = ProgressStore.GetBestScore(levelId);
 
                     levelButtons[i].interactable = unlocked;
+                    levelButtons[i].GetComponent<GuiLevelRow>()?.Refresh(levelId, stars);
 
                     if (selectionTexts[i] != null)
                     {
                         if (stars > 0)
                         {
-                            selectionTexts[i].text = "COMPLETED   BEST " + score.ToString("N0") + "   /   " + stars + " / 3 STARS";
-                            selectionTexts[i].color = UIArt.Gold;
+                            selectionTexts[i].text = "COMPLETED  BEST " + score.ToString("N0");
+                            selectionTexts[i].color = new Color32(0, 144, 202, 255);
                         }
                         else if (unlocked)
                         {
-                            selectionTexts[i].text = "UNLOCKED   BEST " + score.ToString("N0") + "   /   0 / 3 STARS";
-                            selectionTexts[i].color = UIArt.Cyan;
+                            selectionTexts[i].text = "READY TO PLAY";
+                            selectionTexts[i].color = new Color32(0, 144, 202, 255);
                         }
                         else
                         {
-                            selectionTexts[i].text = "LOCKED   Complete Level " + (levelId - 1) + " to unlock";
+                            selectionTexts[i].text = "Complete Level " + (levelId - 1) + " to unlock";
                             selectionTexts[i].color = new Color32(120, 140, 150, 255);
                         }
                     }

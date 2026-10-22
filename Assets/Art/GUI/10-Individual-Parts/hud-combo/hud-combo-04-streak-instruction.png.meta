@@ -1,0 +1,598 @@
+fileFormatVersion: 2
+guid: 1a73fa77917d35649a837dd52e95122d
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5032654456408728571
+    second: hud-combo-04-streak-instruction_0
+  - first:
+      213: 3235598216603288738
+    second: hud-combo-04-streak-instruction_1
+  - first:
+      213: -7635746400615299225
+    second: hud-combo-04-streak-instruction_2
+  - first:
+      213: -7125564193277078376
+    second: hud-combo-04-streak-instruction_3
+  - first:
+      213: 2992539011198342407
+    second: hud-combo-04-streak-instruction_4
+  - first:
+      213: 1373543755792571699
+    second: hud-combo-04-streak-instruction_5
+  - first:
+      213: 3597711950673765966
+    second: hud-combo-04-streak-instruction_6
+  - first:
+      213: -6355681704719598929
+    second: hud-combo-04-streak-instruction_7
+  - first:
+      213: -3752743222544343294
+    second: hud-combo-04-streak-instruction_8
+  - first:
+      213: -9170352288710096747
+    second: hud-combo-04-streak-instruction_9
+  - first:
+      213: 2040743707659370428
+    second: hud-combo-04-streak-instruction_10
+  - first:
+      213: 2218578094392334839
+    second: hud-combo-04-streak-instruction_11
+  - first:
+      213: 6381831903545261665
+    second: hud-combo-04-streak-instruction_12
+  - first:
+      213: -1360589555558952232
+    second: hud-combo-04-streak-instruction_13
+  - first:
+      213: 4231052623212415369
+    second: hud-combo-04-streak-instruction_14
+  - first:
+      213: 8065832073048870028
+    second: hud-combo-04-streak-instruction_15
+  - first:
+      213: 5641895987085022189
+    second: hud-combo-04-streak-instruction_16
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: hud-combo-04-streak-instruction_0
+      rect:
+        serializedVersion: 2
+        x: 164
+        y: 195
+        width: 78
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 50c9870af6b682ab0800000000000000
+      internalID: -5032654456408728571
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hud-combo-04-streak-instruction_1
+      rect:
+        serializedVersion: 2
+        x: 250
+        y: 193
+        width: 82
+        height: 93
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2a4c6806f6727ec20800000000000000
+      internalID: 3235598216603288738
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hud-combo-04-streak-instruction_2
+      rect:
+        serializedVersion: 2
+        x: 344
+        y: 193
+        width: 26
+        height: 93
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7678b54ca11680690800000000000000
+      internalID: -7635746400615299225
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hud-combo-04-streak-instruction_3
+      rect:
+        serializedVersion: 2
+        x: 383
+        y: 195
+        width: 66
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8941a7b7e19ec1d90800000000000000
+      internalID: -7125564193277078376
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hud-combo-04-streak-instruction_4
+      rect:
+        serializedVersion: 2
+        x: 455
+        y: 195
+        width: 87
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 705d9f22062a78920800000000000000
+      internalID: 2992539011198342407
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hud-combo-04-streak-instruction_5
+      rect:
+        serializedVersion: 2
+        x: 583
+        y: 193
+        width: 78
+        height: 93
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33dd87fb4cecf0310800000000000000
+      internalID: 1373543755792571699
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hud-combo-04-streak-instruction_6
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 193
+        width: 93
+        height: 93
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e46661825f3ade130800000000000000
+      internalID: 3597711950673765966
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hud-combo-04-streak-instruction_7
+      rect:
+        serializedVersion: 2
+        x: 762
+        y: 193
+        width: 82
+        height: 93
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: faa3db4d9251cc7a0800000000000000
+      internalID: -6355681704719598929
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hud-combo-04-streak-instruction_8
+      rect:
+        serializedVersion: 2
+        x: 856
+        y: 193
+        width: 76
+        height: 92
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 20f5df60ce39bebc0800000000000000
+      internalID: -3752743222544343294
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hud-combo-04-streak-instruction_9
+      rect:
+        serializedVersion: 2
+        x: 976
+        y: 193
+        width: 76
+        height: 93
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5988e361e2d5cb080800000000000000
+      internalID: -9170352288710096747
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hud-combo-04-streak-instruction_10
+      rect:
+        serializedVersion: 2
+        x: 1049
+        y: 193
+        width: 84
+        height: 92
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cbf76acf69d225c10800000000000000
+      internalID: 2040743707659370428
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hud-combo-04-streak-instruction_11
+      rect:
+        serializedVersion: 2
+        x: 1137
+        y: 193
+        width: 77
+        height: 92
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f9d7b6b509f9ce10800000000000000
+      internalID: 2218578094392334839
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hud-combo-04-streak-instruction_12
+      rect:
+        serializedVersion: 2
+        x: 1225
+        y: 195
+        width: 66
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 16ef11bcd42d09850800000000000000
+      internalID: 6381831903545261665
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hud-combo-04-streak-instruction_13
+      rect:
+        serializedVersion: 2
+        x: 1294
+        y: 193
+        width: 94
+        height: 93
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8d25dc702073e1de0800000000000000
+      internalID: -1360589555558952232
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hud-combo-04-streak-instruction_14
+      rect:
+        serializedVersion: 2
+        x: 1394
+        y: 193
+        width: 79
+        height: 93
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9898f8891f7b7ba30800000000000000
+      internalID: 4231052623212415369
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hud-combo-04-streak-instruction_15
+      rect:
+        serializedVersion: 2
+        x: 1484
+        y: 223
+        width: 27
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c8cc70c29879fef60800000000000000
+      internalID: 8065832073048870028
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hud-combo-04-streak-instruction_16
+      rect:
+        serializedVersion: 2
+        x: 1483
+        y: 194
+        width: 28
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de397e9128a0c4e40800000000000000
+      internalID: 5641895987085022189
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      hud-combo-04-streak-instruction_0: -5032654456408728571
+      hud-combo-04-streak-instruction_1: 3235598216603288738
+      hud-combo-04-streak-instruction_10: 2040743707659370428
+      hud-combo-04-streak-instruction_11: 2218578094392334839
+      hud-combo-04-streak-instruction_12: 6381831903545261665
+      hud-combo-04-streak-instruction_13: -1360589555558952232
+      hud-combo-04-streak-instruction_14: 4231052623212415369
+      hud-combo-04-streak-instruction_15: 8065832073048870028
+      hud-combo-04-streak-instruction_16: 5641895987085022189
+      hud-combo-04-streak-instruction_2: -7635746400615299225
+      hud-combo-04-streak-instruction_3: -7125564193277078376
+      hud-combo-04-streak-instruction_4: 2992539011198342407
+      hud-combo-04-streak-instruction_5: 1373543755792571699
+      hud-combo-04-streak-instruction_6: 3597711950673765966
+      hud-combo-04-streak-instruction_7: -6355681704719598929
+      hud-combo-04-streak-instruction_8: -3752743222544343294
+      hud-combo-04-streak-instruction_9: -9170352288710096747
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -12,6 +12,7 @@ namespace TapBlast
         [SerializeField] private RectTransform rect;
         [SerializeField] private Image lifetimeRing;
         [SerializeField] private Image hitImage;
+        [SerializeField] private Sprite[] illustratedBodies;
         [SerializeField] private Image glow;
         [SerializeField] private GameObject normalSymbol, normalOutline, normalHighlight, goldenSymbol, timeSymbol, bossSymbol;
         [SerializeField] private GameObject chainSymbol, bombSymbol;
@@ -46,6 +47,11 @@ namespace TapBlast
         {
             rect.anchoredPosition = position; rect.sizeDelta = Vector2.one * size;
             rect.localScale = Vector3.one; age = 0; lifetime = seconds; tutorial = first;
+            if (illustratedBodies != null && illustratedBodies.Length == 5)
+            {
+                int body = kind == TargetKind.Golden || kind == TargetKind.Boss ? 3 : kind == TargetKind.Bomb ? 4 : tint.g > tint.b * 1.15f ? 2 : tint.r > .4f ? 1 : 0;
+                hitImage.sprite = illustratedBodies[body];
+            }
             Kind = kind; velocity = moveVelocity; Health = MaxHealth = Mathf.Max(1, health);
             normalSymbol.SetActive(kind == TargetKind.Normal || kind == TargetKind.Chain);
             normalOutline.SetActive(kind == TargetKind.Normal || kind == TargetKind.Chain);
@@ -56,7 +62,7 @@ namespace TapBlast
             chainSymbol.SetActive(false);
             bombSymbol.SetActive(kind == TargetKind.Bomb);
             Tint = kind == TargetKind.Bomb ? new Color32(255, 88, 112, 255) : kind == TargetKind.Golden || kind == TargetKind.Boss ? UIArt.Gold : kind == TargetKind.Time ? new Color32(80, 240, 220, 255) : tint;
-            hitImage.color = new Color(Tint.r, Tint.g, Tint.b, .52f);
+            hitImage.color = illustratedBodies != null && illustratedBodies.Length == 5 ? Color.white : new Color(Tint.r, Tint.g, Tint.b, .52f);
             lifetimeRing.color = Tint; lifetimeRing.fillAmount = 1;
             glow.color = Tint;
             BlastPending = false; Active = true; interactable = true; gameObject.SetActive(true);
@@ -104,7 +110,7 @@ namespace TapBlast
             lifetimeRing.rectTransform.localScale = Vector3.one;
             glow.rectTransform.localScale = Vector3.one;
             lifetimeRing.color = Tint; glow.color = Tint;
-            hitImage.color = new Color(Tint.r, Tint.g, Tint.b, .52f);
+            hitImage.color = illustratedBodies != null && illustratedBodies.Length == 5 ? Color.white : new Color(Tint.r, Tint.g, Tint.b, .52f);
             if (value) return;
             if (Kind == TargetKind.Golden)
             {

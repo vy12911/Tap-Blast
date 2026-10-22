@@ -44,7 +44,7 @@ See [animation coverage through level 20](Animations-Level01-20.md) for the GDD 
 - Completion: pooled confetti, then the existing score/star/reward reveal.
 - Pause freezes gameplay feedback. Restart and navigation clear it. Reduced motion suppresses bursts, bounce, confetti and target pulsing while retaining score text and state labels.
 
-The supplied image guides the neon/star presentation. This is a restrained Canvas illustration, not a reproduction of the image's detailed painted city. The later mechanics pictured there remain gated by the GDD: Golden at Level 6, Time at 8, Chain at 11, Bomb at 16 and Shield at 17; other power-ups, Perfect and Ultimate belong to later progression. No inactive power-up buttons or fake Ultimate meter are shown in World 1.
+The supplied GUI artwork now provides the illustrated backgrounds, panels, buttons, icons and target bodies. See [GUI reference implementation](GUI-Reference-Implementation.md) for screen mappings, component bindings and verification. The later mechanics pictured there remain gated by the GDD: Golden at Level 6, Time at 8, Chain at 11, Bomb at 16 and Shield at 17; other power-ups, Perfect and Ultimate belong to later progression. No inactive power-up buttons or fake Ultimate meter are shown in World 1.
 
 ## World 1 bindings
 
@@ -58,6 +58,8 @@ The target prefab contains the normal star plus non-raycasting GOLD, +3s and COR
 
 The saved Canvas includes `Previous world` and `Next world` buttons inside Level select, a Shield button above the arena, and a World 2 progress label. `introWorld`, `selectionWorld` and `selectionTitle` update the visible world headings. These objects and all TMP labels are authored in the prefab; no runtime buttons, labels or layout objects are constructed. World navigation reuses the same ten level rows for each page.
 
+World 2 counters and Shield share the clear band at y=310, below the objective track and above the arena rim. Keep their separate text bounds and modal-obscured CanvasGroup bindings. The saved `RoundedProgressImage` draws both progress caps without stretching the track or changing its RectTransform; continue updating it through `fillAmount`.
+
 The target prefab retains the legacy `chainSymbol` child but color-chain targets now show the original normal artwork; LINK is hidden. `bombSymbol` (X plus BOMB) remains distinct, with non-raycasting labels. Edit these saved children for art changes. Chain waves use the existing preallocated target pool; chain ripples reuse the existing popup pool with short staggered delays. Reduced motion removes ripple motion without changing chain scoring, cluster movement or Bomb rules.
 
 Long objective, description, countdown and result labels use authored TMP autosizing with a 20-reference-pixel minimum. Do not remove font assignments or saved references. The level-20 briefing checks both 30 best combo and five chains; its results show World 2 completion. Results include chain/Mega/Bomb/Shield statistics.
@@ -65,3 +67,11 @@ Long objective, description, countdown and result labels use authored TMP autosi
 `Tools/World2Authoring.cs` is a one-time editor utility run in the disposable project by `Tools/Run-Campaign20.ps1 -Mode Author`. It saves prefab assets; it is not a runtime UI builder. The saved prefabs in Assets are authoritative.
 
 World 2 now includes a saved **World 2 chain energy** Graphic under Pooled feedback. Tune intensity, link width and burst radius on that component; keep its GameHUD reference wired. See [level-specific effects](Animations-Level01-20.md#world-2-effects-by-level). Its fixed geometry pool draws travelling chain links, readiness halos, level-specific bursts and hazard/Shield indicators without creating UI objects.
+
+### Scrollable level list and image sizing
+
+The ten saved level buttons live under `Level select/Level select card/Level list viewport/Level list content`. The viewport has a RectMask2D and vertical ScrollRect, with a separate fixed scrollbar. Keep the header, wallet, and close button outside this hierarchy. Rows are 900 x 144 reference pixels, with 16-pixel gaps and end padding; title/status boxes have equal 22-pixel outer insets. `GameHUD.selectionScroll` resets the content offset when changing world pages.
+
+Foreground illustrations use Preserve Aspect. Panel backgrounds use nine-slice borders so designers can resize panels without stretching their corners. `StatusCapsule.asset` and `ProgressFill.asset` reference the existing disc texture; their metadata supplies the capsule borders and a proportional strip for the objective fill. Keep the objective fill at 900 x 30 and update `fillAmount`, not anchors.
+
+The gameplay hint title and subtitle share a saved background referenced by `GameHUD.hintPlate`; both text objects must remain later in sibling order than that background. `GuiScreenVisibility.modalObscured` hides arena and hint graphics under pause/countdown, and restores them on return to play. Arena scenery is a child of the saved rounded mask, independently bound to `GuiArenaTheme`.

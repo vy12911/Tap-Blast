@@ -23,7 +23,7 @@ namespace TapBlast
         {
             juiceCombo = streak; punchAge = 0;
             fever.text = streak >= 50 ? "MASTER COMBO" : streak >= 30 ? "ULTRA FEVER" : streak >= 20 ? "SUPER FEVER" : streak >= 10 ? "COMBO FEVER" : streak >= 5 ? "GREAT STREAK" : "BUILD YOUR STREAK";
-            fever.color = streak >= 10 ? UIArt.Gold : UIArt.Cyan;
+            fever.color = streak >= 10 ? new Color32(204, 109, 0, 255) : new Color32(15, 115, 174, 255);
             feverLine.color = fever.color;
         }
         public void MissJuice(Vector2 position)

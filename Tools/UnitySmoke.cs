@@ -119,8 +119,10 @@ public static class UnitySmoke
     public static void RunCampaign() { CampaignSmoke.Run(); }
     public static void VerifyCampaignPersistence() { CampaignSmoke.VerifyPersistence(); }
     private static void Shot(string name) { Capture(hud, name); }
-    public static void Capture(GameHUD hud, string name, int width = 1080, int height = 1920, Rect? safeArea = null, Action validateLayout = null)
+    public static void Capture(GameHUD hud, string name, int width = 1080, int height = 1920, Rect? safeArea = null, Action validateLayout = null, RectTransform captureArea = null)
     {
+        hud.GetComponent<GuiScreenVisibility>()?.Refresh();
+        foreach(var fade in hud.GetComponentsInChildren<GuiPanelFade>()) fade.GetComponent<CanvasGroup>().alpha = 1;
         // Batch mode has no presented Game view; render the real UI through URP.
         var canvas = hud.GetComponent<Canvas>();
         var scaler = hud.GetComponent<CanvasScaler>();
@@ -148,8 +150,15 @@ public static class UnitySmoke
             var request = new UnityEngine.Rendering.RenderPipeline.StandardRequest { destination = texture };
             UnityEngine.Rendering.RenderPipeline.SubmitRenderRequest(camera, request);
             RenderTexture.active = texture;
-            pixels = new Texture2D(width, height, TextureFormat.RGB24, false);
-            pixels.ReadPixels(new Rect(0, 0, width, height), 0, 0); pixels.Apply();
+            var region=new Rect(0,0,width,height);
+            if(captureArea!=null) {
+                var corners=new Vector3[4]; captureArea.GetWorldCorners(corners);
+                var bottom=RectTransformUtility.WorldToScreenPoint(camera,corners[0]);
+                var top=RectTransformUtility.WorldToScreenPoint(camera,corners[2]);
+                region=Rect.MinMaxRect(Mathf.Floor(bottom.x),Mathf.Floor(bottom.y),Mathf.Ceil(top.x),Mathf.Ceil(top.y));
+            }
+            pixels = new Texture2D((int)region.width, (int)region.height, TextureFormat.RGB24, false);
+            pixels.ReadPixels(region, 0, 0); pixels.Apply();
             File.WriteAllBytes(name + ".png", pixels.EncodeToPNG());
         }
         finally

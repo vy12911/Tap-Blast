@@ -146,12 +146,18 @@ public static class Campaign20Smoke
         {
             Check(game.SelectLevel(id), "Unlocked routing to level " + id);
             TextFits("introGoal"); TextFits("description"); TextFits("starRules"); TextFits("introName");
-            Begin(); TextFits("countdownGoal"); TextFits("hint"); TextFits("subhint");
+            Begin(); TextFits("countdownGoal"); TextFits("hint"); TextFits("subhint"); TextFits("objective");
+            if(id>10) {
+                TextFits("mechanicStatus");
+                var status=Field<TMP_Text>(hud,"mechanicStatus").rectTransform;
+                Check(status.anchoredPosition.y-status.rect.height*.5f>288 && status.anchoredPosition.y+status.rect.height*.5f<331,"World 2 status stays between progress track and arena rim");
+            }
             Check(Field<TMP_Text>(hud, "mechanicStatus").gameObject.activeSelf == (id > 10) && hud.Shield.gameObject.activeSelf == (id >= 17), "Relevant mechanics are visible immediately when level " + id + " starts");
             var config = game.CurrentLevel;
             var pool = Field<TargetPool>(game, "pool"); var spawner = Field<TargetSpawner>(game, "spawner");
             float time = game.Session.RemainingTime;
             game.Pause(); foreach (var t in Targets()) Tap(t); game.Session.Tick(5); game.ActivateShield();
+            Check(!Field<TMP_Text>(hud,"mechanicStatus").gameObject.activeSelf && !hud.Shield.gameObject.activeSelf && hud.Arena.GetComponent<CanvasGroup>().alpha==0,"Pause hides gameplay graphics immediately in level "+id);
             Check(game.Session.Score == 0 && game.Session.RemainingTime == time && !game.Session.ShieldActive, "Pause blocks taps, clock and Shield in level " + id);
             game.Resume();
             bool boundsOk = true, bombsSafe = true;
@@ -201,11 +207,12 @@ public static class Campaign20Smoke
         }
         game.ShowLevels(); hud.ShowLevelsPage(0); hud.ShowLevelsPage(1);
         TextFits("selectionWallet");
-        Check(Field<TMP_Text>(hud, "selectionWorld").text == "WORLD 02" && Field<TMP_Text>(hud, "selectionTitle").text == "COMBO CITY", "World 2 selection header matches its levels");
+        Field<TMP_Text>(hud, "selectionTitle").ForceMeshUpdate(true);
+        Check(Field<TMP_Text>(hud, "selectionWorld").text == "WORLD 02" && Field<TMP_Text>(hud, "selectionTitle").GetParsedText() == "COMBO CITY", "World 2 selection header matches its levels");
         Check(hud.GetComponentsInChildren<RectTransform>(true).Length == objectCount, "Campaign navigation reuses authored UI and preallocated targets");
-        Check(Field<Button[]>(hud, "levelButtons")[0].GetComponentInChildren<TMP_Text>().text.Contains("11"), "World 2 page binds Level 11");
+        Check(Field<TMP_Text>(Field<Button[]>(hud, "levelButtons")[0].GetComponent<GuiLevelRow>(), "number").text == "11", "World 2 page binds Level 11");
         Field<Button>(hud, "prevWorldBtn").onClick.Invoke();
-        Check(Field<Button[]>(hud, "levelButtons")[0].GetComponentInChildren<TMP_Text>().text.Contains("01"), "World 1 remains accessible after completion");
+        Check(Field<TMP_Text>(Field<Button[]>(hud, "levelButtons")[0].GetComponent<GuiLevelRow>(), "number").text == "01", "World 1 remains accessible after completion");
     }
     static void VerifyMechanics()
     {
@@ -308,16 +315,20 @@ public static class Campaign20Smoke
             if (id > 16) { variedPosition |= (initial - previousPosition).sqrMagnitude > 1; variedDirection |= (bomb.Velocity.normalized - previousVelocity.normalized).sqrMagnitude > .01f; }
             previousPosition = initial; previousVelocity = bomb.Velocity;
             game.Pause(); Call(game, "Update"); Check(bomb.Position == initial, "Pause freezes the Bomb in level " + id); game.Resume();
-            bool safe = true;
+            bool safe = true, moved = false; float minimumGap = float.MaxValue;
             for (int frame = 0; frame < 60; frame++)
             {
                 pool.Tick(1f / 60, true);
                 if (!bomb.Active) break;
+                moved |= (bomb.Position - initial).sqrMagnitude > .0001f;
                 safe &= hud.Arena.rect.Contains(bomb.Position + Vector2.one * bomb.Radius) && hud.Arena.rect.Contains(bomb.Position - Vector2.one * bomb.Radius);
                 foreach (var t in Targets()) if (t != bomb && t.Active)
-                    safe &= (t.Position - bomb.Position).magnitude >= t.Radius + bomb.Radius + 15;
+                {
+                    float gap = (t.Position - bomb.Position).magnitude - t.Radius - bomb.Radius;
+                    minimumGap = Mathf.Min(minimumGap, gap); safe &= gap >= 15;
+                }
             }
-            Check(bomb.Position != initial && safe, "Level " + id + " Bomb moves in reduced motion while remaining in bounds and separated from targets");
+            Check(moved && safe, "Level " + id + " Bomb moves in reduced motion while remaining in bounds and separated from targets (moved " + moved + ", safe " + safe + ", minimum gap " + minimumGap + ")");
         }
         Check(variedPosition && variedDirection, "Bomb positions and movement directions vary across rounds");
         Begin(); pool.Clear();
@@ -538,7 +549,14 @@ public static class Campaign20Smoke
             else if (stage == 1) { Capture("campaign20-briefing"); game.SelectLevel(17); Begin(); game.ActivateShield(); stage++; next = EditorApplication.timeSinceStartup + .3; }
             else if (stage == 2) { Capture("campaign20-shield"); game.SelectLevel(13); Begin(); stage++; next = EditorApplication.timeSinceStartup + .3; }
             else if (stage == 3) { Capture("campaign20-mega"); game.Pause(); Capture("campaign20-pause"); game.ShowLevels(); stage++; next = EditorApplication.timeSinceStartup + .3; }
-            else if (stage == 4) { Capture("campaign20-world2"); Finish(true, "All 20 authored levels, transitions, mechanics, mastery and rewards verified"); }
+            else if (stage == 4) { Capture("campaign20-world2");
+                game.SelectLevel(8); Begin(); Capture("gui-03-waterfall");
+                game.SelectLevel(4); Begin();
+                var guiPool=Field<TargetPool>(game,"pool"); var guiSpawner=Field<TargetSpawner>(game,"spawner");
+                for(int i=0;i<80 && guiPool.ActiveCount<4;i++) guiSpawner.Tick(.1f,false);
+                Capture("gui-08-active-four-targets");
+                ProgressStore.SelectLevel(13);
+                Finish(true, "All 20 authored levels, transitions, mechanics, mastery and rewards verified"); }
         }
         catch (Exception e) { Finish(false, e.ToString()); }
     }

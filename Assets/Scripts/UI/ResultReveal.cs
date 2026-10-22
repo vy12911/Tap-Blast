@@ -38,7 +38,7 @@ namespace TapBlast
             {
                 float starTime = elapsed - (1.1f + i * .25f);
                 bool earned = i < finalStars && starTime >= 0;
-                stars[i].color = earned ? UIArt.Gold : new Color32(57, 77, 90, 255);
+                stars[i].color = earned ? Color.white : new Color(.38f, .48f, .58f, .45f);
                 float bounce = earned && !reducedMotion ? Mathf.Sin(Mathf.Clamp01(starTime / .3f) * Mathf.PI) * .2f : 0;
                 stars[i].rectTransform.localScale = Vector3.one * (1 + bounce);
             }

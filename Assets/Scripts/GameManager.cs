@@ -63,7 +63,10 @@ public sealed class GameManager : MonoBehaviour
         if (Session == null) return;
         if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
         {
-            if (Session.State == RoundState.Paused) Resume(); else Pause();
+            if (hud.GetComponent<GuiNavigation>()?.TryCloseWallet() != true)
+            {
+                if (Session.State == RoundState.Paused) Resume(); else Pause();
+            }
         }
         if (Session.State == RoundState.Countdown)
         {

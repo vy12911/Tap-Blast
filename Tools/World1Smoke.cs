@@ -87,20 +87,19 @@ public static class World1Smoke
         game.ShowLevels(); Canvas.ForceUpdateCanvases();
         var buttons = Field<Button[]>(hud, "levelButtons");
         var labels = Field<TMP_Text[]>(hud, "selectionTexts");
-        Check(buttons.Length == 10 && labels.Length == 10, "Ten authored level buttons and progress labels");
+        Check(buttons.Length == 20 && labels.Length == 20, "Twenty authored level buttons and progress labels in one list");
         var fitting = hud.GetComponent<ResponsiveCanvas>();
         Check(fitting != null && fitting.SafeArea != null && fitting.Frame != null, "Authored responsive Canvas references");
         var frame = fitting.Frame;
-        Check(frame.rect.size == new Vector2(1080, 1920), "Portrait frame is authored at 1080 by 1920");
+        Check(frame.rect.width >= 1079 && frame.rect.height >= 1919, "Portrait frame fills the screen at no less than 1080 by 1920 reference units");
         var scaler = hud.GetComponent<CanvasScaler>();
         Check(scaler.uiScaleMode == CanvasScaler.ScaleMode.ScaleWithScreenSize && scaler.referenceResolution == new Vector2(1080, 1920) && scaler.screenMatchMode == CanvasScaler.ScreenMatchMode.Expand, "Canvas Scaler fits phone and tablet resolutions");
         var corners = new Vector3[4];
-        for (int i = 0; i < 10; i++)
-        {
+        var viewport = Field<ScrollRect>(hud, "selectionScroll").viewport;
+        viewport.GetWorldCorners(corners);
+        foreach (var corner in corners) Check(frame.rect.Contains((Vector2)frame.InverseTransformPoint(corner)), "Level list viewport inside portrait safe frame");
+        for (int i = 0; i < 20; i++)
             Check(buttons[i] != null && labels[i] != null && buttons[i].interactable == (i == 0), "Authored level selection lock " + (i + 1));
-            buttons[i].GetComponent<RectTransform>().GetWorldCorners(corners);
-            foreach (var corner in corners) Check(frame.rect.Contains((Vector2)frame.InverseTransformPoint(corner)), "Button inside portrait safe frame " + (i + 1));
-        }
         Check(hud.GetComponentsInChildren<Graphic>(true).Length == count, "Level selection creates no UI objects");
         int coins = 0, xp = 0;
         for (int id = 1; id <= 10; id++)
@@ -169,30 +168,35 @@ public static class World1Smoke
         var sizes = new[] { new Vector2Int(1080, 1920), new Vector2Int(720, 1280), new Vector2Int(1080, 2400), new Vector2Int(1536, 2048), new Vector2Int(2048, 1536) };
         foreach (var size in sizes)
         {
-            Rect safe = size.y == 2400 ? new Rect(0, 84, size.x, size.y - 204) : new Rect(0, 0, size.x, size.y);
+            // The 1080x2400 run still simulates a notch; safe areas are off, so the UI must use the whole screen.
+            Rect notch = size.y == 2400 ? new Rect(0, 84, size.x, size.y - 204) : new Rect(0, 0, size.x, size.y);
+            Rect safe = new Rect(0, 0, size.x, size.y);
             var fitting = hud.GetComponent<ResponsiveCanvas>();
             int objects = hud.GetComponentsInChildren<RectTransform>(true).Length;
             string device = size.x + "x" + size.y;
-            UnitySmoke.Capture(hud, "responsive-" + screenName + "-" + device, size.x, size.y, safe, () =>
+            UnitySmoke.Capture(hud, "responsive-" + screenName + "-" + device, size.x, size.y, notch, () =>
             {
                 var corners = new Vector3[4];
                 fitting.Frame.GetWorldCorners(corners);
                 foreach (var corner in corners)
                 {
                     Vector2 p = RectTransformUtility.WorldToScreenPoint(Camera.main, corner);
-                    Check(p.x >= safe.xMin - 1 && p.x <= safe.xMax + 1 && p.y >= safe.yMin - 1 && p.y <= safe.yMax + 1, screenName + " frame stays inside safe area " + device);
+                    Check(p.x >= safe.xMin - 1 && p.x <= safe.xMax + 1 && p.y >= safe.yMin - 1 && p.y <= safe.yMax + 1, screenName + " frame stays on screen " + device);
                 }
+                var scroll = Field<ScrollRect>(hud, "selectionScroll");
                 foreach (var button in hud.GetComponentsInChildren<Button>())
                 {
-                    button.GetComponent<RectTransform>().GetWorldCorners(corners);
+                    // Level rows scroll; their clipping viewport must be reachable instead.
+                    var rect = button.transform.IsChildOf(scroll.content) ? scroll.viewport : button.GetComponent<RectTransform>();
+                    rect.GetWorldCorners(corners);
                     foreach (var corner in corners)
                     {
                         Vector2 p = RectTransformUtility.WorldToScreenPoint(Camera.main, corner);
-                        Check(p.x >= safe.xMin - 1 && p.x <= safe.xMax + 1 && p.y >= safe.yMin - 1 && p.y <= safe.yMax + 1, button.name + " is reachable in " + screenName + " " + device);
+                        Check(p.x >= safe.xMin - 1 && p.x <= safe.xMax + 1 && p.y >= safe.yMin - 1 && p.y <= safe.yMax + 1, button.name + " is reachable on screen in " + screenName + " " + device);
                     }
                 }
                 Check(Mathf.Approximately(fitting.Frame.lossyScale.x, fitting.Frame.lossyScale.y), "Uniform layout scale " + device);
-                Check(fitting.Frame.rect.size == new Vector2(1080, 1920), "Device fitting preserves editable reference dimensions " + device);
+                Check(fitting.Frame.rect.width >= 1079 && fitting.Frame.rect.height >= 1919 && fitting.Frame.rect.size == ((RectTransform)hud.transform).rect.size, "Frame fills the full canvas at reference size or larger " + device);
                 Check(hud.GetComponentsInChildren<RectTransform>(true).Length == objects, "Resizing does not create UI " + device);
             });
         }

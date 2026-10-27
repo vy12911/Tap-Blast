@@ -19,6 +19,23 @@ Write-Output 'All 20 campaign levels are referenced by the build scene.'
 $authoredUI = Get-ChildItem (Join-Path $workspace 'Assets') -Recurse -File | Where-Object { $_.Extension -in '.prefab', '.unity' }
 $legacyText = $authoredUI | Select-String -SimpleMatch '5f7201a12d95ffc409449d95f23cf332'
 if ($legacyText) { throw ('Legacy UI Text component found; use TextMeshProUGUI: ' + ($legacyText.Path -join ', ')) }
+# Every script a scene or prefab uses must resolve in this project. A .meta GUID that differs from
+# the one saved in the scene (e.g. a script authored in another project copy) silently becomes a
+# "Missing Script" component and the visual it drives disappears.
+$scriptGuids = @{}
+foreach ($root in @((Join-Path $workspace 'Assets'), (Join-Path $workspace 'Library/PackageCache'))) {
+    Get-ChildItem $root -Recurse -File -Filter '*.cs.meta' -ErrorAction SilentlyContinue | ForEach-Object {
+        $guid = [regex]::Match([IO.File]::ReadAllText($_.FullName), '(?m)^guid: ([a-f0-9]{32})').Groups[1].Value
+        if ($guid) { $scriptGuids[$guid] = $_.Name }
+    }
+}
+$missingScripts = foreach ($file in $authoredUI) {
+    foreach ($match in [regex]::Matches([IO.File]::ReadAllText($file.FullName), 'm_Script: \{fileID: 11500000, guid: ([a-f0-9]{32}), type: 3\}')) {
+        if (!$scriptGuids.ContainsKey($match.Groups[1].Value)) { $file.Name + ' -> ' + $match.Groups[1].Value }
+    }
+}
+if ($missingScripts) { throw ('Scene/prefab references scripts missing from this project: ' + (($missingScripts | Select-Object -Unique) -join '; ')) }
+Write-Output 'Every scene and prefab script reference resolves.'
 $reportDir = Join-Path $workspace 'Logs/Validation'
 New-Item -ItemType Directory -Force -Path $reportDir | Out-Null
 $unityData = Join-Path $UnityEditor 'Data'

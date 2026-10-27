@@ -1,4 +1,5 @@
-// One-time editor authoring. The resulting prefab, font and sprite metadata are saved assets.
+// One-time editor authoring for the original flat Canvas. The resulting prefab, font and sprite
+// metadata are saved assets. Superseded by CanvasLayoutAuthoring, which owns the HUD / Screens layout.
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -230,10 +231,10 @@ public static class GuiAuthoring
         Picture(select,"Selection star left","09-Panels-and-Effects/star-gold",-365,625,55,55);
         Picture(select,"Selection star right","09-Panels-and-Effects/star-gold",365,625,55,55);
         string[] colors={"blue","green","purple","orange","red","blue","green","purple","orange","red"};
-        for(int i=0;i<10;i++) {
+        for(int i=0;i<buttons.arraySize;i++) {
             var row=((Button)buttons.GetArrayElementAtIndex(i).objectReferenceValue).transform;
             Place(row,0,462-i*116,900,104);
-            Skin(row.Find("Number badge"),"05-Buttons/Blank-Skins/button-"+colors[i]+"-blank-skin",true);
+            Skin(row.Find("Number badge"),"05-Buttons/Blank-Skins/button-"+colors[i%colors.Length]+"-blank-skin",true);
             row.Find("Number badge").GetComponent<Image>().pixelsPerUnitMultiplier=6;
             var status=((TMP_Text)data.FindProperty("selectionTexts").GetArrayElementAtIndex(i).objectReferenceValue);
             Place(status.transform,25,-23,360,32); PlateBehind(status,"09-Panels-and-Effects/objective-plate",10);
@@ -371,6 +372,7 @@ public static class GuiAuthoring
             var root=PrefabUtility.LoadPrefabContents("Assets/Prefabs/UI/GameCanvas.prefab");
             data=new SerializedObject(root.GetComponent<GameHUD>());
             frame=root.transform.Find("Device safe area/Portrait frame");
+            if(frame.Find("HUD")!=null) throw new Exception("GuiAuthoring targets the legacy flat Canvas; the HUD / Screens layout is owned by CanvasLayoutAuthoring.");
             RefineSelectionReference(AssetDatabase.LoadAssetAtPath<Material>("Assets/Fonts/LilitaOne-Title.mat"));
             RefineScreenSpacing(root);
             data.ApplyModifiedPropertiesWithoutUndo();
@@ -386,15 +388,8 @@ public static class GuiAuthoring
         card.GetComponent<Image>().color=new Color(.76f,.97f,.98f,.9f);
         Place(card.Find("Illustrated outer rim"),0,0,980,1700);
         Place(card.Find("Selection logo"),0,825,400,195);
-        foreach(string name in new[]{"Previous world","Next world"}) {
-            var button=Find("Level select/"+name); Place(button,name=="Previous world"?-345:345,815,230,90);
-            Skin(button,"09-Panels-and-Effects/row-panel");
-            var colors=button.GetComponent<Button>().colors; colors.normalColor=colors.highlightedColor=colors.disabledColor=Color.white;
-            colors.pressedColor=new Color(.85f,.93f,1);button.GetComponent<Button>().colors=colors;
-            var label=button.GetComponentInChildren<TMP_Text>(true);Place(label.transform,0,3,210,80);label.font=font;label.fontSharedMaterial=font.material;label.fontSize=label.fontSizeMax=55;
-        }
-        var world=Text("selectionWorld",0,704,250,42,34); world.font=font;world.fontSharedMaterial=font.material;
-        Place(card.Find("World plate"),0,704,290,56);
+        var world=Text("selectionWorld",0,704,300,42,34); world.font=font;world.fontSharedMaterial=font.material;
+        Place(card.Find("World plate"),0,704,340,56);
         var worldPlate=card.Find("World plate").GetComponent<Image>();
         worldPlate.sprite=StatusCapsule();worldPlate.type=Image.Type.Sliced;
         worldPlate.pixelsPerUnitMultiplier=128f/56;worldPlate.color=new Color32(0,78,170,255);
@@ -408,7 +403,7 @@ public static class GuiAuthoring
         var touchSurface=Ensure<Image>(viewport.gameObject);touchSurface.color=Color.clear;touchSurface.raycastTarget=true;
         var content=Container(viewport,"Level list content");
         content.anchorMin=new Vector2(0,1);content.anchorMax=Vector2.one;content.pivot=new Vector2(.5f,1);
-        content.sizeDelta=new Vector2(0,1616);content.anchoredPosition=Vector2.zero;
+        content.sizeDelta=new Vector2(0,16+buttons.arraySize*160);content.anchoredPosition=Vector2.zero;
         var scroll=Ensure<ScrollRect>(viewport.gameObject);scroll.viewport=viewport;scroll.content=content;
         scroll.horizontal=false;scroll.vertical=true;scroll.movementType=ScrollRect.MovementType.Clamped;
         scroll.inertia=true;scroll.decelerationRate=.135f;scroll.scrollSensitivity=45;
@@ -419,7 +414,7 @@ public static class GuiAuthoring
         var scrollbar=Ensure<Scrollbar>(scrollRail.gameObject);scrollbar.handleRect=handle;scrollbar.targetGraphic=handleImage;scrollbar.direction=Scrollbar.Direction.BottomToTop;
         scroll.verticalScrollbar=scrollbar;
         data.FindProperty("selectionScroll").objectReferenceValue=scroll;
-        for(int i=0;i<10;i++) {
+        for(int i=0;i<buttons.arraySize;i++) {
             var row=((Button)buttons.GetArrayElementAtIndex(i).objectReferenceValue).transform;
             row.SetParent(content,false);Place(row,0,-88-i*160,900,144);
             ((RectTransform)row).anchorMin=((RectTransform)row).anchorMax=new Vector2(.5f,1);
@@ -488,6 +483,7 @@ public static class GuiAuthoring
             const string path = "Assets/Prefabs/UI/GameCanvas.prefab";
             var root = PrefabUtility.LoadPrefabContents(path); data = new SerializedObject(root.GetComponent<GameHUD>());
             frame = root.transform.Find("Device safe area/Portrait frame");
+            if(frame.Find("HUD")!=null) throw new Exception("GuiAuthoring targets the legacy flat Canvas; the HUD / Screens layout is owned by CanvasLayoutAuthoring.");
             foreach (var label in root.GetComponentsInChildren<TMP_Text>(true))
             {
                 // Feedback popups keep their contrast over moving targets.
@@ -580,12 +576,12 @@ public static class GuiAuthoring
             Picture(count,"Countdown bubble","04-Targets/Empty-Bases/target-blue",0,15,350,350).transform.SetAsFirstSibling();
             Text("countdownText",0,15,350,260,185).color=Color.white;
             Text("countdownGoal",0,-255,800,130,40); PlateBehind((TMP_Text)data.FindProperty("countdownGoal").objectReferenceValue);
-            // Level list: ten saved rows, real progress, two world pages.
+            // Level list: one saved row per level, real progress, a single page.
             var select = Panel("Level select","Level select card",0,34,960,1740);
             Picture(select,"Selection logo","03-Logo-and-Icons/Illustrated/logo",0,760,390,190);
             Text("selectionWorld",0,650,450,45,36); Text("selectionTitle",0,568,800,78,61);
             Move("Level select/Level select card/Description",0,500,820,48);
-            for(int i=0;i<10;i++)
+            for(int i=0;i<data.FindProperty("levelButtons").arraySize;i++)
             {
                 var b=(Button)data.FindProperty("levelButtons").GetArrayElementAtIndex(i).objectReferenceValue;
                 Place(b.transform,0,405-i*111,880,102); Skin(b.transform,"09-Panels-and-Effects/row-panel");
@@ -603,8 +599,6 @@ public static class GuiAuthoring
             }
             Text("selectionWallet",0,-730,800,103,31); PlateBehind((TMP_Text)data.FindProperty("selectionWallet").objectReferenceValue,"09-Panels-and-Effects/row-panel",30);
             Move("Level select/Level select card/Footer",0,-827,820,38);
-            Move("Level select/Previous world",-337,800,155,74); ButtonSkin(Find("Level select/Previous world"),"blue");
-            Move("Level select/Next world",337,800,155,74); ButtonSkin(Find("Level select/Next world"),"blue");
             // Results use the same visual language; all existing reward/replay bindings survive.
             Panel("Results","Results card",0,0,960,1460);
             foreach(var star in (Image[])new Image[]{(Image)data.FindProperty("resultStars").GetArrayElementAtIndex(0).objectReferenceValue,(Image)data.FindProperty("resultStars").GetArrayElementAtIndex(1).objectReferenceValue,(Image)data.FindProperty("resultStars").GetArrayElementAtIndex(2).objectReferenceValue}) star.sprite=Sprite("09-Panels-and-Effects/star-gold");

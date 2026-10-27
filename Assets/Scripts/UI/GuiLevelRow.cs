@@ -13,7 +13,7 @@ namespace TapBlast
         {
             number.text = level.ToString("00");
             for (int i = 0; i < stars.Length; i++)
-                stars[i].color = i < earned ? Color.white : new Color(0.38f, 0.48f, 0.58f, .45f);
+                stars[i].color = i < earned ? Color.white : UIArt.Unearned;
         }
     }
 }

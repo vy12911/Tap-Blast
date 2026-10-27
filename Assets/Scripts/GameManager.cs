@@ -21,13 +21,24 @@ public sealed class GameManager : MonoBehaviour
     private string roundId;
     private bool roundFinalized;
     private TargetView[] chainTargets;
+    // Combo milestones get a short callout word over the arena.
+    private static readonly int[] milestoneCombos = { 5, 10, 20, 30, 50 };
+    private static readonly string[] milestoneWords = { "NICE!", "GREAT!", "AWESOME!", "AMAZING!", "LEGENDARY!" };
+    private static readonly Color[] milestoneColors =
+    {
+        new Color32(120, 150, 255, 255), new Color32(90, 200, 255, 255), new Color32(170, 120, 255, 255),
+        new Color32(255, 120, 190, 255), new Color32(255, 190, 60, 255)
+    };
 
     private void Start()
     {
+        // Hard 60 fps cap on every platform: VSync must be off or targetFrameRate is ignored
+        // (desktop/editor), and 120 Hz phones would otherwise run at their panel rate.
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = 60;
         if (level == null) { Debug.LogError("Assign a LevelConfig to GameManager.", this); enabled = false; return; }
         if (levels == null || levels.Length == 0) levels = new[] { level };
         foreach (var config in levels) if (config != null && config.LevelId == ProgressStore.SelectedLevel) level = config;
-        Application.targetFrameRate = 60;
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
         Session = new RoundSession(level.Rules);
         if (hud == null || hud.TargetPrefab == null) { Debug.LogError("Assign the scene Canvas and Normal Target prefab to GameManager.", this); enabled = false; return; }
@@ -117,6 +128,7 @@ public sealed class GameManager : MonoBehaviour
             int penalty = Session.Tap(TargetKind.Bomb);
             feedback.PlayHazard(protectedTap);
             hud.WorldEffects.Hazard(bombPosition, protectedTap);
+            hud.Shake(protectedTap ? 6 : 16, protectedTap ? .2f : .32f);
             if (protectedTap) hud.ShieldJuice();
             hud.MessagePop(bombPosition, protectedTap ? "SHIELD!" : "BOMB " + penalty, target.Tint, feedback.ReducedMotion);
             hud.HitJuice(Session.Combo);
@@ -138,19 +150,25 @@ public sealed class GameManager : MonoBehaviour
                 var member = chainTargets[i];
                 int memberPoints = Session.Tap(member.Kind); total += memberPoints;
                 hud.Pop(member.Position, memberPoints, member.Tint, feedback.ReducedMotion, i * TargetView.ChainStepSeconds,
-                    chainCount >= 8 ? 1.65f : chainCount >= 5 ? 1.35f : 1.15f, reactionStyle);
+                    chainCount >= 8 ? 1.65f : chainCount >= 5 ? 1.35f : 1.15f, reactionStyle, member);
                 if (member.Kind == TargetKind.Time) hud.TimeJuice();
                 member.BeginBlast(i * TargetView.ChainStepSeconds, feedback.ReducedMotion, i); chainTargets[i] = null;
             }
             total += Session.RecordChain(chainCount);
             hud.WorldEffects.Hit(chainOrigin, chainTint, previousCombo, Session.Combo);
             feedback.PlayTap(Session.Combo); feedback.PlayChain(chainCount); hud.HitJuice(Session.Combo);
+            // The callout and shake land as the last link detonates.
+            float finish = (chainCount - 1) * TargetView.ChainStepSeconds;
+            hud.Callout(chainCount >= 8 ? "MEGA CHAIN!" : chainCount >= 5 ? "SUPER CHAIN!" : "CHAIN!",
+                chainCount >= 8 ? (Color)new Color32(255, 190, 60, 255) : chainCount >= 5 ? (Color)new Color32(255, 140, 90, 255) : chainTint, finish + .06f);
+            if (chainCount >= 5) hud.Shake(chainCount >= 8 ? 10 : 5, chainCount >= 8 ? .38f : .2f, finish);
             hud.SetHint((chainCount >= 8 ? "MEGA CHAIN! " : chainCount >= 5 ? "CHAIN 2! " : "CHAIN! ") + chainCount + " TARGETS  +" + total,
                 level.GoalText);
             tutorialStarted = true; hud.HideTapHand(); RefreshHUD(); return;
         }
         Vector2 position = target.Position;
         Color color = target.Tint;
+        float diameter = target.Diameter;
 
         TargetKind kind = target.Kind;
         bool destroyed = kind != TargetKind.Boss || target.Damage();
@@ -160,9 +178,19 @@ public sealed class GameManager : MonoBehaviour
         int priorCombo = Session.Combo;
         int points = Session.Tap(kind, destroyed);
         hud.WorldEffects.Hit(position, color, priorCombo, Session.Combo);
+        hud.WorldEffects.Burst(position, color, diameter * .5f, kind);
         feedback.PlayTap(Session.Combo);
-        hud.Pop(position, points, color, feedback.ReducedMotion);
+        hud.Pop(position, points, color, feedback.ReducedMotion, 0, 1, 0, target,
+            kind == TargetKind.Golden || kind == TargetKind.Boss ? 1.3f : 1);
         hud.HitJuice(Session.Combo);
+        if (kind == TargetKind.Boss)
+        {
+            hud.Shake(destroyed ? 12 : 5, destroyed ? .36f : .14f);
+            if (destroyed) { hud.WorldEffects.Finale(position, UIArt.Gold); hud.Callout("CORE DESTROYED!", UIArt.Gold); }
+        }
+        else
+            for (int i = 0; i < milestoneCombos.Length; i++)
+                if (priorCombo < milestoneCombos[i] && Session.Combo >= milestoneCombos[i]) hud.Callout(milestoneWords[i], milestoneColors[i]);
         RefreshHUD();
 
         if (Session.State == RoundState.Results) { Finish(); return; }

@@ -14,6 +14,8 @@ using UnityEngine.UI;
 public static class CampaignSmoke
 {
     private const string Key = "TapBlast.CampaignSmoke";
+    // Static authored label used to prove designer Canvas edits survive entering Play.
+    private const string ProbeLabel = "Device safe area/Portrait frame/Screens/Results/Results card/Score/Score caption";
     private static GameManager game;
     private static GameHUD hud;
     private static int stage, checks;
@@ -47,7 +49,7 @@ public static class CampaignSmoke
         SessionState.SetInt(Key + ".Graphics", authoredGraphicCount);
         foreach (var img in canvas.GetComponentsInChildren<Image>(true))
             if (img.sprite != null) Check(AssetDatabase.Contains(img.sprite), "Canvas sprite is persisted: " + img.name);
-        var wordmark = canvas.transform.Find("Device safe area/Portrait frame/Wordmark").GetComponent<TMP_Text>();
+        var wordmark = canvas.transform.Find(ProbeLabel).GetComponent<TMP_Text>();
         SessionState.SetString(Key + ".Wordmark", wordmark.text); wordmark.text = "CANVAS EDIT CHECK";
         PrefabUtility.RecordPrefabInstancePropertyModifications(wordmark);
         EditorSceneManager.MarkSceneDirty(canvas.gameObject.scene); EditorSceneManager.SaveScene(canvas.gameObject.scene);
@@ -72,7 +74,9 @@ public static class CampaignSmoke
         Canvas.ForceUpdateCanvases();
         var data = new PointerEventData(EventSystem.current) { position = RectTransformUtility.WorldToScreenPoint(null, target.transform.position), button = PointerEventData.InputButton.Left };
         raycasts.Clear(); EventSystem.current.RaycastAll(data, raycasts);
-        Check(raycasts.Count > 0 && (raycasts[0].gameObject == target || raycasts[0].gameObject.transform.IsChildOf(target.transform)), "Raycast reaches " + target.name);
+        bool reached = raycasts.Count > 0 && (raycasts[0].gameObject == target || raycasts[0].gameObject.transform.IsChildOf(target.transform));
+        Check(reached, "Raycast reaches " + target.name + (reached ? "" : raycasts.Count == 0 ? " (nothing hit)" :
+            " (blocked by " + AnimationUtility.CalculateTransformPath(raycasts[0].gameObject.transform, hud.transform) + ")"));
         if (tap) ExecuteEvents.Execute(target, data, ExecuteEvents.pointerDownHandler); else ExecuteEvents.Execute(target, data, ExecuteEvents.pointerClickHandler);
     }
     private static void TapAll() { foreach (var target in Targets()) Click(target.gameObject, true); }
@@ -98,9 +102,9 @@ public static class CampaignSmoke
                     hud = UnityEngine.Object.FindFirstObjectByType<GameHUD>();
                     if (game == null || game.Session == null || hud == null) return;
                     checks = SessionState.GetInt(Key + ".Checks", 0);
-                    var wordmark = hud.transform.Find("Device safe area/Portrait frame/Wordmark").GetComponent<TMP_Text>();
+                    var wordmark = hud.transform.Find(ProbeLabel).GetComponent<TMP_Text>();
                     Check(wordmark.text == "CANVAS EDIT CHECK", "Designer Canvas text edit survives entering Play");
-                    wordmark.text = SessionState.GetString(Key + ".Wordmark", "TAP BLAST");
+                    wordmark.text = SessionState.GetString(Key + ".Wordmark", "FINAL SCORE");
                     Check(hud.GetComponentsInChildren<Graphic>(true).Length == SessionState.GetInt(Key + ".Graphics", 0) + 12 * hud.TargetPrefab.GetComponentsInChildren<Graphic>(true).Length, "Play only prewarms target prefab; it does not rebuild Canvas elements");
                     PlayerPrefs.SetString("TapBlast.v2.Progress", "{\"bestScore\":275,\"bestStars\":3,\"coins\":180,\"xp\":90,\"activeRound\":\"\"}");
                     Check(ProgressStore.IsUnlocked(2) && ProgressStore.GetBestScore(1) == 275 && ProgressStore.Coins == 180 && ProgressStore.XP == 90, "Existing Level 1 save unlocks Level 2 without losing wallet");
@@ -122,7 +126,7 @@ public static class CampaignSmoke
                     Check(hud.TutorialHandVisible && game.Session.RemainingTime == 60, "Level 1 retains first-tap tutorial timing");
                     Click(Targets()[0].gameObject, true); Advance(201, .12); break;
                 case 201:
-                    frozenSpark = hud.transform.Find("Device safe area/Portrait frame/Pooled feedback/Tap feedback 0/Spark 0") as RectTransform;
+                    frozenSpark = hud.transform.Find("Device safe area/Portrait frame/HUD/Arena/Pooled feedback/Tap feedback 0/Spark 0") as RectTransform;
                     Check(frozenSpark.gameObject.activeInHierarchy && frozenSpark.anchoredPosition.sqrMagnitude > 500, "Tap emits pooled outward sparks");
                     Shot("15-canvas-tap-burst"); Click(hud.Pause.gameObject); frozenSparkPosition = frozenSpark.anchoredPosition;
                     Advance(202, .3); break;
@@ -137,14 +141,14 @@ public static class CampaignSmoke
                     if (game.Session.Combo == 10 && !checkedFever)
                     {
                         checkedFever = true;
-                        Check(hud.transform.Find("Device safe area/Portrait frame/Combo card/Fever state").GetComponent<TMP_Text>().text == "COMBO FEVER", "Ten-hit streak enters GDD Combo Fever presentation");
+                        Check(hud.transform.Find("Device safe area/Portrait frame/HUD/Combo card/Fever state").GetComponent<TMP_Text>().text == "COMBO FEVER", "Ten-hit streak enters GDD Combo Fever presentation");
                         Shot("16-canvas-combo-fever");
                     }
                     if (game.Session.State != RoundState.Results) break;
                     Check(game.Session.Won && ProgressStore.IsUnlocked(2), "Completing Level 1 unlocks Level 2");
                     Check(ProgressStore.Coins == 50 && ProgressStore.XP == 25, "Level 1 grants only its configured reward");
                     Check(hud.Next.gameObject.activeSelf, "Level 1 success offers Next Level");
-                    Check(hud.transform.Find("Device safe area/Portrait frame/Results/Completion confetti").gameObject.activeSelf, "Successful completion starts pooled confetti");
+                    Check(hud.transform.Find("Device safe area/Portrait frame/Screens/Results/Completion confetti").gameObject.activeSelf, "Successful completion starts pooled confetti");
                     Advance(4, 2.4); break;
                 case 4:
                     Shot("08-level1-next"); Click(hud.Next.gameObject);
@@ -200,7 +204,7 @@ public static class CampaignSmoke
                     Check(game.Session.State == RoundState.Results && !game.Session.Won && game.Session.Stars == 0, "Level 2 fails when timer ends below 500");
                     Check(ProgressStore.Coins == 125 && ProgressStore.XP == 60, "Failed Level 2 replay pays no reward");
                     Check(!hud.Next.gameObject.activeSelf, "Failed round offers no next-level shortcut");
-                    Check(!hud.transform.Find("Device safe area/Portrait frame/Results/Completion confetti").gameObject.activeSelf, "Failure does not play success confetti");
+                    Check(!hud.transform.Find("Device safe area/Portrait frame/Screens/Results/Completion confetti").gameObject.activeSelf, "Failure does not play success confetti");
                     Advance(11, 2.4); break;
                 case 11:
                     Shot("13-level2-failure"); Click(hud.ResultMenu.gameObject);

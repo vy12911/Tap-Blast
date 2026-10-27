@@ -20,6 +20,13 @@ public static class GuiSmoke
         EditorSceneManager.OpenScene("Assets/Scenes/Level01.unity"); SessionState.SetBool(Key,true); EditorApplication.EnterPlaymode();
     }
     static T Field<T>(object target,string field) => (T)target.GetType().GetField(field,BindingFlags.NonPublic|BindingFlags.Instance).GetValue(target);
+    // Section CanvasGroups hide whole HUD areas; multiply alpha up the hierarchy.
+    static float VisibleAlpha(Transform t)
+    {
+        float alpha=1;
+        for(;t!=null;t=t.parent) {var group=t.GetComponent<CanvasGroup>(); if(group==null) continue; alpha*=group.alpha; if(group.ignoreParentGroups) break;}
+        return alpha;
+    }
     static void Check(bool pass,string message) { if(!pass) throw new Exception(message); File.AppendAllText("gui-smoke-results.txt","PASS "+message+"\n"); }
     static void Layout(GameHUD hud)
     {
@@ -41,13 +48,19 @@ public static class GuiSmoke
         foreach(var button in hud.GetComponentsInChildren<Button>()) button.targetGraphic.CrossFadeColor(button.interactable ? button.colors.normalColor : button.colors.disabledColor,0,true,true);
         UnitySmoke.Capture(hud,"gui-"+name,validateLayout:()=>Layout(hud));
     }
+    // Mirrors GameHUD.Refresh: glow and shine stretch with the fill, the head rides its leading edge.
+    static void ShowProgress(GameHUD hud,float amount)
+    {
+        foreach(var follower in Field<RectTransform[]>(hud,"progressFollowers")) {follower.anchorMax=new Vector2(amount,follower.anchorMax.y);follower.gameObject.SetActive(amount>0);}
+        var head=Field<RectTransform>(hud,"progressHead");head.anchorMin=new Vector2(amount,.5f);head.anchorMax=new Vector2(amount,.5f);head.gameObject.SetActive(amount>0);
+    }
     static void RoundedFill(GameHUD hud,Image progress)
     {
         Check(progress is RoundedProgressImage,"Progress uses a rounded-cap Image");
         float previous=progress.fillAmount;
         try {
             foreach(float amount in new[]{0f,.01f,.35f,1f}) {
-                progress.fillAmount=amount;
+                progress.fillAmount=amount; ShowProgress(hud,amount);
                 using(var mesh=new VertexHelper()) {
                     typeof(RoundedProgressImage).GetMethod("OnPopulateMesh",BindingFlags.Instance|BindingFlags.NonPublic|BindingFlags.DeclaredOnly).Invoke(progress,new object[]{mesh});
                     if(amount==0) Check(mesh.currentVertCount==0,"Zero progress has no green geometry");
@@ -60,9 +73,10 @@ public static class GuiSmoke
                         Check(caps && Mathf.Abs(right-left-progress.rectTransform.rect.width*amount)<.01f,"Both fill ends are round at "+amount);
                     }
                 }
-                UnitySmoke.Capture(hud,"gui-progress-"+Mathf.RoundToInt(amount*100),captureArea:(RectTransform)hud.transform.Find("Device safe area/Portrait frame/Objective track"));
+                Check(Field<RectTransform>(hud,"progressHead").gameObject.activeSelf==(amount>0),"Progress head shows only with progress at "+amount);
+                UnitySmoke.Capture(hud,"gui-progress-"+Mathf.RoundToInt(amount*100),captureArea:(RectTransform)hud.transform.Find("Device safe area/Portrait frame/HUD/Objective/Objective card"));
             }
-        } finally {progress.fillAmount=previous;}
+        } finally {progress.fillAmount=previous; ShowProgress(hud,previous);}
     }
     [Serializable] sealed class SelectionFixture
     {
@@ -74,14 +88,16 @@ public static class GuiSmoke
     static void SelectionLayout(GameHUD hud)
     {
         Layout(hud);
-        var card=(RectTransform)hud.transform.Find("Device safe area/Portrait frame/Level select/Level select card");
+        var card=(RectTransform)hud.transform.Find("Device safe area/Portrait frame/Screens/Level select/Level select card");
         var scroll=Field<ScrollRect>(hud,"selectionScroll");
         Check(scroll.viewport.GetComponent<RectMask2D>()!=null && scroll.vertical && !scroll.horizontal && scroll.content.rect.height>scroll.viewport.rect.height,"Saved scroll viewport clips the taller vertical list");
         Check(scroll.verticalScrollbar!=null,"Scroll position has a visible indicator");
-        var wallet=(RectTransform)card.Find("Wallet plate"); var footer=(RectTransform)card.Find("Footer");
-        Check(footer.GetSiblingIndex()>wallet.GetSiblingIndex() && footer.gameObject.activeInHierarchy,"Footer renders above wallet background");
-        var local=new Vector3[4];footer.GetWorldCorners(local);
-        for(int i=0;i<4;i++) Check(wallet.rect.Contains(wallet.InverseTransformPoint(local[i])),"Footer corner inside wallet card "+i);
+        var wallet=(RectTransform)card.Find("Wallet/Wallet card"); var local=new Vector3[4];
+        foreach(string chip in new[]{"Wallet/Coins chip","Wallet/XP chip"}) {
+            var chipRect=(RectTransform)card.Find(chip); chipRect.GetWorldCorners(local);
+            Check(chipRect.GetSiblingIndex()>wallet.GetSiblingIndex(),chip+" renders above the wallet card");
+            for(int i=0;i<4;i++) Check(wallet.rect.Contains(wallet.InverseTransformPoint(local[i])),chip+" corner inside wallet card "+i);
+        }
         foreach(var row in Field<Button[]>(hud,"levelButtons")) {
               var rowRect=(RectTransform)row.transform;
               var rowImage=row.GetComponent<Image>();
@@ -108,7 +124,7 @@ public static class GuiSmoke
         }
         var xp=Field<TMP_Text>(hud,"selectionExperience");xp.ForceMeshUpdate(true);Check(!xp.isTextOverflowing,"XP and player level fit wallet");
     }
-    static void ReferenceSelection(GameHUD hud)
+    static void ReferenceSelection(GameManager game,GameHUD hud)
     {
         // Disposable IsolatedGui save only; restore it after rendering fixture progress.
         const string key="TapBlast.v2.Progress";
@@ -118,16 +134,19 @@ public static class GuiSmoke
             int[] scores={275,1465,1040,1001,1080,5511,8529,3350,1675,3354,5005,7164,12779,4954,4260,2830,2090};
             for(int i=0;i<scores.Length;i++){fixture.scores[i]=scores[i];fixture.stars[i]=3;}
             PlayerPrefs.SetString(key,JsonUtility.ToJson(fixture));
-            hud.ShowLevelsPage(0);Shot(hud,"09-reference-world1");
-            UnitySmoke.Capture(hud,"gui-world1-narrow",343,728,validateLayout:()=>SelectionLayout(hud));
-            UnitySmoke.Capture(hud,"gui-world1-reference",1080,1920,validateLayout:()=>SelectionLayout(hud));
+            game.ShowLevels();Shot(hud,"09-reference-levels");
+            UnitySmoke.Capture(hud,"gui-levels-narrow",343,728,validateLayout:()=>SelectionLayout(hud));
+            UnitySmoke.Capture(hud,"gui-levels-reference",1080,1920,validateLayout:()=>SelectionLayout(hud));
             UnitySmoke.Capture(hud,"gui-row-reference-scale",1800,3200,captureArea:(RectTransform)Field<Button[]>(hud,"levelButtons")[0].transform);
             fixture.coins=4980;fixture.xp=2495;PlayerPrefs.SetString(key,JsonUtility.ToJson(fixture));
-            Field<Button>(hud,"nextWorldBtn").onClick.Invoke();
-            Check(Field<TMP_Text>(hud,"selectionWorld").text=="WORLD 02","World 2 navigation opens correct page");
-            Shot(hud,"09-reference-world2");
-            UnitySmoke.Capture(hud,"gui-world2-narrow",343,728,validateLayout:()=>SelectionLayout(hud));
-            UnitySmoke.Capture(hud,"gui-world2-tablet",1536,2048,validateLayout:()=>SelectionLayout(hud));
+            game.ShowLevels();
+            Check(Field<TMP_Text>(hud,"selectionWorld").text=="Tap Blast","Level selection has one page without worlds");
+            var rows=Field<Button[]>(hud,"levelButtons");
+            Check(rows.Length==20,"One saved list holds all twenty level rows");
+            for(int i=0;i<rows.Length;i++) Check(Field<TMP_Text>(rows[i].GetComponent<GuiLevelRow>(),"number").text==(i+1).ToString("00"),"List row binds level "+(i+1));
+            var select=hud.transform.Find("Device safe area/Portrait frame/Screens/Level select");
+            Check(select.Find("Previous world")==null && select.Find("Next world")==null,"World navigation buttons are removed");
+            UnitySmoke.Capture(hud,"gui-levels-tablet-reference",1536,2048,validateLayout:()=>SelectionLayout(hud));
             var scroll=Field<ScrollRect>(hud,"selectionScroll");
             Canvas.ForceUpdateCanvases();
             var drag=new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current) {position=new Vector2(500,800),button=UnityEngine.EventSystems.PointerEventData.InputButton.Left};
@@ -135,12 +154,11 @@ public static class GuiSmoke
             Check(scroll.content.anchoredPosition.y>0,"Pointer drag scrolls the level list");
             var wheel=new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current) {scrollDelta=new Vector2(0,-30)};
             scroll.OnScroll(wheel);
-            Check(scroll.content.anchoredPosition.y>400,"Level list scrolls to the final rows");
-            UnitySmoke.Capture(hud,"gui-world2-scrolled",1080,1920,validateLayout:()=>SelectionLayout(hud));
-            Field<Button>(hud,"prevWorldBtn").onClick.Invoke();
-            Check(scroll.content.anchoredPosition==Vector2.zero,"Changing worlds resets the scroll position");
-            Check(Field<TMP_Text>(hud,"selectionWorld").text=="WORLD 01","World 1 navigation returns to correct page");
-        } finally {if(existed)PlayerPrefs.SetString(key,previous);else PlayerPrefs.DeleteKey(key);PlayerPrefs.Save();hud.ShowLevelsPage(0);}
+            Check(scroll.content.anchoredPosition.y>400,"Level list scrolls toward the later rows");
+            UnitySmoke.Capture(hud,"gui-levels-scrolled",1080,1920,validateLayout:()=>SelectionLayout(hud));
+            game.ShowLevels();
+            Check(scroll.content.anchoredPosition==Vector2.zero,"Reopening the list returns to the current level 1 row");
+        } finally {if(existed)PlayerPrefs.SetString(key,previous);else PlayerPrefs.DeleteKey(key);PlayerPrefs.Save();game.ShowLevels();}
     }
     static void Step()
     {
@@ -158,14 +176,16 @@ public static class GuiSmoke
             }
             int fontLabels=0;
             foreach(var text in UnityEngine.Object.FindObjectsByType<TMP_Text>(FindObjectsInactive.Include,FindObjectsSortMode.None)) {
-                if(text.font==null || text.font.faceInfo.familyName!="Roboto Condensed") throw new Exception("Wrong font on "+text.name);
+                if(text.font==null || text.font.faceInfo.familyName!="Poppins") throw new Exception("Wrong font on "+text.name);
                 if(text.font.atlasPopulationMode!=AtlasPopulationMode.Static || text.fontSharedMaterial.GetTexture("_MainTex")!=text.font.atlasTextures[0]) throw new Exception("Wrong atlas/material on "+text.name);
                 fontLabels++;
             }
-            Check(fontLabels>0,"All "+fontLabels+" live/pooled/hidden labels use static Roboto Condensed with matching materials");
+            Check(fontLabels>0,"All "+fontLabels+" live/pooled/hidden labels use static Poppins with matching materials");
               int aspectImages=0;
               foreach(var image in UnityEngine.Object.FindObjectsByType<Image>(FindObjectsInactive.Include,FindObjectsSortMode.None)) {
                   if(image.name=="Background" || image.name=="Target arena" || image.name=="Arena scenery" || image.name=="Scenery") continue;
+                  // Full-stretch tints and overlays fill their parent; they have no artwork aspect to keep.
+                  if(image.rectTransform.anchorMin==Vector2.zero && image.rectTransform.anchorMax==Vector2.one) continue;
                   if(!image.preserveAspect) throw new Exception("Preserve Aspect disabled: "+image.name);
                   aspectImages++;
               }
@@ -173,13 +193,13 @@ public static class GuiSmoke
             var nav=hud.GetComponent<GuiNavigation>();
             game.SelectLevel(1); Shot(hud,"07-briefing");
             game.BeginCountdown(); hud.SetCountdown(3); Shot(hud,"01-countdown");
-              Check(hud.Arena.GetComponent<CanvasGroup>().alpha==0,"Countdown hides arena artwork and targets beneath the modal");
+              Check(VisibleAlpha(hud.Arena)==0,"Countdown hides arena artwork and targets beneath the modal");
             typeof(GameManager).GetField("countdown",BindingFlags.NonPublic|BindingFlags.Instance).SetValue(game,0f);
             typeof(GameManager).GetMethod("Update",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(game,null);
             Shot(hud,"05-tutorial");
-              Check(hud.Arena.GetComponent<CanvasGroup>().alpha==1,"Gameplay restores arena visibility");
+              Check(VisibleAlpha(hud.Arena)==1,"Gameplay restores arena visibility");
               var progress=Field<Image>(hud,"progressFill");
-              Check(progress.sprite!=null && progress.type==Image.Type.Filled && progress.fillAmount==0 && progress.rectTransform.rect.height==30,"Empty objective uses a fixed-height zero fill with a real sprite");
+              Check(progress.sprite!=null && progress.type==Image.Type.Filled && progress.fillAmount==0 && progress.rectTransform.rect.height==20,"Empty objective uses a fixed-height zero fill with a real sprite");
               RoundedFill(hud,progress);
               var hintPlate=Field<GameObject>(hud,"hintPlate").transform;
               Check(Field<TMP_Text>(hud,"hint").transform.GetSiblingIndex()>hintPlate.GetSiblingIndex() && Field<TMP_Text>(hud,"subhint").transform.GetSiblingIndex()>hintPlate.GetSiblingIndex(),"Both hint lines render above their shared background");
@@ -189,11 +209,11 @@ public static class GuiSmoke
             Field<Button>(nav,"walletButton").onClick.Invoke(); Check(nav.TryCloseWallet() && !nav.TryCloseWallet() && game.Session.State==RoundState.Playing,"Back action closes wallet once and resumes play");
             hud.HideTapHand(); hud.SetHint("READY?","Tap the glowing targets before they disappear."); Shot(hud,"04-ready");
             hud.SetHint("TARGET MISSED!","Your combo reset. Start a new streak!"); Shot(hud,"06-missed");
-            Field<Button>(nav,"headerPause").onClick.Invoke(); Check(game.Session.State==RoundState.Paused,"Header pause is connected"); Shot(hud,"02-paused");
+            hud.Pause.onClick.Invoke(); Check(game.Session.State==RoundState.Paused,"Single header pause button is connected"); Shot(hud,"02-paused");
             game.ShowLevels(); Shot(hud,"09-levels");
             UnitySmoke.Capture(hud,"gui-levels-tall",1080,2400,new Rect(0,84,1080,2196),()=>Layout(hud));
             UnitySmoke.Capture(hud,"gui-levels-tablet",1536,2048,validateLayout:()=>Layout(hud));
-            ReferenceSelection(hud);
+            ReferenceSelection(game,hud);
             Field<Button>(nav,"selectionClose").onClick.Invoke(); Check(game.Session.State==RoundState.Ready,"Level selection close returns to briefing");
             var result=new RoundSession(new RoundRules(45,20,10,240,20)); result.Reset(); result.StartPlaying(); for(int i=0;i<20;i++) result.Tap();
             hud.SetSettings(true,true,false); hud.ShowResults(result,true,result.Score,new ProgressStore.RewardReceipt(50,25,50,25));

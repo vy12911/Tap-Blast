@@ -106,6 +106,27 @@ public static class Campaign20Smoke
         }
     }
     static void Complete() { game.Session.Tick(game.Session.RemainingTime + 1); Call(game, "Finish"); }
+    const string HudPath = "Device safe area/Portrait frame/HUD/";
+    // Section CanvasGroups hide whole HUD areas; multiply alpha up the hierarchy.
+    static float VisibleAlpha(Transform t)
+    {
+        float alpha = 1;
+        for (; t != null; t = t.parent)
+        {
+            var group = t.GetComponent<CanvasGroup>();
+            if (group == null) continue;
+            alpha *= group.alpha;
+            if (group.ignoreParentGroups) break;
+        }
+        return alpha;
+    }
+    static Rect FrameRect(RectTransform rect)
+    {
+        var frame = (RectTransform)hud.transform.Find("Device safe area/Portrait frame"); var corners = new Vector3[4];
+        rect.GetWorldCorners(corners);
+        Vector2 min = frame.InverseTransformPoint(corners[0]), max = frame.InverseTransformPoint(corners[2]);
+        return Rect.MinMaxRect(min.x, min.y, max.x, max.y);
+    }
     static void TextFits(string field)
     {
         var label = Field<TMP_Text>(hud, field); label.ForceMeshUpdate(true);
@@ -134,9 +155,11 @@ public static class Campaign20Smoke
         foreach (var text in hud.GetComponentsInChildren<TMP_Text>(true))
             Check(text.font != null && !text.raycastTarget, "TMP font and nonblocking label: " + text.name);
         Check(Field<GameObject>(hud.TargetPrefab, "chainSymbol") != null && Field<GameObject>(hud.TargetPrefab, "bombSymbol") != null, "Target prefab contains distinct LINK and X BOMB symbols");
-        Check(hud.transform.Find("Device safe area/Portrait frame/Pooled feedback").GetComponent<RectMask2D>() != null, "Saved feedback mask keeps Mega rings inside the arena");
-        Check(!game.SelectLevel(11), "World 2 is locked on a fresh save");
-        Check(!Field<Button>(hud, "nextWorldBtn").interactable, "World 2 navigation shows locked state");
+        Check(hud.transform.Find(HudPath + "Arena/Pooled feedback").GetComponent<RectMask2D>() != null, "Saved feedback mask keeps Mega rings inside the arena");
+        Check(!game.SelectLevel(11), "Level 11 is locked on a fresh save");
+        game.ShowLevels();
+        var rows = Field<Button[]>(hud, "levelButtons");
+        Check(rows.Length == 20 && rows[0].interactable && !rows[10].interactable, "Single level list shows level 11 locked on a fresh save");
     }
     static void VerifyCampaign()
     {
@@ -146,18 +169,20 @@ public static class Campaign20Smoke
         {
             Check(game.SelectLevel(id), "Unlocked routing to level " + id);
             TextFits("introGoal"); TextFits("description"); TextFits("starRules"); TextFits("introName");
-            Begin(); TextFits("countdownGoal"); TextFits("hint"); TextFits("subhint"); TextFits("objective");
+            Begin(); TextFits("countdownGoal"); TextFits("hint"); TextFits("subhint"); TextFits("objective"); TextFits("worldLabel"); TextFits("levelChip");
             if(id>10) {
                 TextFits("mechanicStatus");
-                var status=Field<TMP_Text>(hud,"mechanicStatus").rectTransform;
-                Check(status.anchoredPosition.y-status.rect.height*.5f>288 && status.anchoredPosition.y+status.rect.height*.5f<331,"World 2 status stays between progress track and arena rim");
+                var status=FrameRect(Field<TMP_Text>(hud,"mechanicStatus").rectTransform);
+                var fill=FrameRect(Field<Image>(hud,"progressFill").rectTransform);
+                var rim=FrameRect((RectTransform)hud.transform.Find(HudPath+"Arena/Arena rim"));
+                Check(status.yMin>rim.yMax && status.yMax<fill.yMin,"World 2 status stays between progress track and arena rim");
             }
             Check(Field<TMP_Text>(hud, "mechanicStatus").gameObject.activeSelf == (id > 10) && hud.Shield.gameObject.activeSelf == (id >= 17), "Relevant mechanics are visible immediately when level " + id + " starts");
             var config = game.CurrentLevel;
             var pool = Field<TargetPool>(game, "pool"); var spawner = Field<TargetSpawner>(game, "spawner");
             float time = game.Session.RemainingTime;
             game.Pause(); foreach (var t in Targets()) Tap(t); game.Session.Tick(5); game.ActivateShield();
-            Check(!Field<TMP_Text>(hud,"mechanicStatus").gameObject.activeSelf && !hud.Shield.gameObject.activeSelf && hud.Arena.GetComponent<CanvasGroup>().alpha==0,"Pause hides gameplay graphics immediately in level "+id);
+            Check(!Field<TMP_Text>(hud,"mechanicStatus").gameObject.activeSelf && !hud.Shield.gameObject.activeSelf && VisibleAlpha(hud.Arena)==0,"Pause hides gameplay graphics immediately in level "+id);
             Check(game.Session.Score == 0 && game.Session.RemainingTime == time && !game.Session.ShieldActive, "Pause blocks taps, clock and Shield in level " + id);
             game.Resume();
             bool boundsOk = true, bombsSafe = true;
@@ -205,14 +230,29 @@ public static class Campaign20Smoke
             }
             else Check(!hud.Next.gameObject.activeSelf, "Chain Master results do not offer unavailable level 21");
         }
-        game.ShowLevels(); hud.ShowLevelsPage(0); hud.ShowLevelsPage(1);
+        game.ShowLevels(); Canvas.ForceUpdateCanvases();
         TextFits("selectionWallet");
+        Check(UIArt.Compact(5030) == 5030.ToString("N0") && UIArt.Compact(99999) == 99999.ToString("N0") && UIArt.Compact(100000) == "100K"
+            && UIArt.Compact(999999) == "999K" && UIArt.Compact(1239999) == 1.23m.ToString("0.##") + "M" && UIArt.Compact(int.MaxValue) == 2.14m.ToString("0.##") + "B",
+            "Compact coin amounts keep full digits to 99,999 then truncate to K/M/B");
+        var balance = Field<TMP_Text>(hud.GetComponent<GuiNavigation>(), "headerBalance");
+        foreach (var amount in new[] { 99999, 888888, 88888888, int.MaxValue })
+        {
+            balance.text = UIArt.Compact(amount); balance.ForceMeshUpdate(true);
+            Check(!balance.isTextOverflowing && balance.textBounds.size.x <= balance.rectTransform.rect.width, "Header coin pill fits " + amount.ToString("N0"));
+        }
+        balance.text = UIArt.Compact(ProgressStore.Coins);
         Field<TMP_Text>(hud, "selectionTitle").ForceMeshUpdate(true);
-        Check(Field<TMP_Text>(hud, "selectionWorld").text == "WORLD 02" && Field<TMP_Text>(hud, "selectionTitle").GetParsedText() == "COMBO CITY", "World 2 selection header matches its levels");
+        Check(Field<TMP_Text>(hud, "selectionWorld").text == "Tap Blast" && Field<TMP_Text>(hud, "selectionTitle").GetParsedText() == "Choose a Level", "Selection header names one list without worlds");
         Check(hud.GetComponentsInChildren<RectTransform>(true).Length == objectCount, "Campaign navigation reuses authored UI and preallocated targets");
-        Check(Field<TMP_Text>(Field<Button[]>(hud, "levelButtons")[0].GetComponent<GuiLevelRow>(), "number").text == "11", "World 2 page binds Level 11");
-        Field<Button>(hud, "prevWorldBtn").onClick.Invoke();
-        Check(Field<TMP_Text>(Field<Button[]>(hud, "levelButtons")[0].GetComponent<GuiLevelRow>(), "number").text == "01", "World 1 remains accessible after completion");
+        var rows = Field<Button[]>(hud, "levelButtons");
+        for (int i = 0; i < 20; i++)
+            Check(rows[i].interactable && Field<TMP_Text>(rows[i].GetComponent<GuiLevelRow>(), "number").text == (i + 1).ToString("00"), "Completed campaign lists level " + (i + 1) + " on the single page");
+        var scroll = Field<ScrollRect>(hud, "selectionScroll"); var corners = new Vector3[4];
+        ((RectTransform)rows[19].transform).GetWorldCorners(corners);
+        bool visible = true;
+        foreach (var corner in corners) visible &= scroll.viewport.rect.Contains(scroll.viewport.InverseTransformPoint(corner));
+        Check(scroll.content.anchoredPosition.y > 0 && visible, "Level list opens scrolled to the current level 20 row");
     }
     static void VerifyMechanics()
     {
@@ -455,7 +495,7 @@ public static class Campaign20Smoke
             UnitySmoke.Capture(hud, "vfx-" + id + "-cascade");
             TickHUD(1); pool.Tick(1, false);
             if (id == 13 || id == 19 || id == 20) UnitySmoke.Capture(hud, "vfx-" + id + "-finale");
-            TickHUD(4); pool.Tick(4, false);
+            TickHUD(4); pool.Tick(4, false); TickHUD(1); // Expiry puffs from leftover targets drain too.
             Check(fx.ActiveEffectCount == 0, "Level " + id + " releases all transient effects");
         }
         game.SelectLevel(15); Begin(); fx.Clear();
@@ -473,6 +513,25 @@ public static class Campaign20Smoke
         Check(fx.ActiveEffectCount == 0, "Replay cancels queued World 2 feedback");
         Check(hud.GetComponentsInChildren<RectTransform>(true).Length == objects,
             "All ten World 2 effects reuse the authored Canvas without creating objects");
+        // Pop accents, callouts and arena shake run on every level and always settle.
+        game.SelectLevel(1); Begin(); fx.Clear();
+        var card = (RectTransform)hud.Arena.parent; Vector2 home = card.anchoredPosition;
+        Tap(Targets()[0]);
+        Check(fx.ActiveEffectCount > 0, "World 1 taps emit pop accents");
+        TickHUD(.07f); UnitySmoke.Capture(hud, "pop-squash");
+        TickHUD(.1f); UnitySmoke.Capture(hud, "pop-burst");
+        TickHUD(.15f); UnitySmoke.Capture(hud, "pop-sparks");
+        hud.Callout("GREAT!", new Color32(90, 200, 255, 255)); TickHUD(.3f); UnitySmoke.Capture(hud, "pop-callout");
+        hud.Shake(16, .3f); TickHUD(.05f);
+        Check(card.anchoredPosition != home, "Shake offsets the arena card");
+        TickHUD(1.2f); pool.Tick(1.2f, false);
+        Check(card.anchoredPosition == home && fx.ActiveEffectCount == 0, "Shake returns the arena card home and pop accents drain");
+        hud.Shake(16, .3f); TickHUD(.05f); game.BeginCountdown();
+        Check(card.anchoredPosition == home, "Replay cancels a running shake");
+        hud.SetSettings(true, true, false); hud.Shake(16, .3f); TickHUD(.05f);
+        Check(card.anchoredPosition == home, "Reduced motion never shakes the arena");
+        hud.SetSettings(true, false, false);
+        Check(hud.GetComponentsInChildren<RectTransform>(true).Length == objects, "Pop accents and callouts reuse the authored pool");
         game.SelectLevel(13);
     }
     static void VerifyReactionVariety()

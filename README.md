@@ -70,7 +70,7 @@ From level 11, ordinary colored targets appear gradually across the board. Tap o
 
 Red X/BOMB targets spawn at random safe positions and move in random directions. They bounce at arena edges and reverse before overlapping valid targets. Ignoring them is safe; tapping one breaks combo and subtracts up to 50 points. Chain blasts exclude Bombs. From level 17, the authored Shield button grants one protection per round; activation alone does not satisfy the Shield lesson until a Bomb is blocked. No-Bomb objectives remain at risk until time expires.
 
-World navigation uses saved Canvas buttons, and both Editor and Android use the same 20 serialized configs. Next opens World 2 after level 10; level 20 reports World 2 completion without offering an unavailable level 21.
+Level select shows all 20 levels in one scrolling list with no world pages, and both Editor and Android use the same 20 serialized configs. Next opens level 11 after level 10 like any other level; level 20 reports campaign completion without offering an unavailable level 21. The World 1/World 2 headings below are design groupings only.
 
 ## Progress, rewards and controls
 

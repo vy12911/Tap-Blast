@@ -3,7 +3,8 @@ using UnityEngine.UI;
 
 namespace TapBlast
 {
-    /// <summary>Authored Canvas graphic. Fixed effect storage, one clock, no runtime UI creation.</summary>
+    /// <summary>Authored Canvas graphic for arena effects on every level (pop flashes, shards, chain
+    /// reactions, hazards). Fixed effect storage, one clock, no runtime UI creation.</summary>
     [DisallowMultipleComponent]
     public sealed class World2Effects : MaskableGraphic
     {
@@ -14,15 +15,16 @@ namespace TapBlast
         {
             public Vector2 From, To;
             public Color Tint;
-            public float Age, Life, Size;
+            public float Age, Life, Size, Seed;
             public int Kind;
         }
-        // Link, ring, star shower, hexagon. Overload replaces oldest cosmetics only.
-        private readonly Effect[] effects = new Effect[128];
+        // 0 link, 1 ring, 2 star shower, 3 hexagon, 4-9 chain reactions, 10 soft flash, 11 candy shards,
+        // 12 arena flash. Overload replaces oldest cosmetics only.
+        private readonly Effect[] effects = new Effect[192];
         private int cursor, level, reactionSequence;
         public int LastReactionStyle { get; private set; }
         private float clock;
-        private bool reduced, shield;
+        private bool reduced, shield, drawn;
         private TargetPool pool;
         public int ActiveEffectCount
         {
@@ -48,22 +50,57 @@ namespace TapBlast
         }
         public void Tick(float delta)
         {
-            if (level < 11) return;
             if (!reduced) clock += delta;
+            bool live = false;
             for (int i = 0; i < effects.Length; i++)
             {
                 if (effects[i].Life <= 0) continue;
                 effects[i].Age += delta;
-                if (effects[i].Age >= effects[i].Life) effects[i].Life = 0;
+                if (effects[i].Age >= effects[i].Life) effects[i].Life = 0; else live = true;
             }
-            SetVerticesDirty();
+            // World 2 boards animate every frame; otherwise rebuild only while effects play (plus one clearing frame).
+            if (live || drawn || level >= 11) SetVerticesDirty();
+            drawn = live;
         }
         private void Emit(int kind, Vector2 from, Vector2 to, Color tint, float size, float delay = 0, float life = .65f)
         {
-            if (reduced || level < 11) return;
-            effects[cursor++ % effects.Length] = new Effect { Kind = kind, From = from, To = to,
-                Tint = tint, Size = size, Age = -delay, Life = life };
+            if (reduced) return;
+            effects[cursor % effects.Length] = new Effect { Kind = kind, From = from, To = to,
+                Tint = tint, Size = size, Age = -delay, Life = life, Seed = cursor * 2.39996f };
+            cursor++;
         }
+        /// <summary>Accent for a single target pop: a soft white flash, plus themed extras for special targets.</summary>
+        public void Burst(Vector2 position, Color tint, float radius, TargetKind kind)
+        {
+            Emit(10, position, position, new Color(1, 1, 1, .85f), radius * 1.25f, 0, .24f);
+            if (kind == TargetKind.Golden)
+            {
+                Emit(11, position, position, UIArt.Gold, radius * 1.1f, 0, .7f);
+                Emit(2, position, position, new Color(1, .85f, .3f), radius * 1.2f, .05f, .7f);
+                Emit(1, position, position, new Color(1, .82f, .3f), radius * 2.3f, 0, .5f);
+            }
+            else if (kind == TargetKind.Time)
+            {
+                // Two ripples, like a drop in water: the bonus seconds land softly.
+                Emit(1, position, position, tint, radius * 2, 0, .5f);
+                Emit(1, position, position, tint, radius * 2.7f, .13f, .55f);
+            }
+            else if (kind == TargetKind.Boss)
+            {
+                Emit(11, position, position, UIArt.Gold, radius * .8f, 0, .55f);
+                Emit(1, position, position, new Color(1, .82f, .3f), radius * 1.9f, 0, .4f);
+            }
+        }
+        /// <summary>Large finish: arena-wide colour flash, a big shard fountain and a star shower.</summary>
+        public void Finale(Vector2 position, Color tint, float delay = 0)
+        {
+            Emit(12, position, position, new Color(tint.r, tint.g, tint.b, .32f), 0, delay, .5f);
+            Emit(11, position, position, tint, 190, delay, .85f);
+            Emit(2, position, position, new Color(1, .86f, .35f), 240, delay + .05f, .9f);
+            Emit(1, position, position, Color.white, 330, delay, .6f);
+        }
+        /// <summary>Quiet grey puff where a target expired; misses should read, not celebrate.</summary>
+        public void Puff(Vector2 position) { Emit(10, position, position, new Color(.78f, .8f, .92f, .45f), 95, 0, .4f); }
         public int Chain(TargetView[] members, int count)
         {
             // Cycle without repeats, independently of target/scoring order.
@@ -78,6 +115,7 @@ namespace TapBlast
                 if (i > 0) Emit(4 + style, members[i - 1].Position, p, tint, linkWidth,
                     delay - TargetView.ChainStepSeconds, TargetView.ChainStepSeconds + .23f);
                 float size = burstRadius * (count >= 8 ? 1.3f : 1);
+                Emit(10, p, p, new Color(1, 1, 1, .8f), members[i].Radius * 1.3f, delay, .24f);
                 Emit(7 + style, p, p, tint, size, delay, .75f);
                 if (style == 0) Emit(2, p, p, tint, size * .7f, delay, .5f);
                 if (level == 12) Emit(1, p, p, UIArt.Gold, size * .8f, delay + .18f);
@@ -87,6 +125,7 @@ namespace TapBlast
             float finish = (count - 1) * TargetView.ChainStepSeconds;
             if (count >= 8)
             {
+                Finale(last, UIArt.Gold, finish);
                 Emit(1, last, last, UIArt.Gold, burstRadius * 2.1f, finish, .9f);
                 Emit(2, last, last, Color.white, burstRadius * 1.8f, finish, 1);
                 if (level == 19) Emit(1, last, last, UIArt.Cyan, burstRadius * 2.4f, finish + .22f, 1);
@@ -122,19 +161,29 @@ namespace TapBlast
             Emit(blocked ? 3 : 1, position, position, tint, blocked ? 190 : 220);
             Emit(2, position, position, blocked ? Color.white : UIArt.Gold, 180, 0, .8f);
             if (blocked) Emit(3, position, position, tint, 240, .16f, .8f);
+            else
+            {
+                // Unprotected: red arena flash and hot shards so the penalty is unmistakable.
+                Emit(12, position, position, new Color(1, .25f, .2f, .3f), 0, 0, .45f);
+                Emit(11, position, position, new Color(1, .45f, .2f), 130, 0, .7f);
+            }
         }
         protected override void OnPopulateMesh(VertexHelper vh)
         {
             vh.Clear();
-            if (level < 11 || pool == null) return;
-            DrawBoard(vh);
+            if (pool == null) return;
+            if (level >= 11) DrawBoard(vh);
             for (int i = 0; i < effects.Length; i++)
             {
                 Effect e = effects[i];
                 if (e.Life <= 0 || e.Age < 0) continue;
                 float t = Mathf.Clamp01(e.Age / e.Life), ease = 1 - (1 - t) * (1 - t);
                 Color c = e.Tint; c.a = (1 - t) * intensity;
-                if (e.Kind >= 4)
+                if (e.Kind >= 10)
+                {
+                    DrawPop(vh, e, t);
+                }
+                else if (e.Kind >= 4)
                 {
                     DrawReaction(vh, e, t, c);
                 }
@@ -163,6 +212,37 @@ namespace TapBlast
                         Vector2 p = e.From + direction * (18 + ease * e.Size) + Vector2.down * (t * t * 65);
                         Star(vh, p, (j % 3 == 0 ? 13 : 7) * (1 - t), c);
                     }
+            }
+        }
+        private void DrawPop(VertexHelper vh, Effect e, float t)
+        {
+            float ease = 1 - (1 - t) * (1 - t);
+            Color c = e.Tint;
+            if (e.Kind == 10) // Soft flash: bright centre fading to a transparent rim.
+            {
+                c.a *= (1 - t) * (1 - t) * intensity;
+                Glow(vh, e.From, e.Size * Mathf.Lerp(.55f, 1, ease), c);
+            }
+            else if (e.Kind == 12) // Arena flash: a huge, faint wash from the impact point.
+            {
+                c.a *= (1 - t) * (1 - t);
+                Glow(vh, e.From, 1300, c);
+            }
+            else // Candy shards: ten pieces burst out, fall under gravity, spin and shrink.
+            {
+                Color light = Color.Lerp(c, Color.white, .45f);
+                for (int j = 0; j < 10; j++)
+                {
+                    float angle = e.Seed + j * Mathf.PI * 2 / 10;
+                    var direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+                    float reach = e.Size * (1.1f + (j * 7 % 10) * .07f);
+                    Vector2 p = e.From + direction * (reach * ease) + Vector2.down * (240 * t * t);
+                    float size = (j % 3 == 0 ? 15 : 10) * (1 - t * .85f);
+                    Color piece = j % 3 == 0 ? Color.white : j % 3 == 1 ? c : light;
+                    piece.a = (1 - t * t) * intensity;
+                    if (j % 2 == 0) Shard(vh, p, size, e.Seed + j + t * 7, piece);
+                    else Star(vh, p, size, piece);
+                }
             }
         }
         private void DrawReaction(VertexHelper vh, Effect e, float t, Color c)
@@ -328,6 +408,29 @@ namespace TapBlast
                 vh.AddVert(p + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius, tint, Vector2.zero);
             }
             for (int i = 0; i < 8; i++) vh.AddTriangle(start, start + 1 + i, start + 1 + (i + 1) % 8);
+        }
+        private static void Glow(VertexHelper vh, Vector2 center, float radius, Color tint)
+        {
+            const int segments = 28;
+            Color rim = tint; rim.a = 0;
+            int start = vh.currentVertCount;
+            vh.AddVert(center, tint, Vector2.zero);
+            for (int i = 0; i < segments; i++)
+            {
+                float a = i * Mathf.PI * 2 / segments;
+                vh.AddVert(center + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * radius, rim, Vector2.zero);
+            }
+            for (int i = 0; i < segments; i++) vh.AddTriangle(start, start + 1 + i, start + 1 + (i + 1) % segments);
+        }
+        // Rotated candy fragment: a long diamond.
+        private static void Shard(VertexHelper vh, Vector2 p, float size, float rotation, Color tint)
+        {
+            var along = new Vector2(Mathf.Cos(rotation), Mathf.Sin(rotation)) * size;
+            var across = new Vector2(-along.y, along.x) * .55f;
+            int start = vh.currentVertCount;
+            vh.AddVert(p + along, tint, Vector2.zero); vh.AddVert(p + across, tint, Vector2.zero);
+            vh.AddVert(p - along, tint, Vector2.zero); vh.AddVert(p - across, tint, Vector2.zero);
+            vh.AddTriangle(start, start + 1, start + 2); vh.AddTriangle(start, start + 2, start + 3);
         }
         private static void Diamond(VertexHelper vh, Vector2 p, float size, Color tint)
         {

@@ -27,6 +27,10 @@ namespace TapBlast
         public Vector2 Position => rect.anchoredPosition;
         public void SetPosition(Vector2 value) { rect.anchoredPosition = value; }
         public float Radius => rect.rect.width * .5125f;
+        public float Diameter => rect.rect.width;
+        public Sprite Body => hitImage.sprite;
+        // Star face of normal and chain targets (null for Golden, Time, Core and Bomb labels).
+        public Sprite Symbol => normalSymbol.activeSelf ? normalSymbol.GetComponent<Image>().sprite : null;
         public Vector2 Velocity => velocity;
         public void SetVelocity(Vector2 value) { velocity = value; }
         public Color Tint { get; private set; }
@@ -103,10 +107,12 @@ namespace TapBlast
         public void SetReducedMotion(bool value)
         {
             motionReduced = value;
-            float arrival = Mathf.Clamp01(age / .16f);
+            // Spawn: springs up from 40% with a small overshoot (about 4%), settled by 0.2 s.
+            float arrival = Mathf.Clamp01(age / .2f), t = arrival - 1;
+            float spring = arrival >= 1 ? 1 : Mathf.LerpUnclamped(.4f, 1, 1 + 2.4f * t * t * t + 1.4f * t * t);
             float impact = value ? 0 : Mathf.Sin(Mathf.Clamp01(impactAge / .22f) * Mathf.PI);
             float idle = Kind == TargetKind.Bomb ? 0 : Mathf.Sin(age * 3.5f) * .025f;
-            rect.localScale = Vector3.one * (value ? 1 : Mathf.Lerp(.82f, 1, arrival) + idle);
+            rect.localScale = Vector3.one * (value ? 1 : spring + idle);
             lifetimeRing.rectTransform.localScale = Vector3.one;
             glow.rectTransform.localScale = Vector3.one;
             lifetimeRing.color = Tint; glow.color = Tint;

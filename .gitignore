@@ -16,3 +16,6 @@
 *.apk
 *.aab
 *.log
+
+# Android native build intermediates (CMake/Ninja), regenerated on every build
+.utmp/

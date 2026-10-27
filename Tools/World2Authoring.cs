@@ -65,7 +65,7 @@ public static class World2Authoring
         var root = PrefabUtility.LoadPrefabContents(canvasPath);
         var hud = root.GetComponent<GameHUD>(); data = new SerializedObject(hud);
         var frame = root.transform.Find("Device safe area/Portrait frame");
-        var feedbackRoot = frame.Find("Pooled feedback");
+        var feedbackRoot = frame.Find("Pooled feedback") ?? frame.Find("HUD/Arena/Pooled feedback");
         if (feedbackRoot.GetComponent<RectMask2D>() == null) feedbackRoot.gameObject.AddComponent<RectMask2D>();
         font = ((TMP_Text)data.FindProperty("worldLabel").objectReferenceValue).font;
         var select = ((GameObject)data.FindProperty("levelSelect").objectReferenceValue).transform;
@@ -83,26 +83,19 @@ public static class World2Authoring
             label.enableAutoSizing = true; label.fontSizeMin = 20; label.fontSizeMax = label.fontSize;
         }
         ((TMP_Text)data.FindProperty("countdownGoal").objectReferenceValue).rectTransform.sizeDelta = new Vector2(525, 120);
-        if (data.FindProperty("prevWorldBtn").objectReferenceValue == null)
-        {
-            var prev = Button(select, "Previous world", font, "< WORLD 1", new Vector2(-330, 817), new Vector2(210, 66));
-            var next = Button(select, "Next world", font, "WORLD 2 >", new Vector2(330, 817), new Vector2(210, 66));
-            Bind(data, "prevWorldBtn", prev); Bind(data, "nextWorldBtn", next);
-            Bind(data, "prevWorldImg", prev.GetComponent<Image>()); Bind(data, "nextWorldImg", next.GetComponent<Image>());
-            Bind(data, "prevWorldText", prev.GetComponentInChildren<TMP_Text>()); Bind(data, "nextWorldText", next.GetComponentInChildren<TMP_Text>());
-        }
+        // World page buttons were retired; LevelListAuthoring saves one twenty-row list.
         if (data.FindProperty("<Shield>k__BackingField").objectReferenceValue == null)
         {
             var shield = Button(frame, "Shield", font, "SHIELD 1", new Vector2(340, 450), new Vector2(252, 64));
             Bind(data, "<Shield>k__BackingField", shield); Bind(data, "shieldLabel", shield.GetComponentInChildren<TMP_Text>());
             shield.gameObject.SetActive(false);
-            var status = Label(frame, "World 2 progress", font, "CHAINS 0   MEGA 0   BOMBS 0", new Vector2(-110, 450), new Vector2(630, 48), 24);
+            var status = Label(frame, "Mechanics status", font, "CHAINS 0   MEGA 0   BOMBS 0", new Vector2(-110, 450), new Vector2(630, 48), 24);
             Bind(data, "mechanicStatus", status); status.gameObject.SetActive(false);
         }
         data.ApplyModifiedPropertiesWithoutUndo();
         PrefabUtility.SaveAsPrefabAsset(root, canvasPath); PrefabUtility.UnloadPrefabContents(root);
         AssetDatabase.SaveAssets();
-        System.IO.File.WriteAllText("world2-authoring.txt", "Saved Chain/Bomb symbols, Shield, progress and world navigation bindings.\n");
+        System.IO.File.WriteAllText("world2-authoring.txt", "Saved Chain/Bomb symbols, Shield and progress bindings.\n");
         EditorApplication.Exit(0);
     }
 }

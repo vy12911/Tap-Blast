@@ -10,6 +10,9 @@ namespace TapBlast
         [SerializeField] private Button walletButton, selectionClose, walletClose;
         [SerializeField] private GameObject walletPanel;
         [SerializeField] private TMP_Text walletText, headerBalance;
+        [Header("Wallet panel")]
+        [SerializeField] private TMP_Text walletCoins, walletXP, walletLevel;
+        [SerializeField] private Image walletXpFill;
         private GameManager game;
         private bool resumeAfterWallet;
         private int displayedCoins = -1;
@@ -27,11 +30,14 @@ namespace TapBlast
         private void OpenWallet()
         {
             resumeAfterWallet = game.Session.State == RoundState.Playing;
-            if (resumeAfterWallet) game.Pause();
-            // Big values with coloured labels; the explanation stays secondary.
-            walletText.text = "<size=150%><b>" + ProgressStore.Coins.ToString("N0") + "</b></size>\n<color=#C46800>COINS</color>\n\n" +
-                "<size=150%><b>" + ProgressStore.XP.ToString("N0") + "</b></size>\n<color=#7A55F0>XP  ·  PLAYER LEVEL " + (1 + ProgressStore.XP / 100) + "</color>\n\n" +
-                "<size=80%><color=#6B7190>Complete levels to earn coins and XP.\nEvery 100 XP raises your player level.</color></size>";
+            if (resumeAfterWallet) game.PauseBehindOverlay();
+            // Exact amounts here (the header pill shows the compact form).
+            int xp = ProgressStore.XP, level = 1 + xp / 100;
+            walletCoins.text = ProgressStore.Coins.ToString("N0") + "\n<size=48%><color=#9A5B00>Coins</color></size>";
+            walletXP.text = xp.ToString("N0") + "\n<size=48%><color=#6A45D8>Total XP</color></size>";
+            walletLevel.text = "Player level <b>" + level + "</b><size=80%><color=#6B7190>   ·   " + xp % 100 + " / 100 XP to level " + (level + 1) + "</color></size>";
+            walletXpFill.rectTransform.anchorMax = new Vector2(xp % 100 / 100f, 1);
+            walletText.text = "Complete levels to earn coins and XP.\nEvery 100 XP raises your player level.";
             walletPanel.SetActive(true);
         }
         public bool TryCloseWallet()

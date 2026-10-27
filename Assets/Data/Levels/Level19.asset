@@ -38,7 +38,7 @@ MonoBehaviour:
   coinReward: 400
   xpReward: 190
   objectiveCount: 2
-  mechanicHint: Wait for 8 of one color per Mega Chain. Make 2.
+  mechanicHint: A Mega Chain needs 8 or more targets of one color. Wait, then tap one.
   clusterSize: 8
   clusterInterval: 2.4
   movementSpeed: 70

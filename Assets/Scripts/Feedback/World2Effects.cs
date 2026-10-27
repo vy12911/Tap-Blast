@@ -19,7 +19,8 @@ namespace TapBlast
             public int Kind;
         }
         // 0 link, 1 ring, 2 star shower, 3 hexagon, 4-9 chain reactions, 10 soft flash, 11 candy shards,
-        // 12 arena flash. Overload replaces oldest cosmetics only.
+        // 12 arena flash, 13 fireball, 14 smoke, 15 scorch, 16 embers, 17 debris, 18 implosion.
+        // Overload replaces oldest cosmetics only.
         private readonly Effect[] effects = new Effect[192];
         private int cursor, level, reactionSequence;
         public int LastReactionStyle { get; private set; }
@@ -155,19 +156,34 @@ namespace TapBlast
             }
         }
         public void ShieldActivate() { Emit(3, Vector2.zero, Vector2.zero, UIArt.Cyan, 420, 0, .85f); }
+        // The bomb swells for this long (HUD popup) before it blows.
+        public const float BombFuseSeconds = .07f;
         public void Hazard(Vector2 position, bool blocked)
         {
-            Color tint = blocked ? UIArt.Cyan : new Color(1, .3f, .2f);
-            Emit(blocked ? 3 : 1, position, position, tint, blocked ? 190 : 220);
-            Emit(2, position, position, blocked ? Color.white : UIArt.Gold, 180, 0, .8f);
-            if (blocked) Emit(3, position, position, tint, 240, .16f, .8f);
-            else
+            Vector2 p = position;
+            if (blocked)
             {
-                // Unprotected: red arena flash and hot shards so the penalty is unmistakable.
-                Emit(12, position, position, new Color(1, .25f, .2f, .3f), 0, 0, .45f);
-                Emit(11, position, position, new Color(1, .45f, .2f), 130, 0, .7f);
+                // Shield: the bomb is sucked into a cyan hex bubble and fizzles out.
+                Emit(18, p, p, UIArt.Cyan, 170, 0, .32f);
+                Emit(3, p, p, UIArt.Cyan, 190, .18f, .6f);
+                Emit(3, p, p, UIArt.Cyan, 260, .28f, .7f);
+                Emit(10, p, p, new Color(.7f, 1, 1, .8f), 110, .2f, .25f);
+                Emit(14, p, p, new Color(.72f, .8f, .9f), 70, .28f, .9f);
+                return;
             }
+            // Layered explosion, back to front: scorch, smoke, fireball, debris, embers, shockwave, flash.
+            float boom = BombFuseSeconds;
+            Emit(15, p, p, new Color(.12f, .06f, .1f, .38f), 120, boom, 1.4f);
+            Emit(14, p, p, new Color(.3f, .26f, .34f), 150, boom + .1f, 1.2f);
+            Emit(13, p, p, Color.white, 240, boom, .65f);
+            Emit(17, p, p, new Color(1, .43f, .16f), 170, boom, .8f);
+            Emit(16, p, p, new Color(1, .7f, .25f), 210, boom, 1);
+            Emit(1, p, p, Color.white, 330, boom, .35f);
+            Emit(10, p, p, new Color(1, .95f, .8f, .95f), 260, boom, .18f);
+            Emit(12, p, p, new Color(1, .3f, .15f, .32f), 0, boom, .5f);
         }
+        /// <summary>A bomb left alone fizzles out in a small puff (no penalty).</summary>
+        public void Fizzle(Vector2 position) { Emit(14, position, position, new Color(.55f, .52f, .62f), 55, 0, .9f); }
         protected override void OnPopulateMesh(VertexHelper vh)
         {
             vh.Clear();
@@ -228,6 +244,10 @@ namespace TapBlast
                 c.a *= (1 - t) * (1 - t);
                 Glow(vh, e.From, 1300, c);
             }
+            else if (e.Kind >= 13)
+            {
+                DrawExplosion(vh, e, t);
+            }
             else // Candy shards: ten pieces burst out, fall under gravity, spin and shrink.
             {
                 Color light = Color.Lerp(c, Color.white, .45f);
@@ -243,6 +263,67 @@ namespace TapBlast
                     if (j % 2 == 0) Shard(vh, p, size, e.Seed + j + t * 7, piece);
                     else Star(vh, p, size, piece);
                 }
+            }
+        }
+        private void DrawExplosion(VertexHelper vh, Effect e, float t)
+        {
+            float fast = 1 - (1 - t) * (1 - t) * (1 - t), fade = Mathf.Pow(1 - t, 1.4f) * intensity;
+            float fire = Mathf.Pow(1 - t, 1.1f); // Fire ignores the global intensity so it reads on any arena.
+            Vector2 o = e.From;
+            if (e.Kind == 13) // Fireball: red rim, orange body, white-hot core that cools first.
+            {
+                Blob(vh, o, e.Size * (.35f + .75f * fast), e.Seed + t * 2, .12f, new Color(1, .3f, .12f, .9f * fire), new Color(1, .2f, .1f, 0));
+                Blob(vh, o, e.Size * (.25f + .55f * fast), e.Seed * 1.3f, .15f, new Color(1, .62f, .18f, fire), new Color(1, .5f, .15f, .15f * fire));
+                Blob(vh, o, e.Size * (.2f + .3f * fast) * (1 - t * .6f), e.Seed * 2.1f, .08f, new Color(1, .98f, .88f, fire), new Color(1, .85f, .4f, .4f * fire));
+            }
+            else if (e.Kind == 14) // Smoke: soft lumpy puffs fade in, swell and drift upward.
+            {
+                float alpha = .34f * (1 - t) * Mathf.Clamp01(t / .15f) * intensity;
+                for (int j = 0; j < 6; j++)
+                {
+                    float a = e.Seed + j * Mathf.PI / 3;
+                    Vector2 p = o + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * (e.Size * .5f * fast) + Vector2.up * (70 * t);
+                    Color smoke = e.Tint; smoke.a = alpha; Color edge = smoke; edge.a = 0;
+                    Blob(vh, p, e.Size * (.28f + .35f * fast), e.Seed + j, .18f, smoke, edge);
+                }
+            }
+            else if (e.Kind == 15) // Scorch: a dark mark that lingers briefly.
+            {
+                Color mark = e.Tint; mark.a *= (1 - t) * (1 - t); Color edge = mark; edge.a = 0;
+                Blob(vh, o, e.Size * Mathf.Lerp(.7f, 1, fast), e.Seed, .2f, mark, edge);
+            }
+            else if (e.Kind == 16) // Embers: flickering sparks that rise as they die.
+            {
+                for (int j = 0; j < 14; j++)
+                {
+                    float a = e.Seed + j * 2.39996f, reach = e.Size * (.45f + (j * 7 % 10) * .06f);
+                    Vector2 p = o + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * (reach * fast) + Vector2.up * (90 * t * t);
+                    Color ember = Color.Lerp(e.Tint, new Color(1, .95f, .7f), j % 3 == 0 ? .6f : 0);
+                    ember.a = (1 - t) * (.6f + .4f * Mathf.Sin(t * 34 + j * 1.7f)) * intensity;
+                    Diamond(vh, p, (j % 4 == 0 ? 7 : 5) * (1 - t * .7f), ember);
+                }
+            }
+            else if (e.Kind == 17) // Debris: charcoal chunks and glowing bits thrown out under gravity.
+            {
+                for (int j = 0; j < 10; j++)
+                {
+                    float a = e.Seed + j * Mathf.PI / 5, speed = e.Size * (1.1f + (j * 3 % 5) * .2f);
+                    Vector2 p = o + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * (speed * fast) + Vector2.down * (420 * t * t);
+                    Color chunk = j % 2 == 0 ? new Color(.18f, .14f, .2f) : e.Tint; chunk.a = (1 - t * t) * intensity;
+                    Shard(vh, p, (j % 3 == 0 ? 17 : 11) * (1 - t * .5f), e.Seed + j + t * 9, chunk);
+                }
+            }
+            else // Implosion: sparks and a ring rush inward into the shield.
+            {
+                for (int j = 0; j < 12; j++)
+                {
+                    float a = e.Seed + j * Mathf.PI / 6;
+                    Vector2 p = o + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * (e.Size * (1 - fast));
+                    Color spark = e.Tint; spark.a = (.4f + .6f * t) * intensity;
+                    Star(vh, p, 10 * (1 - t * .5f), spark);
+                }
+                Color ring = e.Tint; ring.a = t * intensity;
+                Ring(vh, o, e.Size * (1 - fast) + 8, 4, ring, 32, 0);
             }
         }
         private void DrawReaction(VertexHelper vh, Effect e, float t, Color c)
@@ -419,6 +500,20 @@ namespace TapBlast
             {
                 float a = i * Mathf.PI * 2 / segments;
                 vh.AddVert(center + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * radius, rim, Vector2.zero);
+            }
+            for (int i = 0; i < segments; i++) vh.AddTriangle(start, start + 1 + i, start + 1 + (i + 1) % segments);
+        }
+        // Lumpy soft disc for fire, smoke and scorch: the rim wobbles so clouds never look like circles.
+        private static void Blob(VertexHelper vh, Vector2 center, float radius, float seed, float lump, Color inner, Color outer)
+        {
+            const int segments = 32;
+            int start = vh.currentVertCount;
+            vh.AddVert(center, inner, Vector2.zero);
+            for (int i = 0; i < segments; i++)
+            {
+                float a = i * Mathf.PI * 2 / segments;
+                float r = radius * (1 + lump * (Mathf.Sin(a * 5 + seed) * .6f + Mathf.Sin(a * 3 - seed * 1.7f) * .4f));
+                vh.AddVert(center + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * r, outer, Vector2.zero);
             }
             for (int i = 0; i < segments; i++) vh.AddTriangle(start, start + 1 + i, start + 1 + (i + 1) % segments);
         }

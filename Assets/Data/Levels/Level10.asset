@@ -36,5 +36,5 @@ MonoBehaviour:
   coinReward: 250
   xpReward: 100
   bossSize: 270
-  mechanicHint: Hit the giant Golden Core 5 times. Its ring shows remaining health.
+  mechanicHint: Tap the big CORE target 5 times. Its ring shows the hits left.
   objectiveCount: 1

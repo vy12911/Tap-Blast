@@ -1,0 +1,363 @@
+<title>Tap Blast Logo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Fredoka:wght@600;700&family=Poppins:wght@500;600;800&display=swap">
+<style>
+/* Layout: a brand board. Each logo sits on the real game surfaces it will be used on (lavender page, indigo arena, white card), followed by in-game mockups. */
+:root {
+  --bg: #F6F4FF;          /* page */
+  --panel: #FFFFFF;
+  --ink: #1E2240;         /* game navy */
+  --muted: #5E6488;
+  --line: #E3DEFA;
+  --lavender: linear-gradient(180deg, #BAC9FF 0%, #DDD0FF 45%, #FFE1F1 100%);
+  --arena: linear-gradient(160deg, #3E4AC2 0%, #5B3FB8 55%, #6A3DB0 100%);
+  --display: "Lilita One", "Fredoka", "Poppins", system-ui, sans-serif;
+  --body: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #14122B; --panel: #1E1B3A; --ink: #F1EEFF; --muted: #A9A5CC; --line: #2E2A55; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #14122B; --panel: #1E1B3A; --ink: #F1EEFF; --muted: #A9A5CC; --line: #2E2A55; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); line-height: 1.55; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-block: 40px 72px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 56px; }
+header h1 { font-family: var(--display); font-weight: 400; font-size: clamp(34px, 6vw, 56px); line-height: 1.05; margin: 0 0 10px; letter-spacing: .5px; text-wrap: balance; }
+header p { margin: 0; max-width: 62ch; color: var(--muted); }
+.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+section h2 { font-family: var(--display); font-weight: 400; font-size: 30px; margin: 0 0 4px; letter-spacing: .3px; }
+section > p { margin: 0 0 18px; color: var(--muted); max-width: 64ch; }
+.surfaces { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
+.surface { border-radius: 22px; display: grid; place-items: center; padding: 22px; min-width: 0; }
+.surface svg { width: 100%; height: auto; max-width: 100%; }
+.s-lavender { background: var(--lavender); }
+.s-arena { background: var(--arena); }
+.s-white { background: #FFFFFF; border: 1px solid var(--line); }
+.stack { display: grid; gap: 14px; }
+.tag { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-top: 10px; }
+.mocks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; align-items: start; }
+.phone { aspect-ratio: 9 / 19.5; border-radius: 34px; border: 8px solid #1E2240; overflow: hidden; position: relative; max-width: 100%; }
+.phone .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; padding: 14% 7% 7%; gap: 5%; }
+.card { width: 100%; background: #fff; border-radius: 14px; box-shadow: 0 6px 18px rgba(80, 70, 190, .18); }
+.row { height: 11%; display: flex; align-items: center; gap: 8%; padding: 0 6%; }
+.badge { width: 18%; aspect-ratio: 1; border-radius: 10px; }
+.bar { height: 14%; flex: 1; border-radius: 8px; background: #E8E4FA; }
+.cta { width: 100%; height: 7%; border-radius: 999px; background: linear-gradient(90deg, #4F7CFF, #9B6BFF); margin-top: auto; }
+.icons { display: flex; gap: 22px; align-items: flex-end; flex-wrap: wrap; }
+.icons figure { margin: 0; display: grid; gap: 6px; justify-items: center; font-size: 12px; color: var(--muted); }
+.icons svg { border-radius: 22%; box-shadow: 0 10px 24px rgba(40, 30, 120, .25); }
+.named { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+.named figure { margin: 0; display: grid; gap: 10px; min-width: 0; }
+.named svg { width: 100%; height: auto; border-radius: 22%; box-shadow: 0 14px 30px rgba(40, 30, 120, .28); }
+.named figcaption { font-size: 14px; color: var(--muted); }
+.named figcaption b { display: block; color: var(--ink); font-size: 15px; }
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.note { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; }
+.note b { display: block; margin-bottom: 4px; }
+.note span { color: var(--muted); font-size: 14px; }
+@media (max-width: 760px) { .surfaces, .mocks, .named { grid-template-columns: 1fr; } .named figure { max-width: 320px; } .phone { max-width: 300px; margin: 0 auto; } }
+/* Export mode (#export-…): one logo on a transparent page, for rendering PNGs. */
+body.export { background: transparent; margin: 0; }
+body.export .wrap { max-width: none; margin: 0; padding: 0; display: block; }
+#export svg { display: block; }
+body.export .wrap > *:not(#export) { display: none; }
+#export { display: none; }
+body.export #export { display: block; }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Brand</p>
+    <h1>Tap Blast logo</h1>
+    <p>Two wordmark directions built from the game's own pieces: the glossy blue target with its gold star, golden pop sparkles, and the indigo-to-violet brand gradient. Each is shown on the lavender menus, the indigo arena and a white card, then inside the game.</p>
+  </header>
+
+  <section>
+    <h2>A · Candy Pop</h2>
+    <p>Stacked and bubbly. Gold TAP over brand-gradient BLAST, glossy candy letters with a white rim and a deep indigo outline. A target bursts off the P in a shower of the same golden sparkles the game uses when you tap.</p>
+    <div class="surfaces">
+      <div class="surface s-lavender"><svg data-logo="candy" viewBox="0 0 1000 730" role="img" aria-label="Tap Blast logo, Candy Pop"></svg></div>
+      <div class="stack">
+        <div class="surface s-arena"><svg data-logo="candy" viewBox="0 0 1000 730" aria-hidden="true"></svg></div>
+        <div class="surface s-white"><svg data-logo="candy" viewBox="0 0 1000 730" aria-hidden="true"></svg></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>B · Arcade Burst</h2>
+    <p>One line with forward motion. White letters with a heavy indigo outline on a gold explosion, with a target streaking in from the left. Reads well wide and short, so it suits banners and the store feature graphic.</p>
+    <div class="surfaces">
+      <div class="surface s-lavender"><svg data-logo="burst" viewBox="0 0 1400 600" role="img" aria-label="Tap Blast logo, Arcade Burst"></svg></div>
+      <div class="stack">
+        <div class="surface s-arena"><svg data-logo="burst" viewBox="0 0 1400 600" aria-hidden="true"></svg></div>
+        <div class="surface s-white"><svg data-logo="burst" viewBox="0 0 1400 600" aria-hidden="true"></svg></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>App icon</h2>
+    <p>The target on its own: no lettering, so it stays crisp at home-screen sizes. A tap ripple and sparkles say what the game is about at a glance.</p>
+    <div class="icons">
+      <figure><svg data-logo="icon" viewBox="0 0 1024 1024" width="180" height="180" role="img" aria-label="Tap Blast app icon"></svg><figcaption>180 px</figcaption></figure>
+      <figure><svg data-logo="icon" viewBox="0 0 1024 1024" width="120" height="120" aria-hidden="true"></svg><figcaption>120 px</figcaption></figure>
+      <figure><svg data-logo="icon" viewBox="0 0 1024 1024" width="76" height="76" aria-hidden="true"></svg><figcaption>76 px</figcaption></figure>
+      <figure><svg data-logo="icon" viewBox="0 0 1024 1024" width="48" height="48" aria-hidden="true"></svg><figcaption>48 px</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>App icon with the name</h2>
+    <p>The same target and sunburst, now carrying TAP BLAST three ways. The lettering reads from about 76 px up, which covers the store listing and most launchers; at the smallest sizes the target still carries the icon.</p>
+    <div class="named">
+      <figure><svg data-logo="iconArc" viewBox="0 0 1024 1024" role="img" aria-label="App icon with the name arched around the target"></svg><figcaption><b>Badge</b>TAP arches over the target and BLAST curves under it, like a prize coin.</figcaption></figure>
+      <figure><svg data-logo="iconRibbon" viewBox="0 0 1024 1024" role="img" aria-label="App icon with the name on a ribbon"></svg><figcaption><b>Ribbon</b>The target rides above a curved candy ribbon carrying the name.</figcaption></figure>
+      <figure><svg data-logo="iconStack" viewBox="0 0 1024 1024" role="img" aria-label="App icon with stacked name"></svg><figcaption><b>Stacked</b>The target bounces on top of big gold and violet candy letters.</figcaption></figure>
+    </div>
+    <div class="icons" style="margin-top:22px">
+      <figure><svg data-logo="iconArc" viewBox="0 0 1024 1024" width="96" height="96" aria-hidden="true"></svg><figcaption>Badge, 96 px</figcaption></figure>
+      <figure><svg data-logo="iconRibbon" viewBox="0 0 1024 1024" width="96" height="96" aria-hidden="true"></svg><figcaption>Ribbon, 96 px</figcaption></figure>
+      <figure><svg data-logo="iconStack" viewBox="0 0 1024 1024" width="96" height="96" aria-hidden="true"></svg><figcaption>Stacked, 96 px</figcaption></figure>
+      <figure><svg data-logo="iconArc" viewBox="0 0 1024 1024" width="60" height="60" aria-hidden="true"></svg><figcaption>Badge, 60 px</figcaption></figure>
+      <figure><svg data-logo="iconRibbon" viewBox="0 0 1024 1024" width="60" height="60" aria-hidden="true"></svg><figcaption>Ribbon, 60 px</figcaption></figure>
+      <figure><svg data-logo="iconStack" viewBox="0 0 1024 1024" width="60" height="60" aria-hidden="true"></svg><figcaption>Stacked, 60 px</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>In the game</h2>
+    <p>Candy Pop on the level select and briefing; the compact one-line version fits the top bar where space is tight.</p>
+    <div class="mocks">
+      <figure style="margin:0">
+        <div class="phone" style="background: var(--lavender)">
+          <div class="screen">
+            <svg data-logo="candy" viewBox="0 0 1000 730" style="width:88%" aria-hidden="true"></svg>
+            <div class="card row"><div class="badge" style="background:linear-gradient(#FFB45C,#FF8A2B)"></div><div class="bar"></div></div>
+            <div class="card row"><div class="badge" style="background:linear-gradient(#FF7AA8,#F0457E)"></div><div class="bar"></div></div>
+            <div class="card row"><div class="badge" style="background:linear-gradient(#5FA0FF,#2F6BFF)"></div><div class="bar"></div></div>
+            <div class="card row"><div class="badge" style="background:linear-gradient(#5ED68C,#22AA60)"></div><div class="bar"></div></div>
+          </div>
+        </div>
+        <figcaption class="tag">Level select</figcaption>
+      </figure>
+      <figure style="margin:0">
+        <div class="phone" style="background: var(--arena)">
+          <div class="screen" style="justify-content:center">
+            <svg data-logo="candy" viewBox="0 0 1000 730" style="width:96%" aria-hidden="true"></svg>
+            <div class="cta" style="margin-top:12%; height:7%"></div>
+          </div>
+        </div>
+        <figcaption class="tag">Splash / start</figcaption>
+      </figure>
+      <figure style="margin:0">
+        <div class="phone" style="background: var(--lavender)">
+          <div class="screen" style="padding-top:9%">
+            <svg data-logo="compact" viewBox="0 -10 900 222" style="width:84%" aria-hidden="true"></svg>
+            <div class="card" style="height:9%"></div>
+            <div class="card" style="height:56%; background: var(--arena)"></div>
+            <div class="card" style="height:8%"></div>
+          </div>
+        </div>
+        <figcaption class="tag">Compact, top bar</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>Why these choices</h2>
+    <div class="notes">
+      <div class="note"><b>It's the game's own target</b><span>The blue ball with the gold star is the thing players tap thousands of times, so the logo and the gameplay recognise each other.</span></div>
+      <div class="note"><b>Brand colours, not new ones</b><span>Gold for rewards and the indigo-violet gradient from the buttons and results stage. Nothing new to keep in sync.</span></div>
+      <div class="note"><b>Reads on every surface</b><span>The thick indigo outline and white rim keep the letters legible on the lavender menus, the dark arena and plain white.</span></div>
+      <div class="note"><b>Clean edges</b><span>Drawn as vectors, so exports have crisp transparent edges with no glow fringe, at any size.</span></div>
+    </div>
+  </section>
+
+  <div id="export"><svg id="export-svg"></svg></div>
+</div>
+
+<script>
+(() => {
+  const NAVY = "#1B1650", DEEP = "#2C2183";
+  let uid = 0;
+  const star5 = (cx, cy, r, inner = .46) => {
+    let d = "";
+    for (let i = 0; i < 10; i++) {
+      const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * inner : r;
+      d += (i ? "L" : "M") + (cx + rr * Math.cos(a)).toFixed(1) + " " + (cy + rr * Math.sin(a)).toFixed(1);
+    }
+    return d + "Z";
+  };
+  const sparkle = (cx, cy, r, fill = "#FFF7C2") =>
+    `<path d="M${cx} ${cy - r} Q${cx + r * .16} ${cy - r * .16} ${cx + r} ${cy} Q${cx + r * .16} ${cy + r * .16} ${cx} ${cy + r} Q${cx - r * .16} ${cy + r * .16} ${cx - r} ${cy} Q${cx - r * .16} ${cy - r * .16} ${cx} ${cy - r}Z" fill="${fill}"/>`;
+
+  // Shared defs, unique per SVG so several copies can sit on one page.
+  const defs = (k) => `
+    <linearGradient id="gold${k}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF4A3"/><stop offset=".42" stop-color="#FFD23F"/><stop offset="1" stop-color="#FF9A1F"/></linearGradient>
+    <linearGradient id="brand${k}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7DB2FF"/><stop offset=".45" stop-color="#6C63FF"/><stop offset="1" stop-color="#C04CF2"/></linearGradient>
+    <linearGradient id="milk${k}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".6" stop-color="#F3EEFF"/><stop offset="1" stop-color="#D9CCFF"/></linearGradient>
+    <linearGradient id="gloss${k}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset=".38" stop-color="#fff" stop-opacity=".18"/><stop offset=".46" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <linearGradient id="shade${k}" x1="0" y1="0" x2="0" y2="1"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#2A0E5C" stop-opacity=".22"/></linearGradient>
+    <radialGradient id="ball${k}" cx=".36" cy=".3" r=".75"><stop offset="0" stop-color="#9AD6FF"/><stop offset=".45" stop-color="#3F86FF"/><stop offset="1" stop-color="#1B34B8"/></radialGradient>
+    <radialGradient id="boom${k}" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FFF6B0"/><stop offset=".55" stop-color="#FFC93C"/><stop offset="1" stop-color="#FF8A1E"/></radialGradient>
+    <radialGradient id="iconbg${k}" cx=".5" cy=".42" r=".7"><stop offset="0" stop-color="#7E73FF"/><stop offset=".6" stop-color="#5236D6"/><stop offset="1" stop-color="#32208F"/></radialGradient>
+    <radialGradient id="halo${k}" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FFE38A" stop-opacity=".9"/><stop offset="1" stop-color="#FFC24A" stop-opacity="0"/></radialGradient>
+    <filter id="soft${k}" x="-20%" y="-20%" width="140%" height="160%"><feGaussianBlur stdDeviation="9"/></filter>`;
+
+  // One candy word: soft shadow, 3D extrusion, indigo outline, white rim + fill, volume shade, top gloss.
+  const word = (k, text, x, y, size, fill, font, spacing = 0, path = null) => {
+    const t = (attrs) => path
+      ? `<text font-family="${font}" font-size="${size}" letter-spacing="${spacing}" ${attrs}><textPath href="#${path}" startOffset="50%" text-anchor="middle">${text}</textPath></text>`
+      : `<text x="${x}" y="${y}" text-anchor="middle" font-family="${font}" font-size="${size}" letter-spacing="${spacing}" ${attrs}>${text}</text>`;
+    const o = size * .13, rim = size * .05;
+    return `
+      <g transform="translate(0 ${size * .085})" filter="url(#soft${k})" opacity=".35">${t(`fill="${NAVY}" stroke="${NAVY}" stroke-width="${o}" stroke-linejoin="round"`)}</g>
+      <g transform="translate(0 ${size * .055})">${t(`fill="${DEEP}" stroke="${DEEP}" stroke-width="${o}" stroke-linejoin="round"`)}</g>
+      ${t(`fill="${NAVY}" stroke="${NAVY}" stroke-width="${o}" stroke-linejoin="round"`)}
+      ${t(`fill="url(#${fill}${k})" stroke="#fff" stroke-width="${rim}" stroke-linejoin="round" paint-order="stroke"`)}
+      ${t(`fill="url(#shade${k})"`)}
+      ${t(`fill="url(#gloss${k})"`)}`;
+  };
+  // The game's target: glossy blue ball, white rim, gold star.
+  const ball = (k, cx, cy, r) => `
+    <circle cx="${cx}" cy="${cy + r * .1}" r="${r * 1.04}" fill="${NAVY}" opacity=".35" filter="url(#soft${k})"/>
+    <circle cx="${cx}" cy="${cy}" r="${r * 1.12}" fill="${NAVY}"/>
+    <circle cx="${cx}" cy="${cy}" r="${r * 1.04}" fill="#E8F4FF"/>
+    <circle cx="${cx}" cy="${cy}" r="${r * .95}" fill="url(#ball${k})"/>
+    <path d="${star5(cx, cy + r * .04, r * .56)}" fill="#FF9F1C" stroke="#C25A00" stroke-width="${r * .05}" stroke-linejoin="round"/>
+    <path d="${star5(cx, cy - r * .01, r * .5)}" fill="url(#gold${k})"/>
+    <ellipse cx="${cx - r * .34}" cy="${cy - r * .48}" rx="${r * .34}" ry="${r * .16}" transform="rotate(-28 ${cx - r * .34} ${cy - r * .48})" fill="#fff" opacity=".75"/>`;
+
+  // shape: "squircle" (store/legacy), "circle" (round icon) or "none" (adaptive background, full bleed).
+  const iconBase = (k, cx, cy, extraDefs, shape = "squircle") => {
+    const clip = shape === "circle" ? `<circle cx="512" cy="512" r="512"/>` : `<rect width="1024" height="1024" rx="${shape === "none" ? 0 : 232}"/>`;
+    let s = `<defs>${defs(k)}${extraDefs}<clipPath id="sq${k}">${clip}</clipPath></defs><g clip-path="url(#sq${k})">`;
+    s += `<rect width="1024" height="1024" fill="url(#iconbg${k})"/>`;
+    for (let i = 0; i < 16; i++) {
+      const a0 = i * Math.PI / 8, a1 = a0 + Math.PI / 16;
+      s += `<path d="M${cx} ${cy} L${cx + 1200 * Math.cos(a0)} ${cy + 1200 * Math.sin(a0)} L${cx + 1200 * Math.cos(a1)} ${cy + 1200 * Math.sin(a1)}Z" fill="#fff" opacity=".07"/>`;
+    }
+    return s + `<circle cx="${cx}" cy="${cy}" r="330" fill="url(#halo${k})" opacity=".5"/>`;
+  };
+  const arcPaths = (k) => `<path id="top${k}" d="M174 512 A338 338 0 0 1 850 512"/><path id="bot${k}" d="M140 512 A372 372 0 0 0 884 512"/>`;
+  // Ring, curved name, target and sparkles of the Badge icon (no background).
+  const arcContent = (k, outerSparkles = true) => {
+    const c = 512, F = "Lilita One, Fredoka, sans-serif";
+    let s = `<circle cx="${c}" cy="${c}" r="345" fill="none" stroke="${NAVY}" stroke-opacity=".3" stroke-width="210"/>`;
+    s += `<circle cx="${c}" cy="${c}" r="452" fill="none" stroke="#fff" stroke-width="8" opacity=".35"/><circle cx="${c}" cy="${c}" r="240" fill="none" stroke="#fff" stroke-width="8" opacity=".35"/>`;
+    s += word(k, "TAP", 0, 0, 190, "gold", F, 14, `top${k}`);
+    s += word(k, "BLAST", 0, 0, 158, "brand", F, 8, `bot${k}`);
+    s += ball(k, c, c, 212);
+    s += sparkle(c - 345, c, 36) + sparkle(c + 345, c, 36);
+    if (outerSparkles) s += sparkle(870, 150, 44, "#fff") + sparkle(150, 880, 34);
+    return s;
+  };
+  const logos = {
+    candy(k) {
+      let s = `<defs>${defs(k)}</defs><g transform="translate(0 70) rotate(-4 500 330)">`;
+      // Golden halo and pop sparkles behind the target.
+      s += `<circle cx="790" cy="150" r="150" fill="url(#halo${k})"/>`;
+      s += word(k, "TAP", 470, 300, 250, "gold", "Lilita One, Fredoka, sans-serif", 6);
+      s += word(k, "BLAST", 500, 540, 230, "brand", "Lilita One, Fredoka, sans-serif", 4);
+      // Burst rays from the tapped target.
+      for (let i = 0; i < 9; i++) {
+        const a = -Math.PI * .95 + i * Math.PI / 7.2, r1 = 112, r2 = 150 + (i % 2) * 22;
+        s += `<line x1="${790 + r1 * Math.cos(a)}" y1="${150 + r1 * Math.sin(a)}" x2="${790 + r2 * Math.cos(a)}" y2="${150 + r2 * Math.sin(a)}" stroke="#FFE27A" stroke-width="12" stroke-linecap="round"/>`;
+      }
+      s += ball(k, 790, 150, 84);
+      s += sparkle(930, 92, 30) + sparkle(905, 250, 18, "#fff") + sparkle(650, 70, 22) + sparkle(120, 470, 26) + sparkle(895, 560, 20, "#fff");
+      return s + `</g>`;
+    },
+    burst(k) {
+      let s = `<defs>${defs(k)}</defs>`;
+      // Gold explosion behind the word.
+      let d = "";
+      for (let i = 0; i < 28; i++) {
+        const a = i * Math.PI / 14, rx = i % 2 ? 460 : 560, ry = i % 2 ? 175 : 250;
+        d += (i ? "L" : "M") + (760 + rx * Math.cos(a)).toFixed(1) + " " + (300 + ry * Math.sin(a)).toFixed(1);
+      }
+      s += `<path d="${d}Z" fill="${NAVY}" transform="translate(0 14)" opacity=".3" filter="url(#soft${k})"/>`;
+      s += `<path d="${d}Z" fill="url(#boom${k})" stroke="${NAVY}" stroke-width="14" stroke-linejoin="round"/>`;
+      s += `<g transform="skewX(-9) translate(58 0)">` + word(k, "TAP BLAST", 790, 362, 168, "milk", "Fredoka, Lilita One, sans-serif", 2) + `</g>`;
+      // Target streaking in from the left.
+      for (let i = 0; i < 3; i++) s += `<line x1="${24 + i * 16}" y1="${258 + i * 40}" x2="${110 + i * 6}" y2="${258 + i * 40}" stroke="#fff" stroke-width="${16 - i * 3}" stroke-linecap="round" opacity="${.9 - i * .2}"/>`;
+      s += ball(k, 180, 300, 76);
+      s += sparkle(1290, 110, 30) + sparkle(1330, 470, 22, "#fff") + sparkle(300, 520, 20, "#fff") + sparkle(330, 90, 24);
+      return s;
+    },
+    // Name on the icon, three ways. Each keeps the sunburst and target from the plain icon.
+    iconArc(k) { return iconBase(k, 512, 512, arcPaths(k)) + arcContent(k) + `</g>`; },
+    // Circle-cut Badge for Android's legacy round icon slot.
+    iconArcRound(k) { return iconBase(k, 512, 512, arcPaths(k), "circle") + arcContent(k, false) + `</g>`; },
+    // Android adaptive layers: full-bleed sunburst, and the badge scaled into the 66 dp safe circle.
+    adaptiveBg(k) { return iconBase(k, 512, 512, "", "none") + `</g>`; },
+    adaptiveFg(k) { return `<defs>${defs(k)}${arcPaths(k)}</defs><g transform="translate(512 512) scale(.64) translate(-512 -512)">` + arcContent(k, false) + `</g>`; },
+    iconArcLegacy(k) {
+      const c = 512;
+      let s = "";
+      s += `<circle cx="${c}" cy="${c}" r="345" fill="none" stroke="${NAVY}" stroke-opacity=".3" stroke-width="210"/>`;
+      s += `<circle cx="${c}" cy="${c}" r="452" fill="none" stroke="#fff" stroke-width="8" opacity=".35"/><circle cx="${c}" cy="${c}" r="240" fill="none" stroke="#fff" stroke-width="8" opacity=".35"/>`;
+      s += word(k, "TAP", 0, 0, 190, "gold", F, 14, `top${k}`);
+      s += word(k, "BLAST", 0, 0, 158, "brand", F, 8, `bot${k}`);
+      s += ball(k, c, c, 212);
+      s += sparkle(c - 345, c, 36) + sparkle(c + 345, c, 36) + sparkle(870, 150, 44, "#fff") + sparkle(150, 880, 34);
+      return s;
+    },
+    iconRibbon(k) {
+      const F = "Lilita One, Fredoka, sans-serif";
+      let s = iconBase(k, 512, 420, `<linearGradient id="rib${k}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FF6FB0"/><stop offset=".5" stop-color="#E055D8"/><stop offset="1" stop-color="#A24CF2"/></linearGradient><path id="rp${k}" d="M150 852 Q512 934 874 852"/>`);
+      s += ball(k, 512, 392, 222);
+      s += sparkle(860, 170, 52) + sparkle(170, 230, 36, "#fff") + sparkle(820, 560, 30, "#fff");
+      // Tails behind the band, then the curved band itself.
+      s += `<path d="M150 742 L36 742 L86 822 L36 902 L150 902Z" fill="#7A2FB8" stroke="${NAVY}" stroke-width="12" stroke-linejoin="round"/>`;
+      s += `<path d="M874 742 L988 742 L938 822 L988 902 L874 902Z" fill="#6A2AA8" stroke="${NAVY}" stroke-width="12" stroke-linejoin="round"/>`;
+      s += `<path d="M110 710 Q512 800 914 710 L914 880 Q512 970 110 880Z" fill="url(#rib${k})" stroke="${NAVY}" stroke-width="14" stroke-linejoin="round"/>`;
+      s += `<path d="M126 728 Q512 816 898 728 L898 760 Q512 846 126 760Z" fill="#fff" opacity=".22"/>`;
+      s += word(k, "TAP BLAST", 0, 0, 122, "milk", F, 4, `rp${k}`);
+      return s + `</g>`;
+    },
+    iconStack(k) {
+      const F = "Lilita One, Fredoka, sans-serif";
+      let s = iconBase(k, 512, 330, "");
+      s += ball(k, 512, 318, 188);
+      s += sparkle(820, 150, 50) + sparkle(200, 190, 34, "#fff") + sparkle(860, 470, 26, "#fff");
+      s += word(k, "TAP", 512, 728, 232, "gold", F, 8);
+      s += word(k, "BLAST", 512, 922, 196, "brand", F, 4);
+      return s + `</g>`;
+    },
+    icon(k) {
+      let s = `<defs>${defs(k)}<clipPath id="sq${k}"><rect width="1024" height="1024" rx="232"/></clipPath></defs><g clip-path="url(#sq${k})">`;
+      s += `<rect width="1024" height="1024" fill="url(#iconbg${k})"/>`;
+      for (let i = 0; i < 16; i++) {
+        const a0 = i * Math.PI / 8, a1 = a0 + Math.PI / 16;
+        s += `<path d="M512 560 L${512 + 900 * Math.cos(a0)} ${560 + 900 * Math.sin(a0)} L${512 + 900 * Math.cos(a1)} ${560 + 900 * Math.sin(a1)}Z" fill="#fff" opacity=".07"/>`;
+      }
+      s += `<circle cx="512" cy="560" r="330" fill="url(#halo${k})" opacity=".55"/>`;
+      s += `<circle cx="512" cy="560" r="300" fill="none" stroke="#fff" stroke-width="14" opacity=".35"/>`;
+      s += `<circle cx="512" cy="560" r="372" fill="none" stroke="#fff" stroke-width="8" opacity=".16"/>`;
+      s += ball(k, 512, 540, 238);
+      s += sparkle(800, 250, 62) + sparkle(230, 300, 40, "#fff") + sparkle(820, 800, 34, "#fff") + sparkle(210, 820, 46);
+      return s + `</g>`;
+    },
+    compact(k) {
+      let s = `<defs>${defs(k)}</defs>`;
+      s += ball(k, 100, 100, 70);
+      s += `<g>` + word(k, "TAP", 300, 140, 130, "gold", "Lilita One, Fredoka, sans-serif", 3) + word(k, "BLAST", 615, 140, 130, "brand", "Lilita One, Fredoka, sans-serif", 3) + `</g>`;
+      s += sparkle(185, 34, 18) + sparkle(850, 46, 20);
+      return s;
+    }
+  };
+  const draw = (svg, name) => { svg.innerHTML = logos[name](++uid); };
+  document.querySelectorAll("svg[data-logo]").forEach(svg => draw(svg, svg.dataset.logo));
+
+  // #export-<name>: render a single logo at full size on a transparent page (used to make PNGs).
+  const m = location.hash.match(/^#export-(\w+)$/);
+  if (m && logos[m[1]]) {
+    const boxes = { iconArcRound: "0 0 1024 1024", adaptiveBg: "0 0 1024 1024", adaptiveFg: "0 0 1024 1024", iconArc: "0 0 1024 1024", iconRibbon: "0 0 1024 1024", iconStack: "0 0 1024 1024", candy: "0 0 1000 730", burst: "0 0 1400 600", icon: "0 0 1024 1024", compact: "0 -10 900 222" };
+    const svg = document.getElementById("export-svg"), [, , w, h] = boxes[m[1]].split(" ").map(Number);
+    svg.setAttribute("viewBox", boxes[m[1]]); svg.setAttribute("width", w); svg.setAttribute("height", h);
+    draw(svg, m[1]);
+    document.body.classList.add("export");
+    document.documentElement.style.padding = "0";
+  }
+})();
+</script>

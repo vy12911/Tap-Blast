@@ -36,4 +36,4 @@ MonoBehaviour:
   coinReward: 150
   xpReward: 75
   objectiveCount: 3
-  mechanicHint: Collect 3 +3s targets. Each adds 3 seconds; up to 6 can appear.
+  mechanicHint: Time Bubbles say +3s and add 3 seconds each. Up to 6 appear.

@@ -10,7 +10,8 @@ namespace TapBlast
         [SerializeField] private ObjectiveKind objective = ObjectiveKind.Taps;
         [SerializeField, Min(1)] private int targetScore = 500;
         [SerializeField, Min(1)] private int objectiveCount = 1;
-        [SerializeField, TextArea] private string mechanicHint = "Tap glowing circles before they fade. Build a streak to multiply your score.";
+        [Tooltip("One exact 'how to do it' sentence shown under the goal (briefing and hint card). Keep it under ~80 characters.")]
+        [SerializeField, TextArea] private string mechanicHint = "Tap the glowing circles before their ring runs out.";
         [SerializeField] private bool firstTapTutorial = true;
         [SerializeField] private float[] targetSizes = new float[0];
         [SerializeField, Min(1)] private float duration = 60;
@@ -72,23 +73,39 @@ namespace TapBlast
             ObjectiveKind.Golden => "GOLDEN", ObjectiveKind.Time => "TIME BUBBLES",
             ObjectiveKind.Boss => "CORE DESTROYED", ObjectiveKind.MegaChains => "MEGA CHAINS",
             ObjectiveKind.Chains or ObjectiveKind.ChainsNoBombs or ObjectiveKind.ChainMaster => "CHAINS",
-            ObjectiveKind.NoBombs => "SAFE TARGETS", ObjectiveKind.Shield => "SHIELD BLOCKS", _ => "TARGETS"
+            ObjectiveKind.NoBombs => "SAFE TARGETS", ObjectiveKind.Shield => "BOMBS BLOCKED", _ => "TARGETS"
         };
-        public string GoalText => (objective switch
+        // Player-facing instructions. Every level shows the same three parts: the exact goal, one "how to"
+        // sentence (mechanicHint) and the win rule. New objective kinds must add a line to each switch.
+        /// <summary>The exact goal, without the time limit: "Make 2 chains".</summary>
+        public string Goal => objective switch
         {
-            ObjectiveKind.Score => "Score " + TargetScore,
-            ObjectiveKind.Combo => "Reach a " + ObjectiveCount + "-hit streak",
-            ObjectiveKind.Golden => "Tap " + ObjectiveCount + " Golden targets",
-            ObjectiveKind.Time => "Collect " + ObjectiveCount + " Time Bubbles",
-            ObjectiveKind.Boss => "Destroy the " + BossHealth + "-hit Golden Core",
-            ObjectiveKind.Chains => "Create " + ObjectiveCount + " chains",
-            ObjectiveKind.MegaChains => "Create " + ObjectiveCount + " Mega Chain" + (ObjectiveCount == 1 ? "" : "s") + " (8+ targets)",
-            ObjectiveKind.NoBombs => "Tap " + RequiredTaps + " targets and avoid all Bombs",
-            ObjectiveKind.Shield => "Block " + ObjectiveCount + " Bomb with Shield",
-            ObjectiveKind.ChainsNoBombs => "Create " + ObjectiveCount + " chains without a Bomb hit",
-            ObjectiveKind.ChainMaster => "Reach a " + RequiredCombo + "-hit streak and create " + ObjectiveCount + " chains",
+            ObjectiveKind.Score => "Score " + TargetScore.ToString("N0") + " points",
+            ObjectiveKind.Combo => "Hit " + ObjectiveCount + " targets in a row",
+            ObjectiveKind.Golden => "Tap " + ObjectiveCount + " Golden target" + Plural(ObjectiveCount),
+            ObjectiveKind.Time => "Tap " + ObjectiveCount + " Time Bubble" + Plural(ObjectiveCount),
+            ObjectiveKind.Boss => "Destroy the Golden Core (" + BossHealth + " hits)",
+            ObjectiveKind.Chains => "Make " + ObjectiveCount + " chain" + Plural(ObjectiveCount),
+            ObjectiveKind.MegaChains => "Make " + ObjectiveCount + " Mega Chain" + Plural(ObjectiveCount),
+            ObjectiveKind.NoBombs => "Tap " + RequiredTaps + " targets without tapping a Bomb",
+            ObjectiveKind.Shield => "Block " + ObjectiveCount + " Bomb with your Shield",
+            ObjectiveKind.ChainsNoBombs => "Make " + ObjectiveCount + " chains without tapping a Bomb",
+            ObjectiveKind.ChainMaster => "Hit " + RequiredCombo + " in a row and make " + ObjectiveCount + " chains",
             _ => "Tap " + RequiredTaps + " targets"
-        }) + " in " + Duration.ToString("0") + " seconds";
+        };
+        /// <summary>The goal with its time limit, for the briefing and countdown.</summary>
+        public string GoalText => Goal + " in " + Duration.ToString("0") + " seconds";
+        /// <summary>When the level ends and what passes it.</summary>
+        public string WinRule => objective switch
+        {
+            ObjectiveKind.Taps => "The level ends as soon as you reach " + RequiredTaps + ".",
+            ObjectiveKind.NoBombs or ObjectiveKind.ChainsNoBombs => "Reach it before time runs out. One Bomb tap fails the goal.",
+            _ => "Reach it before time runs out, then keep scoring for more stars."
+        };
+        public string OneStarRule => "Complete the goal";
+        public string TwoStarRule => "Goal + score " + TwoStarScore.ToString("N0") + "+";
+        public string ThreeStarRule => "Score " + TwoStarScore.ToString("N0") + "+, " + ThreeStarCombo + " in a row, no misses" + (BombChance > 0 ? " or Bomb hits" : "");
+        private static string Plural(int count) => count == 1 ? "" : "s";
         public float SizeAt(int index) => targetSizes == null || targetSizes.Length == 0 ? TargetSize : Mathf.Clamp(targetSizes[index % targetSizes.Length], 105, 240);
         public float LargestTargetSize
         {

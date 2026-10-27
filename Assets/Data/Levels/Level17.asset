@@ -38,7 +38,7 @@ MonoBehaviour:
   coinReward: 350
   xpReward: 170
   objectiveCount: 1
-  mechanicHint: Press SHIELD, then tap one Bomb. Match colors to score.
+  mechanicHint: Press SHIELD above the arena, then tap a red Bomb. The Shield stops it.
   targetSizes: []
   clusterSize: 3
   clusterInterval: 2.4

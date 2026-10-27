@@ -12,7 +12,7 @@ A soft, card-based style: lavender-to-white gradient background with two colour 
 
 | Canvas object | Contents |
 |---|---|
-| HUD / Header | Round pause button, two-line level title, wallet pill (pinned to the top) |
+| HUD / Header | Round pause button, lavender "LEVEL NN" chip above the bold level name, wallet pill with compact coin amount (pinned to the top) |
 | HUD / Stats | White stats card with Score, Level and Timer chips |
 | HUD / Objective | Objective card: label, rounded progress track and three star markers |
 | HUD / Mechanics | Chain/Mega/Bomb status and the Shield pill (levels 11+) |
@@ -20,8 +20,9 @@ A soft, card-based style: lavender-to-white gradient background with two colour 
 | HUD / Tutorial hint, Combo card | Hint card and combo card (pinned to the bottom) |
 | Screens / Level select | Page: back button, eyebrow + title, coins/XP chips, level list filling the rest of the screen |
 | Screens / Level briefing | Page: back button, title, hero card, star-rule tiles, reward chips, Let's Play button pinned to the bottom |
-| Screens / Results | Page: title, score card with stars, stats card, rewards card, Play again / Next and Level select pinned to the bottom |
-| Screens / Countdown, Paused, Wallet information | Dimmed overlay with a centred white card; Wallet uses the Paused card's footprint so it fully covers it |
+| Screens / Results | Page: outcome chip + gradient title; score card whose top is an indigo→violet star stage (`Band`, its own nested Canvas + RectMask2D, holding the turning `Sunburst` and `Star glow`), gradient score and trophy best chip; "This round" card with three coloured stat tiles; rewards card with coin / XP chips and level bar; tinted hint chip; Play again / Next and Level select pinned to the bottom |
+| Screens / Countdown, Paused | Dimmed overlay with a centred white card |
+| Screens / Wallet information | Darker overlay with a white card: gradient header, coin and XP tiles (exact amounts), player-level card with progress bar, footer note. Opening it mid-round pauses the round without showing the Pause card |
 
 `GuiScreenVisibility` fades the single **HUD** CanvasGroup behind full pages and the Objective, Mechanics, Arena and Tutorial hint groups beneath the Pause and Countdown cards.
 
@@ -39,14 +40,20 @@ The shared sprite assets are in `Assets/Art/UI`. You can assign replacement spri
 
 ## Feedback now included
 
-See [animation coverage through level 20](Animations-Level01-20.md) for the GDD mapping and animation verification details.
+See [gameplay animations](Animations-Level01-20.md) for every effect and its verification, and [AGENTS.md section 5](../AGENTS.md) for the rules new levels must follow.
 
-- Normal targets: arrival scale, soft glow, star emblem, lifetime ring and idle pulse.
-- Successful tap: shrinking star, expanding ring, eight outward sparks, floating points, score/combo punch and pitched sound.
-- Combo thresholds: Great Streak at 5, Combo Fever at 10, Super Fever at 20, Ultra Fever at 30 and Master Combo at 50; milestone sound and supported-device vibration accompany major thresholds. These are presentation states using the existing GDD score multipliers, not extra score bonuses or spawn-rate changes.
-- Expiry: MISS popup and cleared Fever state.
-- Completion: pooled confetti, then the existing score/star/reward reveal.
-- Pause freezes gameplay feedback. Restart and navigation clear it. Reduced motion suppresses bursts, bounce, confetti and target pulsing while retaining score text and state labels.
+- Targets: spring-in arrival, soft glow, star emblem, lifetime ring and idle pulse.
+- Tap: squash-and-burst of the ball with its star face, white flash, ring, golden sparkles, bouncy floating score, HUD punch and pitched sound.
+- Combo milestones (5/10/20/30/50): callout words over the arena plus the HUD fever label. These are presentation states using the existing score multipliers, not extra bonuses.
+- Chains: per-link flash and pop, CHAIN! / SUPER CHAIN! / MEGA CHAIN! callouts, Mega finale and shake.
+- Bombs: swell, layered explosion, shake, explosion sound; Shield block implodes into a cyan hexagon; untouched bombs fizzle out.
+- Expiry: MISS text and a grey puff.
+- Completion: star stage reveal, stat tiles, reward chips and confetti.
+- Pause freezes all feedback, replay and navigation clear it, and reduced motion removes motion while keeping text and state labels.
+
+**Pooled feedback objects:** `HUD/Arena/Pooled feedback` holds 16 `Tap feedback N` popups (each: Burst ring, Tap squash core with a `Face` star child, eight sparks, Points label) bound to `GameHUD.popups`, and the `World 2 chain energy` effects Graphic. Keep the array and these children intact; add more popups by duplicating one and extending the array (see `Tools/LiveEdits/15-pop-animations.cs`).
+
+**Nested canvases (performance):** `Target arena`, `Pooled feedback`, the level list's `Level list content` and the results `Band` each carry their own Canvas, so their constant movement does not re-batch the rest of the UI. Keep a GraphicRaycaster on any nested Canvas that holds buttons.
 
 The supplied GUI artwork now provides the illustrated backgrounds, panels, buttons, icons and target bodies. See [GUI reference implementation](GUI-Reference-Implementation.md) for screen mappings, component bindings and verification. The later mechanics pictured there remain gated by the GDD: Golden at Level 6, Time at 8, Chain at 11, Bomb at 16 and Shield at 17; other power-ups, Perfect and Ultimate belong to later progression. No inactive power-up buttons or fake Ultimate meter are shown in World 1.
 
@@ -56,7 +63,7 @@ Level select is one page with no worlds: all twenty saved level rows sit in the 
 
 The target prefab contains the normal star plus non-raycasting GOLD, +3s and CORE labels. `TargetView` toggles these authored symbols by target kind. Edit their appearance directly in the prefab. The Core's existing ring shows health rather than lifetime. Special target effects and objective-specific hints are updated through the same pooled feedback/HUD bindings.
 
-`LevelConfig.mechanicHint` supplies contextual briefing and gameplay instructions. New objectives use the common progress bar for best streak, Golden count, Time count or Core destruction. Levels 2–10 explicitly remain timed so players can keep scoring for mastery after achieving their primary goal.
+Player instructions come from `LevelConfig`: `GoalText` (exact goal + time) on the briefing goal line and countdown, `mechanicHint` (one exact "how to" sentence) plus `WinRule` in the briefing description, `Goal` / `mechanicHint` on the hint card, and `OneStarRule` / `TwoStarRule` / `ThreeStarRule` on the star tiles. Edit the sentence in each level asset; do not hard-code instructions in the Canvas. New objectives use the common progress bar for best streak, Golden count, Time count or Core destruction. Levels 2–10 explicitly remain timed so players can keep scoring for mastery after achieving their primary goal.
 
 ## World 2 bindings
 

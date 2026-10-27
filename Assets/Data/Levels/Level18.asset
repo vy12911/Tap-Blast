@@ -37,7 +37,7 @@ MonoBehaviour:
   coinReward: 375
   xpReward: 180
   objectiveCount: 3
-  mechanicHint: Make 3 same-color chains without a Bomb hit.
+  mechanicHint: Tap a color with 3 or more matches to make a chain. Leave red Bombs alone.
   clusterSize: 5
   clusterInterval: 2.4
   movementSpeed: 70

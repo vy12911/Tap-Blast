@@ -39,7 +39,7 @@ MonoBehaviour:
   coinReward: 275
   xpReward: 140
   objectiveCount: 1
-  mechanicHint: Match colors anywhere on the moving board. Score 3000.
+  mechanicHint: Chains score the most. Tap a color with 3 or more matches; targets keep moving.
   targetSizes: []
   clusterSize: 5
   clusterInterval: 2.4

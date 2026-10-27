@@ -6,16 +6,18 @@ Implemented against GDD v1.0, pages 11–13 (chain thresholds and detailed early
 
 | Level | Name | Primary objective | Time | Two-star score | Three-star best combo | Coins | XP |
 |---|---|---|---|---|---|---|---|
-| 11 | Chain Spark | Create 2 chains | 45s | 900 | 12 | 200 | 110 |
-| 12 | Double Impact | Create 3 chains; five-target clusters | 45s | 1,500 | 20 | 225 | 120 |
-| 13 | Mega Burst | Create 1 Mega Chain | 45s | 2,500 | 24 | 250 | 130 |
-| 14 | Drift Cluster | Score 3,000; moving clusters | 45s | 3,800 | 25 | 275 | 140 |
-| 15 | Combo City | Reach a 20-hit best streak | 45s | 2,200 | 30 | 300 | 150 |
-| 16 | Danger Signs | Avoid all Bombs and tap 20 safe targets | 45s | 650 | 15 | 325 | 160 |
-| 17 | Shield School | Activate Shield and block 1 Bomb | 45s | 700 | 15 | 350 | 170 |
-| 18 | Safe Chain | Create 3 chains without an unprotected Bomb hit | 45s | 1,800 | 25 | 375 | 180 |
-| 19 | Mega Mastery | Create 2 Mega Chains | 45s | 3,200 | 32 | 400 | 190 |
-| 20 | Chain Master | Reach a 30-hit best streak AND create 5 chains | 55s | 4,500 | 40 | 500 | 200 |
+| 11 | Chain Spark | Make 2 chains | 45s | 900 | 12 | 200 | 110 |
+| 12 | Double Impact | Make 3 chains (five-target clusters) | 45s | 1,500 | 20 | 225 | 120 |
+| 13 | Mega Burst | Make 1 Mega Chain | 45s | 2,500 | 24 | 250 | 130 |
+| 14 | Drift Cluster | Score 3,000 points (moving clusters) | 45s | 3,800 | 25 | 275 | 140 |
+| 15 | Combo City | Hit 20 targets in a row | 45s | 2,200 | 30 | 300 | 150 |
+| 16 | Danger Signs | Tap 20 targets without tapping a Bomb | 45s | 650 | 15 | 325 | 160 |
+| 17 | Shield School | Block 1 Bomb with your Shield | 45s | 700 | 15 | 350 | 170 |
+| 18 | Safe Chain | Make 3 chains without tapping a Bomb | 45s | 1,800 | 25 | 375 | 180 |
+| 19 | Mega Mastery | Make 2 Mega Chains | 45s | 3,200 | 32 | 400 | 190 |
+| 20 | Chain Master | Hit 30 in a row and make 5 chains | 55s | 4,500 | 40 | 500 | 200 |
+
+The objective column is the exact goal text shown to the player (`LevelConfig.Goal`). Level 17 is taught in two steps: press **USE SHIELD**, then tap a red Bomb while the button reads **SHIELD ON**; pressing Shield alone does not count. See the README section "What the player is told".
 
 Objectives follow the detailed GDD table. Names, durations, rewards, scores, cluster spacing, movement speeds and bonuses are implementation tuning choices. Level 16's 20-safe-target minimum prevents completing the avoidance lesson by doing nothing. The GDD describes “2-chain/3-chain” lessons without a precise interaction algorithm; this implementation teaches its explicit 3/5/8 linked-target thresholds in levels 11/12/13.
 

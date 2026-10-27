@@ -35,7 +35,7 @@ public static class Campaign20Smoke
         File.WriteAllText(Report, "");
         PlayerPrefs.DeleteKey("TapBlast.v2.Progress");
         PlayerPrefs.DeleteKey("TapBlast.v1.Level01.Best");
-        PlayerPrefs.DeleteKey("TapBlast.v1.Level01.Stars");
+        PlayerPrefs.DeleteKey("TapBlast.v1.Level01.Stars"); ProgressStore.Invalidate();
         EditorSceneManager.OpenScene("Assets/Scenes/Level01.unity");
         SessionState.SetBool(Key, true); EditorApplication.EnterPlaymode();
     }
@@ -169,7 +169,16 @@ public static class Campaign20Smoke
         {
             Check(game.SelectLevel(id), "Unlocked routing to level " + id);
             TextFits("introGoal"); TextFits("description"); TextFits("starRules"); TextFits("introName");
-            Begin(); TextFits("countdownGoal"); TextFits("hint"); TextFits("subhint"); TextFits("objective"); TextFits("worldLabel"); TextFits("levelChip");
+            foreach (var rule in new[] { "oneStar", "twoStars", "threeStars" })
+            {
+                var ruleText = Field<TMP_Text>(hud.GetComponent<GuiBriefing>(), rule); ruleText.ForceMeshUpdate(true);
+                Check(!ruleText.isTextOverflowing, "Star rule fits: " + rule + " in level " + id);
+            }
+            Check(Field<TMP_Text>(hud, "introGoal").GetParsedText() == game.CurrentLevel.GoalText && Field<TMP_Text>(hud, "description").text.Contains(game.CurrentLevel.WinRule),
+                "Briefing states the exact goal and win rule for level " + id);
+            if (id == 1 || id == 11 || id == 16 || id == 17) { Canvas.ForceUpdateCanvases(); UnitySmoke.Capture(hud, "briefing-" + id.ToString("00")); }
+            Begin(); if (id == 17) { Canvas.ForceUpdateCanvases(); UnitySmoke.Capture(hud, "playing-17"); }
+            TextFits("countdownGoal"); TextFits("hint"); TextFits("subhint"); TextFits("objective"); TextFits("worldLabel"); TextFits("levelChip");
             if(id>10) {
                 TextFits("mechanicStatus");
                 var status=FrameRect(Field<TMP_Text>(hud,"mechanicStatus").rectTransform);
@@ -215,6 +224,8 @@ public static class Campaign20Smoke
             }
             if (game.Session.State == RoundState.Results) Call(game, "Finish");
             TextFits("resultStats"); TextFits("resultHint");
+            foreach (var statTile in Field<TMP_Text[]>(hud, "resultStatTiles"))
+            { statTile.ForceMeshUpdate(true); Check(!statTile.isTextOverflowing, "Stat tile fits: " + statTile.GetParsedText().Replace('\n', ' ') + " in level " + game.CurrentLevel.LevelId); }
             Check(boundsOk && bombsSafe, "All targets stay in bounds and Bombs remain separated in level " + id);
             Check(game.Session.Won && game.Session.Stars == 3, "Level " + id + " has attainable objective and three stars (score " + game.Session.Score + ", chains " + game.Session.Chains + ")");
             Check(game.Session.TimeHits <= config.MaxTimeTargets, "Time bonus budget keeps level " + id + " finite");
@@ -390,7 +401,7 @@ public static class Campaign20Smoke
     {
         var feedback = Field<FeedbackPlayer>(game, "feedback");
         if (feedback.ReducedMotion) hud.Motion.onClick.Invoke();
-        hud.SetSettings(true, false, false);
+        hud.SetSettings(true, false);
         int objects = hud.GetComponentsInChildren<RectTransform>(true).Length;
         game.SelectLevel(6); Begin();
         var pool = Field<TargetPool>(game, "pool"); var golden = Targets()[0];
@@ -441,10 +452,10 @@ public static class Campaign20Smoke
         Check(PopupPart<Image>(last, "Ring").enabled && PopupPart<CanvasGroup>(last, "Alpha").alpha > 0, "Chain wave reaches later members in sequence");
         UnitySmoke.Capture(hud, "animation-chain-wave");
         TickHUD(.8f); Check(!PopupPart<bool>(first, "Active") && !PopupPart<bool>(last, "Active"), "Chain feedback releases all pooled bursts");
-        Begin(); Tap(ChainTarget()); hud.SetSettings(true, true, false);
+        Begin(); Tap(ChainTarget()); hud.SetSettings(true, true);
         Check(PopupPart<CanvasGroup>(last, "Alpha").alpha > 0 && !PopupPart<Image>(last, "Ring").enabled && !PopupPart<Image>(last, "Core").enabled, "Reduced motion reveals pending chain score text without animated effects");
         Check(hud.Shield.transform.localScale == Vector3.one && Field<TMP_Text>(hud, "timer").rectTransform.localScale == Vector3.one, "Reduced motion settles all new HUD punches");
-        hud.SetSettings(true, false, false);
+        hud.SetSettings(true, false);
         game.SelectLevel(20); Begin();
         var result = new RoundSession(new RoundRules(45, 20, 10, 240, 20)); result.Reset(); result.StartPlaying();
         for (int i = 0; i < 20; i++) result.Tap();
@@ -457,9 +468,9 @@ public static class Campaign20Smoke
         UnitySmoke.Capture(hud, "animation-results-stars");
         TickHUD(1.2f);
         Check(hud.ResultRevealComplete && Field<CanvasGroup>(hud, "rewardGroup").alpha == 1, "Result animation ends with fully visible rewards");
-        hud.SetSettings(true, true, false); hud.ShowResults(result, true, result.Score, new ProgressStore.RewardReceipt(0, 0, ProgressStore.Coins, ProgressStore.XP));
+        hud.SetSettings(true, true); hud.ShowResults(result, true, result.Score, new ProgressStore.RewardReceipt(0, 0, ProgressStore.Coins, ProgressStore.XP));
         Check(hud.ResultRevealComplete && !Field<CanvasGroup>(hud, "celebration").gameObject.activeSelf, "Reduced motion shows final results immediately without confetti");
-        hud.SetSettings(true, false, false); game.SelectLevel(13); Begin();
+        hud.SetSettings(true, false); game.SelectLevel(13); Begin();
         Check(Field<TMP_Text>(hud, "timer").rectTransform.localScale == Vector3.one && hud.Shield.transform.localScale == Vector3.one, "Replay resets animation transforms");
         Check(hud.GetComponentsInChildren<RectTransform>(true).Length == objects, "Animation playback creates no new Canvas or target objects");
     }
@@ -504,11 +515,11 @@ public static class Campaign20Smoke
         fx.Clear(); fx.Hit(Vector2.zero, UIArt.Cyan, 12, 15);
         Check(fx.ActiveEffectCount == 1, "Hits within the same combo tier do not repeat the skyline");
         game.SelectLevel(13); Begin(); Tap(ChainTarget());
-        hud.SetSettings(true, true, false);
+        hud.SetSettings(true, true);
         Check(fx.ActiveEffectCount == 0, "Reduced motion clears queued travelling links and explosions immediately");
         Begin(); Tap(ChainTarget());
         Check(fx.ActiveEffectCount == 0, "Reduced motion does not enqueue new animated effects");
-        hud.SetSettings(true, false, false);
+        hud.SetSettings(true, false);
         Begin(); Tap(ChainTarget()); game.BeginCountdown();
         Check(fx.ActiveEffectCount == 0, "Replay cancels queued World 2 feedback");
         Check(hud.GetComponentsInChildren<RectTransform>(true).Length == objects,
@@ -528,10 +539,32 @@ public static class Campaign20Smoke
         Check(card.anchoredPosition == home && fx.ActiveEffectCount == 0, "Shake returns the arena card home and pop accents drain");
         hud.Shake(16, .3f); TickHUD(.05f); game.BeginCountdown();
         Check(card.anchoredPosition == home, "Replay cancels a running shake");
-        hud.SetSettings(true, true, false); hud.Shake(16, .3f); TickHUD(.05f);
+        hud.SetSettings(true, true); hud.Shake(16, .3f); TickHUD(.05f);
         Check(card.anchoredPosition == home, "Reduced motion never shakes the arena");
-        hud.SetSettings(true, false, false);
+        hud.SetSettings(true, false);
         Check(hud.GetComponentsInChildren<RectTransform>(true).Length == objects, "Pop accents and callouts reuse the authored pool");
+        // Bomb: swell, layered explosion (level 16) and shield implosion (level 17) play and drain.
+        foreach (int bombLevel in new[] { 16, 17 })
+        {
+            game.SelectLevel(bombLevel); Begin();
+            var spawner = Field<TargetSpawner>(game, "spawner"); TargetView bomb = null;
+            for (int i = 0; i < 400 && bomb == null; i++)
+            {
+                foreach (var t in Targets()) if (t.Active && t.Kind == TargetKind.Bomb) bomb = t;
+                if (bomb == null) { spawner.Tick(.05f, false); pool.Tick(.05f, false); }
+            }
+            Check(bomb != null, "Level " + bombLevel + " spawns a Bomb for the explosion check");
+            if (bombLevel == 17) game.ActivateShield();
+            fx.Clear(); Tap(bomb);
+            string tag = bombLevel == 17 ? "bomb-blocked" : "bomb";
+            Check(fx.ActiveEffectCount >= (bombLevel == 17 ? 5 : 8), "Bomb " + (bombLevel == 17 ? "block" : "explosion") + " layers its effects");
+            TickHUD(.05f); UnitySmoke.Capture(hud, tag + "-1-swell");
+            TickHUD(.07f); UnitySmoke.Capture(hud, tag + "-2-boom");
+            TickHUD(.15f); UnitySmoke.Capture(hud, tag + "-3-fire");
+            TickHUD(.35f); UnitySmoke.Capture(hud, tag + "-4-smoke");
+            TickHUD(2);
+            Check(fx.ActiveEffectCount == 0, "Bomb " + (bombLevel == 17 ? "block" : "explosion") + " effects drain");
+        }
         game.SelectLevel(13);
     }
     static void VerifyReactionVariety()
@@ -559,10 +592,10 @@ public static class Campaign20Smoke
         Check(fx.Chain(members, count) == 0, "Fourth chain wraps to the electric reaction");
         Check(game.Session.Score == score && game.Session.Hits == hits,
             "Presentation variations cannot grant score or extra hits");
-        hud.SetSettings(true, true, false);
+        hud.SetSettings(true, true);
         fx.Chain(members, count);
         Check(fx.ActiveEffectCount == 0, "Alternate reactions obey reduced motion");
-        hud.SetSettings(true, false, false);
+        hud.SetSettings(true, false);
         game.BeginCountdown();
         Check(fx.LastReactionStyle == 0 && fx.ActiveEffectCount == 0, "Replay resets reaction rotation and effects");
         Check(hud.GetComponentsInChildren<RectTransform>(true).Length == objects, "Reaction variety creates no UI objects");

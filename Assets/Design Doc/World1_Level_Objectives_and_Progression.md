@@ -4,21 +4,23 @@ The supplied GDD v1.0 page 12 is the basis for the primary objectives below. Thi
 
 | Level | Name | Primary objective | Base time | Two-star score | Three-star combo | Coins | XP |
 |---|---|---|---|---|---|---|---|
-| 1 | FIRST SPARK | 20 taps | 60s | 240 | 20 | 50 | 25 |
-| 2 | SIZE IT UP | 500 points | 45s | 750 | 20 | 75 | 35 |
-| 3 | STREAK STARTER | 5-hit best streak | 45s | 600 | 15 | 85 | 40 |
-| 4 | PRECISION PUSH | 1,000 points | 45s | 1,250 | 15 | 100 | 45 |
-| 5 | ON THE MOVE | 10-hit best streak | 45s | 800 | 15 | 110 | 50 |
-| 6 | GOLDEN OPPORTUNITY | 3 Golden targets | 45s | 1,800 | 15 | 125 | 60 |
-| 7 | FAST & FURIOUS | 2,000 points | 40s | 2,500 | 20 | 140 | 70 |
-| 8 | TICK TOCK | 3 Time Bubbles | 35s | 1,400 | 20 | 150 | 75 |
-| 9 | MASTER STREAK | 15-hit best streak | 45s | 1,600 | 25 | 175 | 85 |
-| 10 | GOLDEN CORE | Destroy the 5-hit Core | 50s | 3,000 | 25 | 250 | 100 |
+| 1 | FIRST SPARK | Tap 20 targets | 60s | 240 | 20 | 50 | 25 |
+| 2 | SIZE IT UP | Score 500 points | 45s | 750 | 20 | 75 | 35 |
+| 3 | STREAK STARTER | Hit 5 targets in a row | 45s | 600 | 15 | 85 | 40 |
+| 4 | PRECISION PUSH | Score 1,000 points | 45s | 1,250 | 15 | 100 | 45 |
+| 5 | ON THE MOVE | Hit 10 targets in a row | 45s | 800 | 15 | 110 | 50 |
+| 6 | GOLDEN OPPORTUNITY | Tap 3 Golden targets | 45s | 1,800 | 15 | 125 | 60 |
+| 7 | FAST & FURIOUS | Score 2,000 points | 40s | 2,500 | 20 | 140 | 70 |
+| 8 | TICK TOCK | Tap 3 Time Bubbles | 35s | 1,400 | 20 | 150 | 75 |
+| 9 | MASTER STREAK | Hit 15 targets in a row | 45s | 1,600 | 25 | 175 | 85 |
+| 10 | GOLDEN CORE | Destroy the Golden Core (5 hits) | 50s | 3,000 | 25 | 250 | 100 |
+
+The objective column is the exact goal text shown to the player (`LevelConfig.Goal`). The briefing adds one "how to" sentence (`mechanicHint`) and the win rule; see the README section "What the player is told".
 
 ## Completion and mastery
 
 - Level 1 finishes immediately on its twentieth tap; the clock starts with its tutorial tap.
-- Levels 2–10 start their clock after countdown and finish at timeout. Meeting the objective secures a win while leaving time for mastery. Briefings and HUD communicate this.
+- Levels 2–10 start their clock after countdown and finish at timeout. Meeting the objective secures a win while leaving time for mastery. The briefing says so in its win rule: "Reach it before time runs out, then keep scoring for more stars."
 - One star: achieve the primary objective. Two: also meet the score threshold. Three: also have zero expired targets and meet the best-combo threshold.
 - Misses break the current streak but do not erase a previously reached best streak. Normal taps never count toward special collection goals. Core health damage is not Core destruction.
 - Timings, star scores and rewards are tunable implementation choices rather than fixed GDD values. Score-level two-star thresholds are higher than the winning score. The Unity World 1 harness checks that an ideal clean run can reach all three stars with the actual spawn pacing.

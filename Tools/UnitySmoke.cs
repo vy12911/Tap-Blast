@@ -88,7 +88,7 @@ public static class UnitySmoke
         // This project uses a separate product name; never reset production preferences.
         PlayerPrefs.DeleteKey("TapBlast.v2.Progress");
         PlayerPrefs.SetInt("TapBlast.v1.Level01.Best", 123);
-        PlayerPrefs.SetInt("TapBlast.v1.Level01.Stars", 2);
+        PlayerPrefs.SetInt("TapBlast.v1.Level01.Stars", 2); ProgressStore.Invalidate();
         Check(ProgressStore.BestScore == 123 && ProgressStore.BestStars == 2, "Legacy score and stars remain available before migration");
         string token = ProgressStore.BeginRound();
         Check(ProgressStore.BestScore == 123 && ProgressStore.Coins == 0, "First write migrates legacy progress without inventing rewards");
@@ -272,14 +272,14 @@ public static class UnitySmoke
             {
                 Check(!manager.Session.Won && manager.Session.Stars == 0 && manager.Session.State == RoundState.Results && Targets().Length == 0, "Unfinished round times out and clears arena");
                 Check(ProgressStore.Coins == coinsBefore + 50 && ProgressStore.XP == xpBefore + 25, "Timeout adds no coins or XP");
-                hud.SetSettings(true, true, false);
+                hud.SetSettings(true, true);
                 stage++; deadline = EditorApplication.timeSinceStartup + .1;
             }
             else if (stage == 12)
             {
                 Check(hud.ResultRevealComplete, "Reduced motion reveals final results immediately");
                 Shot("06-timeout");
-                hud.SetSettings(true, false, false);
+                hud.SetSettings(true, false);
                 hud.ShowResults(Completed(true), true, ProgressStore.BestScore, new ProgressStore.RewardReceipt(0, 0, ProgressStore.Coins, ProgressStore.XP));
                 Check(!hud.ResultRevealComplete, "A fresh result sequence can start after failure");
                 Click(hud.Replay.gameObject, false);

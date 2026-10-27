@@ -36,4 +36,4 @@ MonoBehaviour:
   coinReward: 125
   xpReward: 60
   objectiveCount: 3
-  mechanicHint: Tap 3 Golden targets. Each awards 100 base points before your multiplier.
+  mechanicHint: Golden targets say GOLD and are worth 100 points. Tap them before they fade.

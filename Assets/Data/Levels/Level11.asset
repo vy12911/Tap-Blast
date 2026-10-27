@@ -36,7 +36,7 @@ MonoBehaviour:
   coinReward: 200
   xpReward: 110
   objectiveCount: 2
-  mechanicHint: Wait for 3 of one color, then tap one to blast them all.
+  mechanicHint: When 3 or more targets share a color, tap one to blast them all. That is 1 chain.
   clusterSize: 3
   clusterInterval: 2.4
   movementSpeed: 70

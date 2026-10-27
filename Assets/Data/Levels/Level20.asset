@@ -40,7 +40,7 @@ MonoBehaviour:
   coinReward: 500
   xpReward: 200
   objectiveCount: 5
-  mechanicHint: Build 30 best combo and 5 same-color chains. Avoid Bombs.
+  mechanicHint: Chain targets add to your streak. A Bomb tap or a fade resets it to 0.
   clusterSize: 8
   clusterInterval: 2.4
   movementSpeed: 100

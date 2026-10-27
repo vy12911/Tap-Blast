@@ -17,7 +17,6 @@ namespace TapBlast
         [field: SerializeField] public Button Replay { get; private set; }
         [field: SerializeField] public Button Sound { get; private set; }
         [field: SerializeField] public Button Motion { get; private set; }
-        [field: SerializeField] public Button Haptics { get; private set; }
         [field: SerializeField] public Button Next { get; private set; }
         [field: SerializeField] public Button Shield { get; private set; }
         [SerializeField] private TMP_Text shieldLabel, mechanicStatus;
@@ -65,6 +64,17 @@ namespace TapBlast
         [Tooltip("Coloured chips behind the results outcome and personal-best labels; three star icons on the briefing best pill.")]
         [SerializeField] private Image resultOutcomeChip, resultBestChip;
         [SerializeField] private Image[] introBestStars = new Image[3];
+        [Header("Results visuals")]
+        [Tooltip("Gradient on the star stage (top of the score card); warm for a win, slate for a miss.")]
+        [SerializeField] private UIGradient resultStageGradient;
+        [SerializeField] private Image resultStageGlow;
+        [Tooltip("Sunburst behind the stars. It sits on its own nested Canvas so its slow spin never re-batches the page.")]
+        [SerializeField] private RectTransform resultRays;
+        [Tooltip("Three stat tiles under the score card (value + label).")]
+        [SerializeField] private TMP_Text[] resultStatTiles = new TMP_Text[3];
+        [SerializeField] private TMP_Text rewardCoins, rewardXP;
+        [SerializeField] private GameObject rewardChips;
+        [SerializeField] private Image resultHintChip;
         [Header("Feedback distances in Canvas reference pixels")]
         [SerializeField] private float popupRise = 48, sparkStartRadius = 33, sparkTravel = 127.5f, previewGlowPadding = 120;
         [Tooltip("Soft plate drawn behind callout words (CHAIN!, MEGA CHAIN!, combo milestones).")]
@@ -95,7 +105,7 @@ namespace TapBlast
             public float Age, BlastScale = 1;
             public int ReactionStyle;
             public bool Active, ReducedMotion;
-            // Runtime state only. Kind: 0 = target pop, 1 = message (MISS, BOMB), 2 = callout word.
+            // Runtime state only. Kind: 0 = target pop, 1 = message (MISS), 2 = callout word, 3 = bomb.
             [System.NonSerialized] public int Kind;
             [System.NonSerialized] public float Life, LabelScale, SizeScale;
             [System.NonSerialized] public Vector2 LabelHome;
@@ -120,7 +130,8 @@ namespace TapBlast
             levelLabel.text = config.LevelId.ToString("00");
             countdownGoal.text = config.GoalText;
             introHero.SetActive(config.LevelId != 2); sizePreview.SetActive(config.LevelId == 2);
-            description.text = config.MechanicHint + (config.FirstTapTutorial ? "" : "\nKeep playing for mastery until time runs out.");
+            // How to do it, then when you win: the same two lines on every level.
+            description.text = config.MechanicHint + "\n<color=#6B7190>" + config.WinRule + "</color>";
             for (int i = 0; i < 3; i++)
             {
                 ((RectTransform)sizePreview.transform.GetChild(i * 2)).sizeDelta = Vector2.one * (config.SizeAt(i) + previewGlowPadding);
@@ -129,8 +140,8 @@ namespace TapBlast
             introName.text = levelName;
             introGoal.text = config.LevelId == 1 ? "Tap <color=#5B6CFF>" + config.RequiredTaps + "</color> targets in <color=#5B6CFF>" + config.Duration.ToString("0") + "</color> seconds" : config.GoalText;
             countdownGoal.text = introGoal.text;
-            if(config.FirstTapTutorial) description.text = "Tap glowing circles before they fade.\nYour first tap starts the clock.";
-            starRules.text = "1 STAR   Complete the level\n2 STARS   Complete + score " + config.TwoStarScore + "+\n3 STARS   Both + no mistakes + " + config.ThreeStarCombo + " combo";
+            if (config.FirstTapTutorial) description.text = config.MechanicHint + "\n<color=#6B7190>Your first tap starts the clock. " + config.WinRule + "</color>";
+            starRules.text = "1 STAR   " + config.OneStarRule + "\n2 STARS   " + config.TwoStarRule + "\n3 STARS   " + config.ThreeStarRule;
             rewardPreview.text = "COMPLETE:  +" + config.CoinReward + " COINS   +" + config.XPReward + " XP";
             int bestStars = ProgressStore.GetBestStars(config.LevelId);
             introBest.text = best > 0 ? "Personal best  <color=#1E2240>" + best.ToString("N0") + "</color>" : "No best yet  ·  set one!";
@@ -191,7 +202,7 @@ namespace TapBlast
             Shield.gameObject.SetActive(playing && config.ShieldCharges > 0);
             Shield.interactable = playing && !session.ShieldActive && session.ShieldsRemaining > 0;
             shieldActive = session.ShieldActive;
-            shieldLabel.text = session.ShieldActive ? "SHIELD ACTIVE" : session.ShieldsRemaining > 0 ? "SHIELD  " + session.ShieldsRemaining : "SHIELD USED";
+            shieldLabel.text = session.ShieldActive ? "SHIELD ON" : session.ShieldsRemaining > 0 ? "USE SHIELD" : "SHIELD USED";
             mechanicStatus.gameObject.SetActive(playing && config.LevelId > 10);
             mechanicStatus.text = "CHAINS " + session.Chains + "   MEGA " + session.MegaChains + "   BOMBS " + session.BombHits +
                 (config.RequiredCombo > 0 ? "   BEST " + session.BestCombo + "/" + config.RequiredCombo : "");
@@ -201,40 +212,57 @@ namespace TapBlast
             HideOverlays(); results.SetActive(true); Pause.interactable = false; animateFeedback = false; ClearFeedback();
             SetHint("", "");
             HideTapHand();
-            resultTitle.text = session.Won ? "Brilliant!" : "Try again";
+            resultTitle.text = session.Won ? (session.Stars == 3 ? "Brilliant!" : "Well done!") : "So close!";
+            SetLabelColors(resultTitle, session.Won ? new Color32(64, 76, 230, 255) : new Color32(46, 52, 92, 255),
+                session.Won ? new Color32(150, 72, 224, 255) : new Color32(98, 92, 150, 255));
+            // Star stage: deep indigo to violet for a win, calm slate for a miss.
+            resultStageGradient.Set(session.Won ? new Color32(92, 106, 255, 255) : new Color32(112, 122, 168, 255),
+                session.Won ? new Color32(160, 88, 236, 255) : new Color32(140, 128, 186, 255), true);
+            resultStageGlow.enabled = session.Won;
+            resultRays.GetComponent<Image>().color = new Color(1, 1, 1, session.Won ? .24f : .1f);
             resultSubtitle.text = session.Won ? "Level " + session.LevelId.ToString("00") + " complete" : session.BombObjectiveFailed ? "Bomb hit  ·  objective missed" : "Time up  ·  objective missed";
             // Outcome chip: green for a win, rose for a miss (text keeps 4.5:1 on its chip).
             resultOutcomeChip.color = session.Won ? new Color32(220, 246, 229, 255) : new Color32(255, 226, 233, 255);
             resultSubtitle.color = session.Won ? new Color32(20, 112, 64, 255) : new Color32(176, 36, 76, 255);
-            bool hasNext = session.Won && session.LevelId < 20 && ProgressStore.IsUnlocked(session.LevelId + 1);
+            bool hasNext = session.Won && session.LevelId < ProgressStore.LevelCount && ProgressStore.IsUnlocked(session.LevelId + 1);
             Next.gameObject.SetActive(hasNext);
             Replay.GetComponentInChildren<TMP_Text>().text = hasNext ? "Replay" : "Play again";
             for (int i = 0; i < 3; i++) resultStars[i].color = i < session.Stars ? Color.white : UIArt.Unearned;
             resultScore.text = session.Score.ToString("N0");
+            SetLabelColors(resultScore, new Color32(40, 46, 112, 255), new Color32(112, 72, 214, 255));
             resultBest.text = newBest ? "New personal best!" : "Personal best  " + best.ToString("N0");
             resultBestChip.color = newBest ? new Color32(255, 239, 196, 255) : new Color32(238, 235, 255, 255);
             resultBest.color = newBest ? new Color32(160, 84, 0, 255) : new Color32(72, 80, 112, 255);
-            // <pos> tab stops keep the value columns aligned in the proportional font.
-            // Grey labels, bold navy values in aligned columns.
-            const string L = "<color=#6B7190>", V = "</color><b>", E = "</b>";
-            resultStats.text = L + "Targets tapped<pos=78%>" + V + session.Hits + E + "\n" + L + "Best combo<pos=78%>" + V + session.BestCombo + E + "\n" + L + "Targets missed<pos=78%>" + V + session.Misses + E;
-            if (session.LevelId > 10)
-                resultStats.text = L + "Best combo<pos=36%>" + V + session.BestCombo + E + L + "<pos=52%>Misses<pos=88%>" + V + session.Misses + E +
-                    "\n" + L + "Chains<pos=36%>" + V + session.Chains + E + L + "<pos=52%>Mega chains<pos=88%>" + V + session.MegaChains + E +
-                    "\n" + L + "Bombs hit<pos=36%>" + V + session.BombHits + E + L + "<pos=52%>Shield blocks<pos=88%>" + V + session.ShieldBlocks + E;
+            // Three stat tiles: big coloured value over a short label (World 2 adds a second stat to each).
+            resultStats.text = "This round";
+            bool chains = session.LevelId > 10;
+            StatTile(0, chains ? session.Chains : session.Hits, chains ? "Chains  ·  Mega " + session.MegaChains : "Targets", "3B5BDB");
+            StatTile(1, session.BestCombo, chains ? "Best combo  ·  Missed " + session.Misses : "Best combo", "D9600F");
+            StatTile(2, chains ? session.BombHits : session.Misses, chains ? "Bombs  ·  Shields " + session.ShieldBlocks : "Missed",
+                (chains ? session.BombHits : session.Misses) == 0 ? "16834A" : "C2264F");
             resultHint.text = !session.Won ? "Tap targets as they appear.\nYou can try again immediately." : session.Stars == 3 ? "Mastery achieved! All three stars earned!" : "Chase three stars: keep a clean streak\nand aim for the score goal.";
             if (hasNext) resultHint.text = "LEVEL " + (session.LevelId + 1) + " UNLOCKED\nGet ready for the next challenge!";
-            else if (session.Won && session.LevelId == 20) resultHint.text = "ALL LEVELS COMPLETE!\nReplay levels to earn every star.";
-            rewardEarned.text = session.Won ? "+" + receipt.Coins + " coins   ·   +" + receipt.XP + " XP" : "Complete the level to earn rewards";
-            rewardBalance.text = "Wallet  " + UIArt.Compact(receipt.TotalCoins) + " coins   ·   Total XP  " + receipt.TotalXP.ToString("N0");
+            else if (session.Won && session.LevelId == ProgressStore.LevelCount) resultHint.text = "ALL LEVELS COMPLETE!\nReplay levels to earn every star.";
+            rewardEarned.text = session.Won ? "Rewards earned" : "Complete the level to earn rewards";
+            rewardChips.SetActive(session.Won);
+            rewardCoins.text = "+" + receipt.Coins.ToString("N0"); rewardXP.text = "+" + receipt.XP.ToString("N0") + " XP";
+            rewardBalance.text = "Wallet  <color=#1E2240><b>" + UIArt.Compact(receipt.TotalCoins) + "</b></color> coins   ·   Total  <color=#1E2240><b>" + UIArt.Compact(receipt.TotalXP) + "</b></color> XP";
             bool leveledUp = receipt.TotalXP / 100 > (receipt.TotalXP - receipt.XP) / 100;
             playerProgress.text = (leveledUp ? "Level up!  Player level " : "Player level ") + receipt.PlayerLevel + "   ·   " + (receipt.TotalXP % 100) + " / 100 XP";
             xpFill.rectTransform.anchorMax = new Vector2(receipt.TotalXP % 100 / 100f, 1);
+            // Hint chip: green when a level unlocks, gold for mastery, lavender otherwise.
+            bool unlocked = hasNext || (session.Won && session.LevelId == ProgressStore.LevelCount), mastery = session.Won && session.Stars == 3 && !unlocked;
+            resultHintChip.color = unlocked ? new Color32(222, 247, 231, 255) : mastery ? new Color32(255, 241, 204, 255) : new Color32(238, 235, 255, 255);
+            resultHint.color = unlocked ? new Color32(20, 112, 64, 255) : mastery ? new Color32(150, 84, 0, 255) : new Color32(72, 80, 112, 255);
             resultReveal.Begin(session.Score, session.Stars, reducedMotion);
             Celebrate(session.Won);
             GetComponent<GuiScreenVisibility>()?.Refresh();
         }
-        public void SetSettings(bool sound, bool reducedMotion, bool haptics)
+        private void StatTile(int index, int value, string label, string hex)
+        {
+            resultStatTiles[index].text = "<size=150%><b><color=#" + hex + ">" + value.ToString("N0") + "</color></b></size>\n<color=#5E6488>" + label + "</color>";
+        }
+        public void SetSettings(bool sound, bool reducedMotion)
         {
             this.reducedMotion = reducedMotion;
             WorldEffects.SetMotion(reducedMotion);
@@ -253,7 +281,6 @@ namespace TapBlast
             // Setting rows: name left, state in a right-hand column.
             Sound.GetComponentInChildren<TMP_Text>().text = "Sound<pos=78%>" + (sound ? "On" : "Off");
             Motion.GetComponentInChildren<TMP_Text>().text = "Reduced motion<pos=78%>" + (reducedMotion ? "On" : "Off");
-            Haptics.GetComponentInChildren<TMP_Text>().text = "Vibration<pos=78%>" + (haptics ? "On" : "Off");
         }
         /// <summary>Target pop: the ball squashes and bursts (body sprite), a ring and candy sparks fly out,
         /// and the score bounces in, then floats away. Pass the tapped target so the burst matches its look.</summary>
@@ -293,6 +320,16 @@ namespace TapBlast
             p.Kind = 1; p.Label.text = text; p.Core.enabled = p.Face.enabled = false;
             SetLabelColors(p.Label, Color.white, Color.Lerp(tint, Color.white, .35f));
             foreach (var spark in p.Sparks) spark.gameObject.SetActive(false);
+        }
+        /// <summary>Bomb tap: the bomb swells and heats up before the blast, or shrinks into the shield when
+        /// blocked; the penalty (or BLOCKED!) text shakes in.</summary>
+        public void HazardPop(Vector2 position, string text, Color tint, bool reducedMotion, TargetView bomb, bool blocked)
+        {
+            MessagePop(position, text, tint, reducedMotion);
+            var p = popups[(popupCursor - 1) % popups.Length];
+            p.Kind = 3; p.Life = .85f; p.LabelScale = 1.2f; p.ReactionStyle = blocked ? 1 : 0;
+            p.Core.enabled = !reducedMotion; p.Core.sprite = bomb.Body; p.Core.color = Color.white;
+            p.Core.rectTransform.sizeDelta = Vector2.one * bomb.Diameter; p.Core.rectTransform.localScale = Vector3.one;
         }
         /// <summary>Big word over the arena (CHAIN!, MEGA CHAIN!, combo milestones) on a soft dark plate.</summary>
         public void Callout(string text, Color accent, float delay = 0)
@@ -347,7 +384,11 @@ namespace TapBlast
         {
             TickJuice(delta);
             tapHand.Tick(delta, animateFeedback, reducedMotion);
-            if (results.activeSelf) resultReveal.Tick(delta, reducedMotion);
+            if (results.activeSelf)
+            {
+                resultReveal.Tick(delta, reducedMotion);
+                if (!reducedMotion) resultRays.Rotate(0, 0, -6 * delta);
+            }
             if (!animateFeedback) return;
             TickProgress(delta);
             WorldEffects.Tick(delta);
@@ -381,6 +422,16 @@ namespace TapBlast
             float rise = 1 - (1 - t) * (1 - t);
             label.localScale = Vector3.one * (p.LabelScale * Mathf.LerpUnclamped(.3f, 1, BackOut(Mathf.Clamp01(p.Age / .2f))));
             label.anchoredPosition = p.LabelHome + Vector2.up * (popupRise * 1.5f * rise);
+            if (p.Kind == 3)
+            {
+                // Shaky penalty text; the bomb swells white-hot for the fuse time, or implodes into the shield.
+                label.localEulerAngles = new Vector3(0, 0, Mathf.Sin(p.Age * 45) * 7 * (1 - t));
+                bool blocked = p.ReactionStyle == 1;
+                float f = p.Age / (blocked ? .22f : World2Effects.BombFuseSeconds);
+                p.Core.rectTransform.localScale = f >= 1 ? Vector3.zero : Vector3.one * (blocked ? 1 - f * f : 1 + .3f * f);
+                p.Core.color = blocked ? Color.Lerp(Color.white, UIArt.Cyan, f) : Color.Lerp(Color.white, new Color(1, .75f, .6f), f);
+                return;
+            }
             if (p.Kind != 0) return;
             // Ball: quick squash (wide and short), then swells and fades as it bursts.
             float c = p.Age / .17f;

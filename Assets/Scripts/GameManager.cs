@@ -58,7 +58,6 @@ public sealed class GameManager : MonoBehaviour
         hud.Replay.onClick.AddListener(BeginCountdown);
         hud.Sound.onClick.AddListener(ToggleSound);
         hud.Motion.onClick.AddListener(ToggleMotion);
-        hud.Haptics.onClick.AddListener(ToggleHaptics);
         hud.Next.onClick.AddListener(NextLevel);
         hud.Shield.onClick.AddListener(ActivateShield);
         hud.IntroMenu.onClick.AddListener(ShowLevels);
@@ -128,12 +127,16 @@ public sealed class GameManager : MonoBehaviour
             int penalty = Session.Tap(TargetKind.Bomb);
             feedback.PlayHazard(protectedTap);
             hud.WorldEffects.Hazard(bombPosition, protectedTap);
-            hud.Shake(protectedTap ? 6 : 16, protectedTap ? .2f : .32f);
+            hud.Shake(protectedTap ? 6 : 16, protectedTap ? .2f : .34f, protectedTap ? .2f : World2Effects.BombFuseSeconds);
             if (protectedTap) hud.ShieldJuice();
-            hud.MessagePop(bombPosition, protectedTap ? "SHIELD!" : "BOMB " + penalty, target.Tint, feedback.ReducedMotion);
+            hud.HazardPop(bombPosition, protectedTap ? "BLOCKED!" : penalty < 0 ? "BOOM!  " + penalty : "BOOM!", protectedTap ? UIArt.Cyan : target.Tint,
+                feedback.ReducedMotion, target, protectedTap);
             hud.HitJuice(Session.Combo);
-            hud.SetHint(protectedTap ? "SHIELD BLOCKED THE BOMB" : "BOMB HIT! COMBO RESET",
-                protectedTap ? "Shield consumed. Avoid the remaining Bombs." : Session.BombObjectiveFailed ? "No-Bomb goal missed. Replay to try again." : "Avoid red Bombs marked X. Let them fade.");
+            hud.SetHint(protectedTap ? "SHIELD BLOCKED THE BOMB" : "BOMB HIT! STREAK RESET",
+                protectedTap ? (Session.GoalMet ? "Goal done! Keep scoring for more stars." : "Shield used. Leave the other Bombs alone.")
+                : Session.BombObjectiveFailed ? "This goal needed zero Bomb taps. Replay to try again."
+                : level.Objective == ObjectiveKind.Shield && Session.ShieldsRemaining > 0 ? "Press SHIELD first, then tap a Bomb."
+                : "Leave red Bombs (X) alone. They fade safely.");
             RefreshHUD(); return;
         }
         int chainCount = pool.FindChain(target, chainTargets);
@@ -220,17 +223,20 @@ public sealed class GameManager : MonoBehaviour
     {
         pool.Release(target);
         if (Session.State != RoundState.Playing) return;
-        if (target.Kind == TargetKind.Bomb) return;
+        if (target.Kind == TargetKind.Bomb) { hud.WorldEffects.Fizzle(target.Position); return; }
         Session.Miss();
         hud.MissJuice(target.Position);
         hud.SetHint("TARGET MISSED", "Your combo reset. Try the next one!");
         RefreshHUD();
     }
 
-    public void Pause()
+    public void Pause() { if (PauseRound()) hud.ShowPause(); }
+    /// <summary>Pauses under an overlay (the wallet) without opening the pause menu; Resume restores play.</summary>
+    public void PauseBehindOverlay() { PauseRound(); }
+    private bool PauseRound()
     {
-        if (Session == null || (Session.State != RoundState.Playing && Session.State != RoundState.Countdown)) return;
-        resumeState = Session.State; Session.Pause(); pool.SetInteractable(false); hud.ShowPause();
+        if (Session == null || (Session.State != RoundState.Playing && Session.State != RoundState.Countdown)) return false;
+        resumeState = Session.State; Session.Pause(); pool.SetInteractable(false); return true;
     }
     public void Resume()
     {
@@ -280,14 +286,13 @@ public sealed class GameManager : MonoBehaviour
         if (Session == null || !Session.ActivateShield()) return;
         hud.ShieldJuice();
         hud.WorldEffects.ShieldActivate();
-        hud.SetHint("SHIELD ACTIVE", "One Bomb hit is protected. Your combo and score are safe.");
+        hud.SetHint("SHIELD ON! NOW TAP A BOMB", "The Shield stops it: no points lost, streak kept.");
         RefreshHUD();
     }
     private void RefreshHUD() { displayedSecond = Mathf.CeilToInt(Session.RemainingTime); hud.Refresh(Session, level); }
-    private void RefreshSettings() { hud.SetSettings(feedback.SoundEnabled, feedback.ReducedMotion, feedback.HapticsEnabled); }
+    private void RefreshSettings() { hud.SetSettings(feedback.SoundEnabled, feedback.ReducedMotion); }
     private void ToggleSound() { feedback.ToggleSound(); RefreshSettings(); }
     private void ToggleMotion() { feedback.ToggleMotion(); pool.SetReducedMotion(feedback.ReducedMotion); RefreshSettings(); }
-    private void ToggleHaptics() { feedback.ToggleHaptics(); RefreshSettings(); }
     private void OnApplicationPause(bool paused) { if (paused) Pause(); }
     private void OnApplicationFocus(bool focused) { if (!focused) Pause(); }
     private void OnDestroy()

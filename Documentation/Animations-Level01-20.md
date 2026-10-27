@@ -1,55 +1,67 @@
-# Animation coverage through level 20
+# Gameplay animations
 
 Reference: supplied Tap Blast GDD v1.0, animation table on pages 13–14, target/tutorial requirements on pages 2 and 8, and the detailed early-level progression on pages 12–13.
 
-| GDD animation | Levels using it | Implementation |
+**Rule for every level, including new ones:** feedback is chosen by target kind and event, never by level number, so a new level gets everything below automatically. The full rule set (required feedback per event, restraint limits, how to add an effect) is in [AGENTS.md section 5](../AGENTS.md).
+
+## Core feedback (all levels)
+
+| Event | What the player sees | Where |
 |---|---|---|
-| Tap: scale down, pop, ring burst | 1–20 | A pooled shrinking core leads the expanding ring by 80 ms, with outward sparks and floating score. Scoring and input remain immediate. |
-| Combo: HUD punch / number bounce | 1–20 | Score, combo, multiplier and Fever label punch at hits, with stronger emphasis at combo thresholds. |
-| Golden: pulse and rotating/radiating ring | 6 onward where Golden targets spawn | The ring expands/contracts over a one-second cycle, accompanied by a glow pulse. Lifetime fill remains independent and accurate. This implements the GDD's radiating-ring option. |
-| Bomb: warning pulse with a fair visual cue | 16–20 | A smooth 1.5 Hz red glow/body pulse; the X/BOMB label stays steady and readable. The pulse does not move the Bomb or alter its tap radius. |
-| Chain: sequential blast wave | 11–20 | Same-color matching across the board, ordered nearest-first from the tapped target, drives target removal and pooled bursts from the tapped member outward, with 160 ms between members and a distinct rising detonation sound on each impact. The next target heats from its color to white and compresses just before detonation and cannot be tapped or expire. Chain 2 and Mega use larger rings. Score commits once; the visual ripple cannot grant additional rewards. |
-| Level complete: confetti and reward reveal | 1–20 | Confetti, score count-up, personal-best reveal, staggered bouncing stars, then reward fade-in. Replay/navigation can interrupt the reveal safely. |
+| Spawn | Target springs in from 40% with a ~4% overshoot, settled by 0.2 s. | `TargetView.SetReducedMotion` |
+| Tap | The ball squashes wide and short with its star face, then swells and bursts; a soft white flash; a lightened ring thins as it expands; gold star sparkles and white streaks fly out on gravity arcs; the score springs in and floats up. ~0.7 s. | `GameHUD.Pop` / `AnimatePopup`, `World2Effects.Burst` |
+| Golden | Gold shards, a gold star shower, a gold ring and a larger "+100". | `Burst` (Golden) |
+| Time Bubble | Two soft ripples, plus the timer punch. | `Burst` (Time), `TimeJuice` |
+| Golden Core | Each hit: gold shards, ring, small shake. Destroyed: arena finale, bigger shake, "CORE DESTROYED!" callout. | `Burst` (Boss), `Finale`, `Shake` |
+| Combo milestones 5/10/20/30/50 | Callout word NICE! / GREAT! / AWESOME! / AMAZING! / LEGENDARY! springs in over the arena on a soft dark plate; HUD fever label and milestone sound. | `GameHUD.Callout` |
+| Miss (expiry) | "MISS" text and a quiet grey puff. | `MessagePop`, `World2Effects.Puff` |
+| Combo HUD | Score, combo, multiplier and fever label punch on hits. | `GameHUD.Juice` |
+| Level complete | Star stage with a slowly turning sunburst and gold glow, score count-up, staggered star bounce, stat tiles, reward chips, confetti. | `ShowResults`, `ResultReveal` |
 
-Additional contextual feedback supports the first 20 levels: the level-1 tutorial hand presses with a ripple; targets animate their arrival and lifetime rings; Time Bubble collection punches the timer; surviving Golden Core hits produce a glow impact and health-ring highlight; Shield activation pulses the button, holds a gentle active pulse, and confirms a protected Bomb hit with a short punch.
+## Chains (any level with chain targets)
 
-## Pause, replay and accessibility
+Same-colour matching across the board, ordered nearest-first from the tapped target, detonates one target every 160 ms (`TargetView.ChainStepSeconds`). The next target heats from its colour to white and compresses just before it blows, and cannot be tapped or expire. Each detonation gets a white flash and a pooled pop (squash, ring, sparkles, score). The last link brings a callout: CHAIN! (3–4), SUPER CHAIN! (5–7, light shake) or MEGA CHAIN! (8+, gold arena flash, shard fountain, star shower, stronger shake). Score commits once; the visuals cannot grant extra rewards.
 
-Target cosmetics use the existing pool tick. HUD effects use one shared feedback tick. There are no per-target Update methods, coroutines, or new runtime UI objects. Existing target and feedback pools are reused.
+Successive chains rotate three reaction styles: Electric → Comet → Split Wave. Electric uses angular lightning and sharp shards; Comet follows a curved sparkling path and unwinds into twin spirals; Split Wave sends two ribbons around the path and bursts into four diagonal rays. Comet and Split Wave suppress the popup ring and sparks so the silhouettes stay distinct. Replay resets the rotation.
 
-The saved feedback container has a RectMask2D so large chain rings cannot spill onto the objective, hints or combo HUD. Chain rings use partial opacity to keep remaining targets readable.
+## Bombs and Shield (any level with Bombs)
 
-Pause freezes target, chain, Shield and other gameplay animation clocks. Replay and navigation reset transient transforms and queued feedback. Enabling reduced motion while paused immediately resets target pulses and HUD punches; pending chain feedback becomes static score text. Golden/Bomb identities, lifetime/health rings, Shield status and actual gameplay movement remain available. Reduced-motion results show final values immediately without confetti.
+- **Warning:** a smooth 1.5 Hz red glow pulse and four amber brackets; the X/BOMB label stays steady and the tap radius never changes.
+- **Tapped:** the bomb swells white-hot for 70 ms (`World2Effects.BombFuseSeconds`), then explodes in layers: white flash, lumpy fireball (white core, orange body, red rim), crisp shockwave ring, charcoal and glowing debris under gravity, rising flickering embers, drifting smoke, a brief scorch mark and a faint red arena wash. The arena shakes as it blows, a synthesised explosion plays (falling bass thump, rumble, crack), and "BOOM! -N" shakes in.
+- **Blocked by Shield:** the bomb implodes, with sparks and a ring rushing inward, into a cyan hexagon bubble; "BLOCKED!", a light shake and the shield sound.
+- **Left alone:** when it expires it fizzles out in a small puff of smoke, with no penalty.
 
-Perfect Tap's micro-freeze/precision ring and Ultimate's time-stretch/full-screen blast belong to later campaign systems, so they are not part of the animation coverage for levels 1–20.
+## Shake
 
-## Verification
+`GameHUD.Shake(strength, seconds, delay)` offsets the whole arena card (rim, targets, effects) with a decaying wobble and always restores the exact saved position. A stronger request overrides a weaker running one. It is used only for big moments: Bomb 16, Mega Chain 10, Core destroyed 12, 5+ chain 5, Core hit 5, Shield block 6 (reference pixels). `Shake Scale` on GameHUD tunes all of them (0 disables).
 
-`Tools/Validate-Level1.ps1` checks runtime/editor compilation and round rules. `Tools/Run-Campaign20.ps1 -Mode Smoke` runs the full campaign plus animation assertions: ordering, pulse changes, health/lifetime accuracy, pause, reduced motion, reset, result sequencing and unchanged object counts.
+## World 2 themed flourishes
 
-Frame captures are saved as `animation-*.png` under `Temp/Campaign20Validation/`, including Golden ring phases, Bomb warning, successive chain-wave frames, and result reveal stages. Animation timing is tested in Unity; on-device frame rate, touch feel and final Android presentation still need APK testing.
-
-## World 2 effects by level
-
-The saved **Pooled feedback / World 2 chain energy** Graphic draws pooled geometry beneath score popups. Its Inspector exposes intensity, link width and burst radius. It inherits the arena feedback mask and never intercepts input. No UI objects or materials are created during play.
+The saved **Pooled feedback / World 2 chain energy** Graphic (`World2Effects`) draws all arena effects for every level in one procedural mesh. On top of the core feedback above, levels 11–20 add these per-level touches:
 
 | Level | Visual identity |
 |---|---|
-| 11 Chain Spark | Colored energy travels between actual matched targets; each arrival releases a ring and star shower. Hexagonal halos identify ready groups. |
+| 11 Chain Spark | Coloured energy travels between matched targets; hexagonal halos identify ready groups. |
 | 12 Double Impact | Every detonation has a delayed second golden shockwave. |
-| 13 Mega Burst | Eight matching targets gain orbiting golden glints; a Mega finishes with an oversized gold shockwave and white star shower. |
-| 14 Drift Cluster | Moving colored targets leave three fading contour trails, alongside travelling chain links. |
-| 15 Combo City | Hits sparkle; crossing a ten-hit milestone launches a skyline of ascending gold energy and fireworks. Chains that skip over a milestone also trigger it. |
-| 16 Danger Signs | Bombs have four amber warning brackets; safe hits produce green hexagonal pulses. |
-| 17 Shield School | Activating Shield sends an expanding cyan hexagon across the arena. Bombs gain a cyan protective outline while Shield is active; blocking produces double cyan impact ripples and white glints. |
-| 18 Safe Chain | Green hexagonal ripples accompany each safe chain detonation; Bombs remain outside the chain. |
-| 19 Mega Mastery | Mega finishes add a delayed second cyan shockwave around the golden blast. |
-| 20 Chain Master | Every chain launches five gold/cyan fireworks from its final target; combo milestones retain the skyline celebration. |
+| 13 Mega Burst | Eight matching targets gain orbiting golden glints. |
+| 14 Drift Cluster | Moving coloured targets leave three fading contour trails. |
+| 15 Combo City | Hits sparkle; crossing a ten-hit milestone launches a skyline of ascending gold energy. |
+| 16 Danger Signs | Safe hits produce green hexagonal pulses. |
+| 17 Shield School | Activating Shield sends an expanding cyan hexagon across the arena; Bombs gain a cyan outline while it is active. |
+| 18 Safe Chain | Green hexagonal ripples accompany each safe chain detonation. |
+| 19 Mega Mastery | Mega finishes add a delayed second cyan shockwave. |
+| 20 Chain Master | Every chain launches five gold/cyan fireworks from its final target. |
 
-Effects use 128 fixed transient slots. Overload replaces cosmetics only, never target state or scoring. One shared HUD clock advances them; pause freezes it and replay/navigation/results clear it. Reduced motion removes travelling links, trails and explosions immediately while retaining static readiness and hazard/Shield indicators. Existing floating scores and state labels remain readable.
+These are optional decoration. New levels do not need one.
 
-Validation: the campaign harness checks all ten effect paths, effect cleanup, pause, reduced motion, serialized bindings, clipping, raycast exclusion and unchanged Canvas object counts. It saves impact/cascade captures as vfx-11 through vfx-20 under Temp/Campaign20Validation. Device GPU performance and touch feel still need hardware playtesting.
+## Pause, replay, accessibility and performance
 
-### Three reaction styles
+Target cosmetics use the pool tick; HUD and arena effects share one feedback clock. There are no per-target Update methods, coroutines, particle systems or runtime UI objects. Effects use 192 fixed slots; overload replaces the oldest cosmetics only, never target state or scoring. Popups come from 16 authored "Tap feedback" objects. The effect mesh only rebuilds while something is playing (World 2 boards animate every frame). The feedback container has a RectMask2D, so large rings cannot spill onto the HUD.
 
-Successive chains within a round rotate Electric ? Comet ? Split Wave, then repeat. Electric uses angular lightning and sharp shards; Comet follows a curved sparkling path and unwinds into twin spirals; Split Wave sends two ribbons around the path and bursts into four diagonal rays. Comet and Split Wave suppress the ordinary popup rings/sparks so the silhouettes stay distinct. Per-level signature effects still apply. Target order, 160 ms hit timing, scoring and Bomb exclusions stay consistent. Replay resets the rotation; reduced motion suppresses every animated style. The Unity harness captures all three as reaction-0/1/2-travel/burst.png.
+Pause freezes every effect clock and the shake. Replay and navigation clear queued effects, popups and shake. Reduced motion removes squash, rings, sparks, flashes, explosions, callout motion, shake and confetti immediately, while score text, state labels, Golden/Bomb identities, lifetime/health rings and Shield status stay readable.
+
+Perfect Tap's micro-freeze and Ultimate's full-screen blast belong to later campaign systems.
+
+## Verification
+
+`Tools/Run-Campaign20.ps1 -Mode Smoke` checks ordering, pulses, pause, reduced motion, reset, result sequencing, effect draining, shake restoration, Bomb explosion and Shield block layering, and unchanged object counts. Captures land in `Temp/Campaign20Validation/`: `pop-*` (single tap and callout), `bomb-*` and `bomb-blocked-*` (four stages each), `animation-chain-*`, `reaction-*`, `vfx-11` to `vfx-20`. On-device frame rate and touch feel still need APK testing.

@@ -58,6 +58,12 @@ namespace TapBlast
             progressHead.localScale = Vector3.one; headClock = 0; earnedStars = 0;
             Shield.targetGraphic.color = UIArt.Primary;
         }
+        // A transform write re-batches the whole Canvas, so skip it when nothing changed (most frames).
+        private static void SetScale(Transform target, float scale)
+        {
+            var value = new Vector3(scale, scale, 1);
+            if (target.localScale != value) target.localScale = value;
+        }
         // Offsets the whole arena card (rim, targets, effects) and always restores the authored position.
         private void ApplyShake(Vector2 offset)
         {
@@ -77,15 +83,15 @@ namespace TapBlast
             float shake = !animateFeedback || reducedMotion || shakeAge < 0 || shakeAge >= shakeLife ? 0 : (1 - shakeAge / shakeLife) * (1 - shakeAge / shakeLife);
             ApplyShake(shake <= 0 ? Vector2.zero : new Vector2(Mathf.Sin(shakeAge * 61), Mathf.Cos(shakeAge * 47)) * (shakeStrength * shake));
             float punch = reducedMotion ? 0 : Mathf.Sin(Mathf.Clamp01(punchAge / .24f) * Mathf.PI);
-            score.rectTransform.localScale = Vector3.one * (1 + punch * punchStrength * .6f);
-            combo.rectTransform.localScale = multiplier.rectTransform.localScale = Vector3.one * (1 + punch * punchStrength);
-            fever.rectTransform.localScale = Vector3.one * (1 + punch * punchStrength * (juiceCombo >= 10 ? .5f : .2f));
+            SetScale(score.rectTransform, 1 + punch * punchStrength * .6f);
+            SetScale(combo.rectTransform, 1 + punch * punchStrength); SetScale(multiplier.rectTransform, 1 + punch * punchStrength);
+            SetScale(fever.rectTransform, 1 + punch * punchStrength * (juiceCombo >= 10 ? .5f : .2f));
             float shieldPunch = reducedMotion ? 0 : Mathf.Sin(Mathf.Clamp01(shieldAge / .35f) * Mathf.PI);
             float shieldPulse = !reducedMotion && shieldActive ? (.5f + .5f * Mathf.Sin(shieldClock * 4)) * .025f : 0;
-            Shield.transform.localScale = Vector3.one * (1 + shieldPunch * punchStrength + shieldPulse);
+            SetScale(Shield.transform, 1 + shieldPunch * punchStrength + shieldPulse);
             Shield.targetGraphic.color = shieldActive ? UIArt.Success : Color.Lerp(UIArt.Primary, UIArt.Accent, shieldPunch * .6f);
             float timePunch = reducedMotion ? 0 : Mathf.Sin(Mathf.Clamp01(timeAge / .3f) * Mathf.PI);
-            timer.rectTransform.localScale = Vector3.one * (1 + timePunch * punchStrength);
+            SetScale(timer.rectTransform, 1 + timePunch * punchStrength);
             if (!celebration.gameObject.activeSelf) return;
             if (reducedMotion || !results.activeSelf) { celebration.gameObject.SetActive(false); return; }
             celebrationAge += delta;

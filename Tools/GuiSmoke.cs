@@ -133,12 +133,12 @@ public static class GuiSmoke
             var fixture=new SelectionFixture();
             int[] scores={275,1465,1040,1001,1080,5511,8529,3350,1675,3354,5005,7164,12779,4954,4260,2830,2090};
             for(int i=0;i<scores.Length;i++){fixture.scores[i]=scores[i];fixture.stars[i]=3;}
-            PlayerPrefs.SetString(key,JsonUtility.ToJson(fixture));
+            PlayerPrefs.SetString(key,JsonUtility.ToJson(fixture)); ProgressStore.Invalidate();
             game.ShowLevels();Shot(hud,"09-reference-levels");
             UnitySmoke.Capture(hud,"gui-levels-narrow",343,728,validateLayout:()=>SelectionLayout(hud));
             UnitySmoke.Capture(hud,"gui-levels-reference",1080,1920,validateLayout:()=>SelectionLayout(hud));
             UnitySmoke.Capture(hud,"gui-row-reference-scale",1800,3200,captureArea:(RectTransform)Field<Button[]>(hud,"levelButtons")[0].transform);
-            fixture.coins=4980;fixture.xp=2495;PlayerPrefs.SetString(key,JsonUtility.ToJson(fixture));
+            fixture.coins=4980;fixture.xp=2495;PlayerPrefs.SetString(key,JsonUtility.ToJson(fixture)); ProgressStore.Invalidate();
             game.ShowLevels();
             Check(Field<TMP_Text>(hud,"selectionWorld").text=="Tap Blast","Level selection has one page without worlds");
             var rows=Field<Button[]>(hud,"levelButtons");
@@ -158,7 +158,7 @@ public static class GuiSmoke
             UnitySmoke.Capture(hud,"gui-levels-scrolled",1080,1920,validateLayout:()=>SelectionLayout(hud));
             game.ShowLevels();
             Check(scroll.content.anchoredPosition==Vector2.zero,"Reopening the list returns to the current level 1 row");
-        } finally {if(existed)PlayerPrefs.SetString(key,previous);else PlayerPrefs.DeleteKey(key);PlayerPrefs.Save();game.ShowLevels();}
+        } finally {if(existed)PlayerPrefs.SetString(key,previous);else PlayerPrefs.DeleteKey(key);PlayerPrefs.Save();ProgressStore.Invalidate();game.ShowLevels();}
     }
     static void Step()
     {
@@ -216,7 +216,7 @@ public static class GuiSmoke
             ReferenceSelection(game,hud);
             Field<Button>(nav,"selectionClose").onClick.Invoke(); Check(game.Session.State==RoundState.Ready,"Level selection close returns to briefing");
             var result=new RoundSession(new RoundRules(45,20,10,240,20)); result.Reset(); result.StartPlaying(); for(int i=0;i<20;i++) result.Tap();
-            hud.SetSettings(true,true,false); hud.ShowResults(result,true,result.Score,new ProgressStore.RewardReceipt(50,25,50,25));
+            hud.SetSettings(true, true); hud.ShowResults(result,true,result.Score,new ProgressStore.RewardReceipt(50,25,50,25));
             Check(hud.ResultRevealComplete,"Reduced-motion results are immediately readable"); Shot(hud,"results-complete");
             File.AppendAllText("gui-smoke-results.txt","PASS Reference-state screenshots rendered from the saved Canvas.\n");
             SessionState.SetBool(Key,false); EditorApplication.Exit(0);

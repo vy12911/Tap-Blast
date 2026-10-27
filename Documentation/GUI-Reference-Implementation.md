@@ -9,7 +9,7 @@ Source: `D:/own/tap-blast/tap blast gui/01-Screens` (1800 x 3200). The game uses
 | Reference | Implemented state |
 | --- | --- |
 | 01 get ready | Countdown modal, numeric orb, live objective |
-| 02 paused | Resume, restart, sound, reduced motion, vibration, level selection |
+| 02 paused | Resume, restart, sound, reduced motion, level selection (vibration was removed) |
 | 03 waterfall target | Level 8 waterfall arena artwork and live Time Bubble gameplay |
 | 04 world ready | World label, score/level/timer HUD, target objective and progress |
 | 05 first tap | Illustrated target and animated tutorial hand; clock waits for first tap |

@@ -36,7 +36,7 @@ MonoBehaviour:
   coinReward: 225
   xpReward: 120
   objectiveCount: 3
-  mechanicHint: Match 3 or more of one color. Make 3 chains.
+  mechanicHint: When 3 or more targets share a color, tap one to blast them all. That is 1 chain.
   clusterSize: 5
   clusterInterval: 2.4
   movementSpeed: 70

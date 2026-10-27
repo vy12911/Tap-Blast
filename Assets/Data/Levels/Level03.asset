@@ -36,4 +36,4 @@ MonoBehaviour:
   coinReward: 85
   xpReward: 40
   objectiveCount: 5
-  mechanicHint: Land 5 hits in a row. An expired target resets your current streak.
+  mechanicHint: A target that fades before you tap it resets your streak to 0.

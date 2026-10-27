@@ -5,19 +5,17 @@ namespace TapBlast
     public sealed class FeedbackPlayer : MonoBehaviour
     {
         private AudioSource source;
-        private AudioClip tap, success, failure, comboRise, chain, bomb, shield, chainImpact;
+        private AudioClip tap, success, failure, comboRise, chain, shield, chainImpact, boom;
         public bool SoundEnabled { get; private set; }
         public bool ReducedMotion { get; private set; }
-        public bool HapticsEnabled { get; private set; }
         public void Initialize()
         {
             SoundEnabled = ProgressStore.Sound; ReducedMotion = ProgressStore.ReducedMotion;
-            HapticsEnabled = ProgressStore.Haptics;
             source = gameObject.AddComponent<AudioSource>(); source.playOnAwake = false; source.spatialBlend = 0;
             tap = Tone("Tap", 620, .09f); success = Tone("Complete", 880, .45f); failure = Tone("Time up", 220, .25f);
             comboRise = Tone("Combo flourish", 1046, .22f);
-            chain = Tone("Chain blast", 440, .3f); bomb = Tone("Bomb warning", 110, .25f); shield = Tone("Shield block", 1320, .2f);
-            chainImpact = BlastSound();
+            chain = Tone("Chain blast", 440, .3f); shield = Tone("Shield block", 1320, .2f);
+            chainImpact = BlastSound(); boom = BoomSound();
         }
         private static AudioClip BlastSound()
         {
@@ -35,6 +33,26 @@ namespace TapBlast
             var clip = AudioClip.Create("Chain detonation", samples.Length, 1, rate, false);
             clip.SetData(samples, 0); return clip;
         }
+        // Bomb explosion: a falling bass thump, low-passed rumble and a short crack.
+        private static AudioClip BoomSound()
+        {
+            const int rate = 22050;
+            var samples = new float[(int)(rate * .7f)];
+            var random = new System.Random(331);
+            float rumble = 0;
+            for (int i = 0; i < samples.Length; i++)
+            {
+                float t = (float)i / rate;
+                float noise = (float)random.NextDouble() * 2 - 1;
+                rumble += (noise - rumble) * .08f;
+                float thump = Mathf.Sin(2 * Mathf.PI * (95 * t - 60 * t * t)) * Mathf.Exp(-t * 9);
+                float crack = noise * Mathf.Exp(-t * 40);
+                float envelope = Mathf.Min(1, t * 400) * Mathf.Exp(-t * 5);
+                samples[i] = Mathf.Clamp((thump * .55f + rumble * 1.8f + crack * .25f) * envelope * .7f, -1, 1);
+            }
+            var clip = AudioClip.Create("Bomb explosion", samples.Length, 1, rate, false);
+            clip.SetData(samples, 0); return clip;
+        }
         private static AudioClip Tone(string name, float frequency, float seconds)
         {
             const int rate = 22050;
@@ -49,9 +67,6 @@ namespace TapBlast
         public void PlayTap(int combo)
         {
             bool milestone = combo == 5 || combo == 10 || combo == 20 || combo == 30 || combo == 50;
-#if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
-            if (milestone && combo >= 10 && HapticsEnabled) Handheld.Vibrate();
-#endif
             if (!SoundEnabled) return;
             source.pitch = 1 + Mathf.Min(combo, 50) * .009f;
             source.PlayOneShot(tap);
@@ -59,9 +74,6 @@ namespace TapBlast
         }
         public void PlayResult(bool won)
         {
-#if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
-            if (won && HapticsEnabled) Handheld.Vibrate();
-#endif
             if (!SoundEnabled) return; source.pitch = 1; source.PlayOneShot(won ? success : failure);
         }
         public void PlayChain(int count)
@@ -77,16 +89,12 @@ namespace TapBlast
         }
         public void PlayHazard(bool blocked)
         {
-#if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
-            if (HapticsEnabled) Handheld.Vibrate();
-#endif
             if (!SoundEnabled) return;
-            source.pitch = 1; source.PlayOneShot(blocked ? shield : bomb);
+            source.pitch = 1; source.PlayOneShot(blocked ? shield : boom);
         }
         public void ToggleSound() { SoundEnabled = !SoundEnabled; if (!SoundEnabled) source.Stop(); Save(); }
         public void ToggleMotion() { ReducedMotion = !ReducedMotion; Save(); }
-        public void ToggleHaptics() { HapticsEnabled = !HapticsEnabled; Save(); }
-        private void Save() { ProgressStore.SaveSettings(SoundEnabled, ReducedMotion, HapticsEnabled); }
-        private void OnDestroy() { Destroy(tap); Destroy(success); Destroy(failure); Destroy(comboRise); Destroy(chain); Destroy(bomb); Destroy(shield); Destroy(chainImpact); }
+        private void Save() { ProgressStore.SaveSettings(SoundEnabled, ReducedMotion); }
+        private void OnDestroy() { Destroy(tap); Destroy(success); Destroy(failure); Destroy(comboRise); Destroy(chain); Destroy(shield); Destroy(chainImpact); Destroy(boom); }
     }
 }

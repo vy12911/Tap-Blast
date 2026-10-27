@@ -36,4 +36,4 @@ MonoBehaviour:
   coinReward: 175
   xpReward: 85
   objectiveCount: 15
-  mechanicHint: Land 15 hits in a row while targets move. Expiry breaks your streak.
+  mechanicHint: Targets move. A target that fades resets your streak to 0.

@@ -61,7 +61,7 @@ public static class World1Smoke
     {
         // Product name is isolated above; these keys do not touch the player's save.
         PlayerPrefs.DeleteKey("TapBlast.v2.Progress");
-        PlayerPrefs.DeleteKey("TapBlast.v1.Level01.Best"); PlayerPrefs.DeleteKey("TapBlast.v1.Level01.Stars");
+        PlayerPrefs.DeleteKey("TapBlast.v1.Level01.Best"); PlayerPrefs.DeleteKey("TapBlast.v1.Level01.Stars"); ProgressStore.Invalidate();
         var configs = Field<LevelConfig[]>(game, "levels");
         var serializedHud = new SerializedObject(hud);
         var binding = serializedHud.GetIterator();

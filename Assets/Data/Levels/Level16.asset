@@ -38,7 +38,7 @@ MonoBehaviour:
   coinReward: 325
   xpReward: 160
   objectiveCount: 1
-  mechanicHint: Match colors and avoid red X BOMBs. Tap 20 safe targets.
+  mechanicHint: Bombs are red with an X. Leave them alone; they fade safely.
   clusterSize: 3
   clusterInterval: 2.4
   movementSpeed: 70

@@ -36,4 +36,4 @@ MonoBehaviour:
   coinReward: 110
   xpReward: 50
   objectiveCount: 10
-  mechanicHint: Follow the moving targets and land 10 hits in a row.
+  mechanicHint: Targets move. A target that fades resets your streak to 0.

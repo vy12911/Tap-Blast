@@ -38,7 +38,7 @@ MonoBehaviour:
   coinReward: 300
   xpReward: 150
   objectiveCount: 20
-  mechanicHint: Same-color chains build combo. Expiry breaks your streak.
+  mechanicHint: Every target in a chain adds to your streak. A fade resets it to 0.
   clusterSize: 5
   clusterInterval: 2.4
   movementSpeed: 70

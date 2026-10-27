@@ -106,11 +106,11 @@ public static class CampaignSmoke
                     Check(wordmark.text == "CANVAS EDIT CHECK", "Designer Canvas text edit survives entering Play");
                     wordmark.text = SessionState.GetString(Key + ".Wordmark", "FINAL SCORE");
                     Check(hud.GetComponentsInChildren<Graphic>(true).Length == SessionState.GetInt(Key + ".Graphics", 0) + 12 * hud.TargetPrefab.GetComponentsInChildren<Graphic>(true).Length, "Play only prewarms target prefab; it does not rebuild Canvas elements");
-                    PlayerPrefs.SetString("TapBlast.v2.Progress", "{\"bestScore\":275,\"bestStars\":3,\"coins\":180,\"xp\":90,\"activeRound\":\"\"}");
+                    PlayerPrefs.SetString("TapBlast.v2.Progress", "{\"bestScore\":275,\"bestStars\":3,\"coins\":180,\"xp\":90,\"activeRound\":\"\"}"); ProgressStore.Invalidate();
                     Check(ProgressStore.IsUnlocked(2) && ProgressStore.GetBestScore(1) == 275 && ProgressStore.Coins == 180 && ProgressStore.XP == 90, "Existing Level 1 save unlocks Level 2 without losing wallet");
                     Check(ProgressStore.GetBestScore(2) == 0 && ProgressStore.GetBestStars(2) == 0, "Migration does not copy Level 1 records into Level 2");
                     Check(ProgressStore.SelectLevel(2) && ProgressStore.SelectedLevel == 2, "Migrated save can select unlocked Level 2");
-                    PlayerPrefs.DeleteKey("TapBlast.v2.Progress"); PlayerPrefs.DeleteKey("TapBlast.v1.Level01.Best"); PlayerPrefs.DeleteKey("TapBlast.v1.Level01.Stars");
+                    PlayerPrefs.DeleteKey("TapBlast.v2.Progress"); PlayerPrefs.DeleteKey("TapBlast.v1.Level01.Best"); PlayerPrefs.DeleteKey("TapBlast.v1.Level01.Stars"); ProgressStore.Invalidate();
                     Check(!ProgressStore.IsUnlocked(2) && !game.SelectLevel(2), "Fresh player cannot enter locked Level 2");
                     Check(game.SelectLevel(1), "Fresh player can select Level 1");
                     foreach (var target in Targets(true)) poolIds.Add(target.GetInstanceID());
@@ -132,9 +132,9 @@ public static class CampaignSmoke
                     Advance(202, .3); break;
                 case 202:
                     Check(frozenSpark.anchoredPosition == frozenSparkPosition, "Pause freezes tap burst animation");
-                    hud.SetSettings(true, true, false);
+                    hud.SetSettings(true, true);
                     Check(!frozenSpark.gameObject.activeSelf, "Reduced motion suppresses in-flight particles");
-                    hud.SetSettings(true, false, false); Click(hud.Resume.gameObject);
+                    hud.SetSettings(true, false); Click(hud.Resume.gameObject);
                     Advance(3); break;
                 case 3:
                     TapAll();

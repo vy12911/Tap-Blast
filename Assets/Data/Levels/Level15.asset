@@ -12,38 +12,745 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9218bab79c640ef96f356711932423c, type: 3}
   m_Name: Level15
   m_EditorClassIdentifier: 
-  displayName: COMBO CITY
+  designVersion: 5
+  bossPhases: []
+  displayName: New Twist
   levelId: 15
   objective: 2
   targetScore: 500
+  objectiveCount: 20
+  mechanicHint: Tap every circle to keep your streak. A missed circle resets it.
   firstTapTutorial: 0
   targetSizes: []
   duration: 45
   requiredTaps: 20
   basePoints: 10
-  spawnInterval: 0.60
-  finalSpawnInterval: 0.40
+  spawnInterval: 1.4
+  finalSpawnInterval: 0.4
   accelerationSeconds: 20
-  targetLifetime: 4.5
-  maxTargets: 12
+  targetLifetime: 3.8
+  maxTargets: 8
   targetSize: 150
   targetSpacing: 36
-  movingTargets: 1
+  movingTargets: 0
   goldenChance: 0
   timeChance: 0
   isBossLevel: 0
   bossHealth: 1
-  twoStarScore: 2200
-  threeStarCombo: 30
-  coinReward: 300
-  xpReward: 150
-  objectiveCount: 20
-  mechanicHint: Every target in a chain adds to your streak. A fade resets it to 0.
+  goldenPoints: 100
+  timeBonus: 3
+  maxTimeTargets: 6
+  bossSize: 270
   clusterSize: 5
   clusterInterval: 2.4
   movementSpeed: 70
   bombChance: 0
   shieldCharges: 0
-  requiredCombo: 0
   bombPenalty: 50
   chainBonus: 25
+  requiredCombo: 0
+  twoStarScore: 1000
+  threeStarCombo: 30
+  coinReward: 300
+  xpReward: 150
+  scripted: 1
+  seed: 31455
+  pressureLimit: 3
+  priorityMissLimit: 99
+  noBombs: 0
+  allowUltimate: 1
+  normalCharge: 3
+  goldenCharge: 6
+  chainCharge: 10
+  ultimateEligible: 0000000006000000010000000200000004000000
+  scriptedGoal: Clear 3 waves and hit 20 in a row
+  waves:
+  - rules:
+      title: BUILD A RHYTHM
+      duration: 9
+      gate: 0
+      quota: 4
+      pairs: 0
+      coreHits: 0
+      priorityOrder: 0
+      coreWarning: 0.45
+      coreOpen: 1.6
+      coreClosed: 1.2
+    maxActive: 4
+    schedule:
+    - id: L15-W1-S01
+      gateId: L15-W1-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 0.65
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: -0.62, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L15-W1-S02
+      gateId: L15-W1-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 1.9499999
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L15-W1-S03
+      gateId: L15-W1-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 3.25
+      kind: 0
+      count: 1
+      color: 2
+      position: {x: 0.62, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L15-W1-S04
+      gateId: L15-W1-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 4.5499997
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: -0.62, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L15-W1-S05
+      gateId: L15-W1-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 5.85
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L15-W1-S06
+      gateId: 
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 6.5
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 0
+      critical: 0
+    encounters:
+    - id: L15-P1-encounter
+      kind: 0
+      at: 0
+      warning: 0.45
+      active: 2
+      corridorX: 0.7
+  - rules:
+      title: HIT 20 IN A ROW
+      duration: 22.5
+      gate: 3
+      quota: 20
+      pairs: 0
+      coreHits: 0
+      priorityOrder: 0
+      coreWarning: 0.45
+      coreOpen: 1.6
+      coreClosed: 1.2
+    maxActive: 4
+    schedule:
+    - id: L15-W2-S01
+      gateId: L15-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 0.65
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: -0.62, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W2-S02
+      gateId: L15-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 1.55
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W2-S03
+      gateId: L15-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 2.4499998
+      kind: 0
+      count: 1
+      color: 2
+      position: {x: 0.62, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W2-S04
+      gateId: L15-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 3.35
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: -0.62, y: 0}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W2-S05
+      gateId: L15-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 4.25
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: 0}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W2-S06
+      gateId: L15-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 5.1499996
+      kind: 0
+      count: 1
+      color: 2
+      position: {x: 0.62, y: 0}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W2-S07
+      gateId: L15-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 6.0499997
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: -0.62, y: 0.55}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W2-S08
+      gateId: L15-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 6.95
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: 0.55}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W2-S09
+      gateId: L15-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 7.85
+      kind: 0
+      count: 1
+      color: 2
+      position: {x: 0.62, y: 0.55}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W2-S10
+      gateId: L15-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 8.75
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: -0.62, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W2-S11
+      gateId: L15-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 9.65
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W2-S12
+      gateId: L15-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 10.549999
+      kind: 0
+      count: 1
+      color: 2
+      position: {x: 0.62, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W2-S13
+      gateId: L15-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 11.45
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: -0.62, y: 0}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W2-S14
+      gateId: L15-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 12.349999
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: 0}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W2-S15
+      gateId: L15-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 13.25
+      kind: 0
+      count: 1
+      color: 2
+      position: {x: 0.62, y: 0}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W2-S16
+      gateId: L15-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 14.15
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: -0.62, y: 0.55}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W2-S17
+      gateId: L15-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 15.049999
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: 0.55}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W2-S18
+      gateId: L15-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 15.95
+      kind: 0
+      count: 1
+      color: 2
+      position: {x: 0.62, y: 0.55}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W2-S19
+      gateId: L15-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 16.85
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: -0.62, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W2-S20
+      gateId: L15-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 17.75
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W2-S21
+      gateId: L15-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 18.65
+      kind: 0
+      count: 1
+      color: 2
+      position: {x: 0.62, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W2-S22
+      gateId: L15-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 19.55
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: -0.62, y: 0}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W2-S23
+      gateId: 
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 20
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 0
+      critical: 0
+    encounters:
+    - id: L15-P2-encounter
+      kind: 0
+      at: 0
+      warning: 0.45
+      active: 2
+      corridorX: 0.7
+  - rules:
+      title: KEEP YOUR FOCUS
+      duration: 13.5
+      gate: 0
+      quota: 4
+      pairs: 0
+      coreHits: 0
+      priorityOrder: 0
+      coreWarning: 0.45
+      coreOpen: 1.6
+      coreClosed: 1.2
+    maxActive: 4
+    schedule:
+    - id: L15-W3-S01
+      gateId: L15-W3-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 0.65
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: -0.62, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W3-S02
+      gateId: L15-W3-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 2.15
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W3-S03
+      gateId: L15-W3-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 3.65
+      kind: 0
+      count: 1
+      color: 2
+      position: {x: 0.62, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W3-S04
+      gateId: L15-W3-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 5.15
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: -0.62, y: 0}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W3-S05
+      gateId: L15-W3-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 6.65
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: 0}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W3-S06
+      gateId: L15-W3-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 8.15
+      kind: 0
+      count: 1
+      color: 2
+      position: {x: 0.62, y: 0}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W3-S07
+      gateId: L15-W3-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 9.65
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: -0.62, y: 0.55}
+      life: 3.8
+      size: 156
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L15-W3-S08
+      gateId: 
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 11
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 0
+      critical: 0
+    encounters:
+    - id: L15-P3-encounter
+      kind: 0
+      at: 0
+      warning: 0.45
+      active: 2
+      corridorX: 0.7

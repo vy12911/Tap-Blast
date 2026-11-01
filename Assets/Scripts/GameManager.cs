@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 
 /// <summary>Coordinates the round; rules, presentation, pooling and saving live separately.</summary>
 [DisallowMultipleComponent]
-public sealed class GameManager : MonoBehaviour
+public sealed partial class GameManager : MonoBehaviour
 {
     [SerializeField] private LevelConfig level = null;
     [SerializeField] private LevelConfig[] levels = new LevelConfig[0];
@@ -51,6 +51,7 @@ public sealed class GameManager : MonoBehaviour
         chainTargets = new TargetView[capacity];
         hud.WorldEffects.Bind(pool);
         spawner = new TargetSpawner(pool, hud.Arena, level);
+        director = new CampaignDirector(pool, hud.Arena, level);
         hud.Play.onClick.AddListener(BeginCountdown);
         hud.Pause.onClick.AddListener(Pause);
         hud.Resume.onClick.AddListener(Resume);
@@ -63,14 +64,19 @@ public sealed class GameManager : MonoBehaviour
         hud.IntroMenu.onClick.AddListener(ShowLevels);
         hud.PauseMenu.onClick.AddListener(ShowLevels);
         hud.ResultMenu.onClick.AddListener(ShowLevels);
+        hud.BindCampaign(ActivateUltimate, StartPractice, RecordEmptyTap);
         RefreshSettings();
         ShowLevels();
         RefreshHUD();
     }
 
-    private void Update()
+    private void LateUpdate() { AdvanceFrame(); }
+    // LateUpdate runs after EventSystem pointer-down: input and gates commit before expiry/spawn.
+    // Kept as a callable method for deterministic editor harnesses.
+    private void AdvanceFrame()
     {
         if (Session == null) return;
+        if (Session.State == RoundState.Results && resultDelay > 0) { TickResultDelay(Time.unscaledDeltaTime); return; }
         if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
         {
             if (hud.GetComponent<GuiNavigation>()?.TryCloseWallet() != true)
@@ -87,6 +93,7 @@ public sealed class GameManager : MonoBehaviour
                 Session.StartPlaying();
                 hud.ShowPlaying();
                 Canvas.ForceUpdateCanvases();
+                if (level.Scripted) { BeginCampaignPlay(); return; }
                 spawner.SpawnTutorial(feedback.ReducedMotion);
                 if (level.FirstTapTutorial)
                 { hud.ShowTapHand(); hud.SetHint("TAP THE GLOWING TARGET", "Your first tap starts the clock"); }
@@ -97,6 +104,7 @@ public sealed class GameManager : MonoBehaviour
             return;
         }
         if (Session.State != RoundState.Playing) return;
+        if (level.Scripted) { TickCampaign(Time.unscaledDeltaTime); return; }
         if (tutorialStarted)
         {
             Session.Tick(Time.unscaledDeltaTime);
@@ -109,16 +117,22 @@ public sealed class GameManager : MonoBehaviour
 
     public void BeginCountdown()
     {
+        TrackExit("level_restart");
+        resultDelay = ultimateSlowRemaining = lowFxSeconds = 0;
         pool.Clear(); hud.ClearFeedback(); spawner.Reset(); Session.Reset();
+        Session.SetPractice(practiceRequested); practiceRequested = false; director.Reset();
+
         roundId = ProgressStore.BeginRound(level.LevelId); roundFinalized = false;
+        CampaignTelemetry.Begin(level.LevelId, level.Seed, ProgressStore.AttemptCount(level.LevelId));
         hud.HideTapHand();
-        tutorialStarted = false; countdown = 3;
-        hud.ShowCountdown(); hud.SetCountdown(3); RefreshHUD();
+        bossVictoryStarted = false; tutorialStarted = false; countdown = level.DesignVersion >= 5 ? 1.5f : 3;
+        hud.ShowCountdown(); hud.SetCountdown(Mathf.CeilToInt(countdown)); RefreshHUD();
     }
 
     private void OnTargetTapped(TargetView target)
     {
         if (Session.State != RoundState.Playing || !target.Active || target.BlastPending) return;
+        if (level.Scripted) { OnCampaignTarget(target); return; }
         if (target.Kind == TargetKind.Bomb)
         {
             bool protectedTap = Session.ShieldActive;
@@ -223,6 +237,7 @@ public sealed class GameManager : MonoBehaviour
     {
         pool.Release(target);
         if (Session.State != RoundState.Playing) return;
+        if (level.Scripted) { OnCampaignExpired(target); return; }
         if (target.Kind == TargetKind.Bomb) { hud.WorldEffects.Fizzle(target.Position); return; }
         Session.Miss();
         hud.MissJuice(target.Position);
@@ -247,11 +262,20 @@ public sealed class GameManager : MonoBehaviour
     }
     private void Finish()
     {
-        if (roundFinalized || Session.State != RoundState.Results) return;
+        if (roundFinalized || Session.State != RoundState.Results || resultDelay > 0) return;
+        if (level.V5Boss && Session.Won && !bossVictoryStarted)
+        {
+            bossVictoryStarted = true; resultDelay = 2;
+            pool.Clear(); hud.WorldEffects.SetBoss(default, false, false, 0, default);
+            hud.WorldEffects.BossDefeat(Vector2.zero); hud.Callout("CORE DESTROYED!", UIArt.Gold);
+            hud.Shake(12, .36f); feedback.PlayChain(8); return;
+        }
         roundFinalized = true;
+        if (level.Scripted) { CampaignTelemetry.Add(Session.Won ? "wave_pass" : "wave_fail", level.LevelId, Session.WaveIndex, Session.Pressure, Session.FailureReason); CampaignTelemetry.Add(Session.Won ? "level_complete" : "level_fail", level.LevelId, Session.WaveIndex, Session.Pressure, Session.FailureReason); CampaignTelemetry.Add("direct_accuracy_percent", level.LevelId, Session.WaveIndex, Mathf.RoundToInt(Session.Accuracy * 100)); CampaignTelemetry.Add("best_combo", level.LevelId, Session.WaveIndex, Session.BestCombo); CampaignTelemetry.Add("critical_misses", level.LevelId, Session.WaveIndex, Session.CriticalMisses); CampaignTelemetry.Flush(); }
         pool.Clear();
-        bool newBest = Session.Score > ProgressStore.GetBestScore(level.LevelId);
+        bool newBest = !Session.Practice && Session.Score > ProgressStore.GetBestScore(level.LevelId);
         ProgressStore.CompleteRound(roundId, Session, level.CoinReward, level.XPReward, out var receipt);
+        if (!Session.Won && !Session.Practice) ProgressStore.RecordFailure(level.LevelId);
         feedback.PlayResult(Session.Won);
         hud.ShowResults(Session, newBest, ProgressStore.GetBestScore(level.LevelId), receipt); RefreshHUD();
     }
@@ -262,8 +286,9 @@ public sealed class GameManager : MonoBehaviour
         if (selected == null || !ProgressStore.IsUnlocked(id)) return false;
         ProgressStore.AbandonRound(roundId); roundId = null; roundFinalized = false;
         pool.Clear(); hud.ClearFeedback(); hud.HideTapHand();
+        resultDelay = ultimateSlowRemaining = lowFxSeconds = 0;
         level = selected; ProgressStore.SelectLevel(id);
-        Session = new RoundSession(level.Rules); spawner = new TargetSpawner(pool, hud.Arena, level);
+        Session = new RoundSession(level.Rules); spawner = new TargetSpawner(pool, hud.Arena, level); director = new CampaignDirector(pool, hud.Arena, level);
         tutorialStarted = false; hud.ShowIntro(level, ProgressStore.GetBestScore(id)); RefreshHUD(); return true;
     }
     public LevelConfig[] GetAllLevels()
@@ -273,8 +298,10 @@ public sealed class GameManager : MonoBehaviour
     }
     public void ShowLevels()
     {
+        TrackExit("level_quit");
         ProgressStore.AbandonRound(roundId); roundId = null; roundFinalized = false;
         pool.Clear(); hud.ClearFeedback(); hud.HideTapHand(); spawner.Reset();
+        resultDelay = ultimateSlowRemaining = lowFxSeconds = 0;
         Session = new RoundSession(level.Rules); tutorialStarted = false; hud.ShowLevels(GetAllLevels(), SelectLevel); RefreshHUD();
     }
     public void NextLevel()
@@ -292,7 +319,7 @@ public sealed class GameManager : MonoBehaviour
     private void RefreshHUD() { displayedSecond = Mathf.CeilToInt(Session.RemainingTime); hud.Refresh(Session, level); }
     private void RefreshSettings() { hud.SetSettings(feedback.SoundEnabled, feedback.ReducedMotion); }
     private void ToggleSound() { feedback.ToggleSound(); RefreshSettings(); }
-    private void ToggleMotion() { feedback.ToggleMotion(); pool.SetReducedMotion(feedback.ReducedMotion); RefreshSettings(); }
+    private void ToggleMotion() { feedback.ToggleMotion(); if (feedback.ReducedMotion) ultimateSlowRemaining = 0; pool.SetReducedMotion(feedback.ReducedMotion); RefreshSettings(); }
     private void OnApplicationPause(bool paused) { if (paused) Pause(); }
     private void OnApplicationFocus(bool focused) { if (!focused) Pause(); }
     private void OnDestroy()

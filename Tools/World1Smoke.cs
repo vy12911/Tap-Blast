@@ -27,6 +27,7 @@ public static class World1Smoke
     }
     public static void Run()
     {
+        if (AssetDatabase.LoadAssetAtPath<LevelConfig>("Assets/Data/Levels/Level01.asset").Scripted) { CampaignV3Smoke.RunWorld1(); return; }
         PlayerSettings.companyName = "TapBlastValidation";
         PlayerSettings.productName = "IsolatedWorld1Flow";
         File.WriteAllText(Report, "");
@@ -50,7 +51,7 @@ public static class World1Smoke
     static void Begin()
     {
         game.BeginCountdown();
-        typeof(GameManager).GetField("countdown", Private).SetValue(game, 0f); Call(game, "Update");
+        typeof(GameManager).GetField("countdown", Private).SetValue(game, 0f); Call(game, "AdvanceFrame");
     }
     static TargetView[] Targets() => UnityEngine.Object.FindObjectsByType<TargetView>(FindObjectsSortMode.None);
     static void Tap(TargetView target) => target.OnPointerDown(new PointerEventData(EventSystem.current) { button = PointerEventData.InputButton.Left });

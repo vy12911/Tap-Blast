@@ -11,21 +11,525 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e9218bab79c640ef96f356711932423c, type: 3}
   m_Name: Level01
-  m_EditorClassIdentifier:
-  displayName: FIRST SPARK
+  m_EditorClassIdentifier: 
+  designVersion: 5
+  bossPhases: []
+  displayName: First Spark
   levelId: 1
   objective: 0
-  firstTapTutorial: 1
-  duration: 60
+  targetScore: 500
+  objectiveCount: 1
+  mechanicHint: Tap each wave's targets before its time ends. Watch the wave counter.
+  firstTapTutorial: 0
+  targetSizes: []
+  duration: 45
   requiredTaps: 20
   basePoints: 10
-  spawnInterval: 1.1
-  targetLifetime: 4.5
-  maxTargets: 4
+  spawnInterval: 1.4
+  finalSpawnInterval: 0
+  accelerationSeconds: 20
+  targetLifetime: 3.8
+  maxTargets: 8
   targetSize: 168
   targetSpacing: 36
-  twoStarScore: 240
+  movingTargets: 0
+  goldenChance: 0
+  timeChance: 0
+  isBossLevel: 0
+  bossHealth: 5
+  goldenPoints: 100
+  timeBonus: 3
+  maxTimeTargets: 6
+  bossSize: 270
+  clusterSize: 0
+  clusterInterval: 2.4
+  movementSpeed: 100
+  bombChance: 0
+  shieldCharges: 0
+  bombPenalty: 50
+  chainBonus: 25
+  requiredCombo: 0
+  twoStarScore: 1000
   threeStarCombo: 20
   coinReward: 50
   xpReward: 25
-  mechanicHint: Tap the glowing circles before their ring runs out.
+  scripted: 1
+  seed: 30097
+  pressureLimit: 4
+  priorityMissLimit: 99
+  noBombs: 0
+  allowUltimate: 1
+  normalCharge: 3
+  goldenCharge: 6
+  chainCharge: 10
+  ultimateEligible: 0000000006000000010000000200000004000000
+  scriptedGoal: Tap 20 targets across 3 waves
+  waves:
+  - rules:
+      title: "WARM UP \xB7 TAP 4"
+      duration: 9
+      gate: 0
+      quota: 4
+      pairs: 0
+      coreHits: 0
+      priorityOrder: 0
+      coreWarning: 0.45
+      coreOpen: 1.6
+      coreClosed: 1.2
+    maxActive: 4
+    schedule:
+    - id: L01-W1-S01
+      gateId: L01-W1-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 0.65
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: 0, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L01-W1-S02
+      gateId: L01-W1-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 2.05
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0.55, y: -0.45}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L01-W1-S03
+      gateId: L01-W1-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 3.4499998
+      kind: 0
+      count: 1
+      color: 2
+      position: {x: -0.55, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L01-W1-S04
+      gateId: L01-W1-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 4.85
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: 0.55, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L01-W1-S05
+      gateId: L01-W1-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 6.25
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: -0.55, y: 0.45}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    encounters:
+    - id: L01-P1-encounter
+      kind: 4
+      at: 0
+      warning: 0.45
+      active: 2
+      corridorX: 0.7
+  - rules:
+      title: "DIRECT HITS \xB7 TAP 10"
+      duration: 22.5
+      gate: 0
+      quota: 10
+      pairs: 0
+      coreHits: 0
+      priorityOrder: 0
+      coreWarning: 0.45
+      coreOpen: 1.6
+      coreClosed: 1.2
+    maxActive: 4
+    schedule:
+    - id: L01-W2-S01
+      gateId: L01-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 0.65
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: -0.55, y: -0.45}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L01-W2-S02
+      gateId: L01-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 2.15
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0.55, y: -0.45}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L01-W2-S03
+      gateId: L01-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 3.65
+      kind: 0
+      count: 1
+      color: 2
+      position: {x: -0.55, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L01-W2-S04
+      gateId: L01-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 5.15
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: 0.55, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L01-W2-S05
+      gateId: L01-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 6.65
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: -0.55, y: 0.45}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L01-W2-S06
+      gateId: L01-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 8.15
+      kind: 0
+      count: 1
+      color: 2
+      position: {x: 0.55, y: 0.45}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L01-W2-S07
+      gateId: L01-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 9.65
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: -0.55, y: -0.45}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L01-W2-S08
+      gateId: L01-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 11.15
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0.55, y: -0.45}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L01-W2-S09
+      gateId: L01-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 12.65
+      kind: 0
+      count: 1
+      color: 2
+      position: {x: -0.55, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L01-W2-S10
+      gateId: L01-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 14.15
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: 0.55, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L01-W2-S11
+      gateId: L01-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 15.65
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: -0.55, y: 0.45}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L01-W2-S12
+      gateId: L01-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 17.15
+      kind: 0
+      count: 1
+      color: 2
+      position: {x: 0.55, y: 0.45}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    encounters:
+    - id: L01-P2-encounter
+      kind: 4
+      at: 0
+      warning: 0.45
+      active: 2
+      corridorX: 0.7
+  - rules:
+      title: "FINAL WAVE \xB7 TAP 6"
+      duration: 13.5
+      gate: 0
+      quota: 6
+      pairs: 0
+      coreHits: 0
+      priorityOrder: 0
+      coreWarning: 0.45
+      coreOpen: 1.6
+      coreClosed: 1.2
+    maxActive: 4
+    schedule:
+    - id: L01-W3-S01
+      gateId: L01-W3-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 0.65
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: -0.55, y: -0.45}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L01-W3-S02
+      gateId: L01-W3-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 2.15
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0.55, y: -0.45}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L01-W3-S03
+      gateId: L01-W3-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 3.65
+      kind: 0
+      count: 1
+      color: 2
+      position: {x: -0.55, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L01-W3-S04
+      gateId: L01-W3-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 5.15
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: 0.55, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L01-W3-S05
+      gateId: L01-W3-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 6.65
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: -0.55, y: 0.45}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L01-W3-S06
+      gateId: L01-W3-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 8.15
+      kind: 0
+      count: 1
+      color: 2
+      position: {x: 0.55, y: 0.45}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L01-W3-S07
+      gateId: L01-W3-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.2
+      at: 9.65
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: -0.55, y: -0.45}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    encounters:
+    - id: L01-P3-encounter
+      kind: 4
+      at: 0
+      warning: 0.45
+      active: 2
+      corridorX: 0.7

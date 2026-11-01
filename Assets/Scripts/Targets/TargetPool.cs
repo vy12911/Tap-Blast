@@ -32,11 +32,11 @@ namespace TapBlast
                 targets[i].Initialize(tapped, expired, ResolveBlast);
             }
         }
-        public bool Spawn(Vector2 position, float size, float lifetime, Color color, bool tutorial, bool reducedMotion, TargetKind kind = TargetKind.Normal, Vector2 moveVelocity = default, int health = 1)
+        public bool Spawn(Vector2 position, float size, float lifetime, Color color, bool tutorial, bool reducedMotion, TargetKind kind = TargetKind.Normal, Vector2 moveVelocity = default, int health = 1, bool required = false, bool critical = false, int sequenceId = 0, int order = 0, bool graph = false)
         {
             for (int i = 0; i < targets.Length; i++) if (!targets[i].Active)
             {
-                targets[i].Spawn(position, size, lifetime, color, tutorial, reducedMotion, kind, moveVelocity, health); ActiveCount++; return true;
+                targets[i].Spawn(position, size, lifetime, color, tutorial, reducedMotion, kind, moveVelocity, health); targets[i].SetCampaign(required, critical, sequenceId, order, graph); ActiveCount++; return true;
             }
             return false;
         }
@@ -50,6 +50,15 @@ namespace TapBlast
         public void Tick(float delta, bool reducedMotion)
         {
             Rect bounds = arena.rect;
+            for (int i = 0; i < targets.Length; i++)
+            {
+                var target = targets[i];
+                if (target.Active && !target.BlastPending && target.LaneShift)
+                {
+                    var desired = target.LanePosition(delta);
+                    if (ClearHazardPath(target, desired)) target.SetPosition(desired);
+                }
+            }
             // Small movement steps prevent hazards crossing valid targets, even
             // during a frame hitch. Lifetimes still advance by the full delta.
             float movement = Mathf.Clamp(delta, 0, .25f);
@@ -77,7 +86,7 @@ namespace TapBlast
             for (int i = 0; i < targets.Length; i++)
             {
                 var other = targets[i];
-                if (other == target || !other.Active || (target.Kind != TargetKind.Bomb && other.Kind != TargetKind.Bomb)) continue;
+                if (other == target || !other.Active) continue;
                 float along = path.sqrMagnitude > 0 ? Mathf.Clamp01(Vector2.Dot(other.Position - target.Position, path) / path.sqrMagnitude) : 0;
                 Vector2 nearest = target.Position + path * along;
                 float gap = target.Radius + other.Radius + 20;
@@ -89,7 +98,7 @@ namespace TapBlast
         // The full board participates; distance only orders the visual cascade.
         public int FindChain(TargetView origin, TargetView[] result)
         {
-            if (!origin.Active || origin.BlastPending || origin.Kind != TargetKind.Chain) return 0;
+            if (!origin.Active || origin.BlastPending || (origin.Kind != TargetKind.Chain && origin.Kind != TargetKind.Conduit)) return 0;
             int count = 1;
             if (result.Length == 0) return 0;
             result[0] = origin;
@@ -102,15 +111,41 @@ namespace TapBlast
                 result[count++] = candidate;
             }
             if (count < 3) return 0;
+            if (origin.GraphChain)
+            {
+                // Breadth-first traversal. The output queue is also the fixed once-only visited set.
+                count = 1;
+                for (int head = 0; head < count; head++)
+                    for (int n = 0; n < targets.Length; n++)
+                    {
+                        var candidate = targets[n];
+                        if (!candidate.Active || candidate.BlastPending || candidate.Kind != TargetKind.Chain || candidate.Tint != origin.Tint) continue;
+                        bool seen = false; for (int k = 0; k < count; k++) if (result[k] == candidate) { seen = true; break; }
+                        if (seen || !Connected(result[head], candidate)) continue;
+                        if (count < result.Length && count < 8) { candidate.SetChainParent(result[head].Position); result[count++] = candidate; }
+                    }
+                return count >= 3 ? count : 0;
+            }
             for (int i = 1; i < count; i++)
             {
                 int nearest = i;
                 for (int j = i + 1; j < count; j++)
-                    if ((result[j].Position - result[i - 1].Position).sqrMagnitude <
-                        (result[nearest].Position - result[i - 1].Position).sqrMagnitude) nearest = j;
+                    if ((result[j].Position - result[i - 1].Position).sqrMagnitude < (result[nearest].Position - result[i - 1].Position).sqrMagnitude) nearest = j;
                 var swap = result[i]; result[i] = result[nearest]; result[nearest] = swap;
+            }            return count;
+        }
+        private bool Connected(TargetView a, TargetView b)
+        {
+            Vector2 path = b.Position - a.Position;
+            float reach = 88 * 3; // 1080-reference canvas / 360 logical dp; authored phone layout.
+            if (path.sqrMagnitude > reach * reach) return false;
+            for (int i = 0; i < targets.Length; i++)
+            {
+                var bomb = targets[i]; if (!bomb.Active || bomb.Kind != TargetKind.Bomb) continue;
+                float along = path.sqrMagnitude > 0 ? Mathf.Clamp01(Vector2.Dot(bomb.Position - a.Position, path) / path.sqrMagnitude) : 0;
+                if ((a.Position + path * along - bomb.Position).sqrMagnitude < (bomb.Radius + 12) * (bomb.Radius + 12)) return false;
             }
-            return count;
+            return true;
         }
         public void Clear() { for (int i = 0; i < targets.Length; i++) targets[i].Release(); ActiveCount = 0; }
         public void SetInteractable(bool value) { for (int i = 0; i < targets.Length; i++) targets[i].SetInteractable(value); }

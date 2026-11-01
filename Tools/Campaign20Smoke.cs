@@ -30,6 +30,7 @@ public static class Campaign20Smoke
     }
     public static void Run()
     {
+        if (AssetDatabase.LoadAssetAtPath<LevelConfig>("Assets/Data/Levels/Level01.asset").Scripted) { CampaignV3Smoke.Run(); return; }
         PlayerSettings.companyName = "TapBlastValidation";
         PlayerSettings.productName = "IsolatedCampaign20";
         File.WriteAllText(Report, "");
@@ -42,6 +43,7 @@ public static class Campaign20Smoke
     static T Field<T>(object o, string name) => (T)o.GetType().GetField(name, Private).GetValue(o);
     public static void VerifyPersistence()
     {
+        if (AssetDatabase.LoadAssetAtPath<LevelConfig>("Assets/Data/Levels/Level01.asset").Scripted) { CampaignV3Smoke.VerifyPersistence(); return; }
         try
         {
             PlayerSettings.companyName = "TapBlastValidation";
@@ -97,7 +99,7 @@ public static class Campaign20Smoke
     static void Begin(bool populateColors = true)
     {
         game.BeginCountdown(); typeof(GameManager).GetField("countdown", Private).SetValue(game, 0f);
-        Call(game, "Update"); Canvas.ForceUpdateCanvases();
+        Call(game, "AdvanceFrame"); Canvas.ForceUpdateCanvases();
         if (populateColors && game.CurrentLevel.LevelId > 10)
         {
             var pool = Field<TargetPool>(game, "pool"); var spawner = Field<TargetSpawner>(game, "spawner");
@@ -285,7 +287,7 @@ public static class Campaign20Smoke
         int score = game.Session.Score;
         foreach (var t in Targets()) if (t.BlastPending) Tap(t);
         Check(game.Session.Score == score, "Pending color targets reject duplicate input");
-        game.Pause(); Call(game, "Update"); Check(pool.ActiveCount == 9, "Pause freezes the color cascade");
+        game.Pause(); Call(game, "AdvanceFrame"); Check(pool.ActiveCount == 9, "Pause freezes the color cascade");
         game.Resume(); foreach (var t in Targets()) if (t.BlastPending) Tap(t);
         Check(game.Session.Score == score, "Resume keeps committed colors noninteractive");
         pool.Tick(.08f, false);
@@ -365,7 +367,7 @@ public static class Campaign20Smoke
             Vector2 initial = bomb.Position;
             if (id > 16) { variedPosition |= (initial - previousPosition).sqrMagnitude > 1; variedDirection |= (bomb.Velocity.normalized - previousVelocity.normalized).sqrMagnitude > .01f; }
             previousPosition = initial; previousVelocity = bomb.Velocity;
-            game.Pause(); Call(game, "Update"); Check(bomb.Position == initial, "Pause freezes the Bomb in level " + id); game.Resume();
+            game.Pause(); Call(game, "AdvanceFrame"); Check(bomb.Position == initial, "Pause freezes the Bomb in level " + id); game.Resume();
             bool safe = true, moved = false; float minimumGap = float.MaxValue;
             for (int frame = 0; frame < 60; frame++)
             {
@@ -412,7 +414,7 @@ public static class Campaign20Smoke
         Check(goldenScale > goldenRing.rectTransform.localScale.x + .05f && goldenRing.fillAmount < 1, "Golden ring radiates while lifetime remains accurate");
         UnitySmoke.Capture(hud, "animation-golden-rest");
         game.Pause(); Vector3 pausedScale = goldenRing.rectTransform.localScale;
-        Call(game, "Update"); TickHUD(.5f);
+        Call(game, "AdvanceFrame"); TickHUD(.5f);
         Check(goldenRing.rectTransform.localScale == pausedScale, "Pause freezes target cosmetics");
         hud.Motion.onClick.Invoke();
         Check(goldenRing.rectTransform.localScale == Vector3.one && Field<Image>(golden, "glow").rectTransform.localScale == Vector3.one, "Reduced motion immediately clears target pulses while paused");

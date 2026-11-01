@@ -14,6 +14,8 @@ namespace TapBlast
         {
             public int bestScore, bestStars, coins, xp;
             public int level2BestScore, level2BestStars;
+            public int[] attempts = new int[LevelCount];
+            public int[] failures = new int[LevelCount];
             public int[] scores = new int[LevelCount];
             public int[] stars = new int[LevelCount];
             public int[] bestCombos = new int[LevelCount];
@@ -41,6 +43,8 @@ namespace TapBlast
             else
                 data = new ProgressData { bestScore = PlayerPrefs.GetInt(Prefix + "Level01.Best", 0), bestStars = PlayerPrefs.GetInt(Prefix + "Level01.Stars", 0) };
 
+            if (data.attempts == null || data.attempts.Length < LevelCount) Array.Resize(ref data.attempts, LevelCount);
+            if (data.failures == null || data.failures.Length < LevelCount) Array.Resize(ref data.failures, LevelCount);
             if (data.scores == null || data.scores.Length < LevelCount) Array.Resize(ref data.scores, LevelCount);
             if (data.stars == null || data.stars.Length < LevelCount) Array.Resize(ref data.stars, LevelCount);
             if (data.bestCombos == null || data.bestCombos.Length < LevelCount) Array.Resize(ref data.bestCombos, LevelCount);
@@ -70,12 +74,15 @@ namespace TapBlast
             if (!IsUnlocked(level)) return false;
             var data = Load(); data.selectedLevel = level; Save(data); return true;
         }
+        public static int AttemptCount(int level) => Load().attempts[Mathf.Clamp(level - 1, 0, LevelCount - 1)];
+        public static int FailureCount(int level) => Load().failures[Mathf.Clamp(level - 1, 0, LevelCount - 1)];
+        public static void RecordFailure(int level) { var d = Load(); d.failures[Mathf.Clamp(level - 1, 0, LevelCount - 1)]++; Save(d); }
         public static int Coins => Load().coins;
         public static int XP => Load().xp;
         public static string BeginRound(int level = 1)
         {
             if (!IsUnlocked(level)) throw new InvalidOperationException("Level is locked or unavailable.");
-            var data = Load(); data.activeRound = Guid.NewGuid().ToString("N"); data.activeLevel = level; Save(data); return data.activeRound;
+            var data = Load(); data.activeRound = Guid.NewGuid().ToString("N"); data.activeLevel = level; data.attempts[Mathf.Clamp(level - 1, 0, LevelCount - 1)]++; Save(data); return data.activeRound;
         }
         public static void AbandonRound(string round)
         {
@@ -86,6 +93,7 @@ namespace TapBlast
         {
             var data = Load(); receipt = new RewardReceipt(0, 0, data.coins, data.xp);
             if (string.IsNullOrEmpty(round) || data.activeRound != round || data.activeLevel != session.LevelId || session.State != RoundState.Results) return false;
+            if (session.Practice) { data.activeRound = ""; Save(data); return true; }
             int earnedCoins = session.Won ? (int)Math.Min(Math.Max(0, coins), (long)int.MaxValue - data.coins) : 0;
             int earnedXP = session.Won ? (int)Math.Min(Math.Max(0, xp), (long)int.MaxValue - data.xp) : 0;
             data.coins += earnedCoins; data.xp += earnedXP;
@@ -96,6 +104,8 @@ namespace TapBlast
             data.activeRound = ""; Save(data);
             receipt = new RewardReceipt(earnedCoins, earnedXP, data.coins, data.xp); return true;
         }
+        public static bool IconMode => PlayerPrefs.GetInt(Prefix + "ShapeCues", 1) == 1;
+        public static void SaveIconMode(bool value) { PlayerPrefs.SetInt(Prefix + "ShapeCues", value ? 1 : 0); PlayerPrefs.Save(); }
         public static bool Sound => PlayerPrefs.GetInt(Prefix + "Sound", 1) == 1;
         public static bool ReducedMotion => PlayerPrefs.GetInt(Prefix + "ReducedMotion", 0) == 1;
         public static void SaveSettings(bool sound, bool reducedMotion)

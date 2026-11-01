@@ -124,7 +124,7 @@ namespace TapBlast
             HideOverlays(); intro.SetActive(true); Pause.interactable = false; animateFeedback = false;
             currentConfig = config;
             string levelName = TitleCase(config.DisplayName);
-            introWorld.text = "Level " + config.LevelId.ToString("00");
+            introWorld.text = config.Scripted ? "LEVEL " + config.LevelId.ToString("00") + "  ·  " + config.MechanicBadge : "Level " + config.LevelId.ToString("00");
             levelChip.text = "LEVEL " + config.LevelId.ToString("00");
             worldLabel.text = levelName;
             levelLabel.text = config.LevelId.ToString("00");
@@ -138,9 +138,9 @@ namespace TapBlast
                 ((RectTransform)sizePreview.transform.GetChild(i * 2 + 1)).sizeDelta = Vector2.one * config.SizeAt(i);
             }
             introName.text = levelName;
-            introGoal.text = config.LevelId == 1 ? "Tap <color=#5B6CFF>" + config.RequiredTaps + "</color> targets in <color=#5B6CFF>" + config.Duration.ToString("0") + "</color> seconds" : config.GoalText;
-            countdownGoal.text = introGoal.text;
-            if (config.FirstTapTutorial) description.text = config.MechanicHint + "\n<color=#6B7190>Your first tap starts the clock. " + config.WinRule + "</color>";
+            introGoal.text = !config.Scripted && config.LevelId == 1 ? "Tap <color=#5B6CFF>" + config.RequiredTaps + "</color> targets in <color=#5B6CFF>" + config.Duration.ToString("0") + "</color> seconds" : config.GoalText;
+            countdownGoal.text = config.Scripted ? config.MechanicHint : introGoal.text;
+            if (config.FirstTapTutorial && !config.Scripted) description.text = config.MechanicHint + "\n<color=#6B7190>Your first tap starts the clock. " + config.WinRule + "</color>";
             starRules.text = "1 STAR   " + config.OneStarRule + "\n2 STARS   " + config.TwoStarRule + "\n3 STARS   " + config.ThreeStarRule;
             rewardPreview.text = "COMPLETE:  +" + config.CoinReward + " COINS   +" + config.XPReward + " XP";
             int bestStars = ProgressStore.GetBestStars(config.LevelId);
@@ -158,8 +158,8 @@ namespace TapBlast
         public void ShowPause() { HideOverlays(); pausePanel.SetActive(true); Pause.interactable = false; animateFeedback = false; GetComponent<GuiScreenVisibility>()?.Refresh(); }
         // Hint tone by message: rewards read green, misses rose, everything else neutral lavender.
         // Frequent "NICE TAP" stays neutral so the card does not flicker on every tap.
-        private static readonly string[] successHints = { "GOAL MET", "GOLDEN", "TIME BUBBLE", "CHAIN", "MEGA CHAIN", "SHIELD BLOCKED" };
-        private static readonly string[] missHints = { "TARGET MISSED", "BOMB HIT" };
+        private static readonly string[] successHints = { "GOAL MET", "GOLDEN", "TIME BUBBLE", "CHAIN", "MEGA CHAIN", "SHIELD BLOCKED", "CORE OPEN", "CORE HIT", "PAIR COMPLETE" };
+        private static readonly string[] missHints = { "TARGET MISSED", "BOMB HIT", "PRIORITY MISSED", "WRONG ORDER" };
         private static bool HintStarts(string title, string[] prefixes) { foreach (var p in prefixes) if (title.StartsWith(p)) return true; return false; }
         public void SetHint(string title, string detail) {
             hint.text = title; subhint.text = detail;
@@ -206,6 +206,7 @@ namespace TapBlast
             mechanicStatus.gameObject.SetActive(playing && config.LevelId > 10);
             mechanicStatus.text = "CHAINS " + session.Chains + "   MEGA " + session.MegaChains + "   BOMBS " + session.BombHits +
                 (config.RequiredCombo > 0 ? "   BEST " + session.BestCombo + "/" + config.RequiredCombo : "");
+            RefreshCampaign(session, config);
         }
         public void ShowResults(RoundSession session, bool newBest, int best, ProgressStore.RewardReceipt receipt)
         {
@@ -254,6 +255,7 @@ namespace TapBlast
             bool unlocked = hasNext || (session.Won && session.LevelId == ProgressStore.LevelCount), mastery = session.Won && session.Stars == 3 && !unlocked;
             resultHintChip.color = unlocked ? new Color32(222, 247, 231, 255) : mastery ? new Color32(255, 241, 204, 255) : new Color32(238, 235, 255, 255);
             resultHint.color = unlocked ? new Color32(20, 112, 64, 255) : mastery ? new Color32(150, 84, 0, 255) : new Color32(72, 80, 112, 255);
+            CampaignResults(session);
             resultReveal.Begin(session.Score, session.Stars, reducedMotion);
             Celebrate(session.Won);
             GetComponent<GuiScreenVisibility>()?.Refresh();

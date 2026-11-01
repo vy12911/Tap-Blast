@@ -195,7 +195,7 @@ public static class GuiSmoke
             game.BeginCountdown(); hud.SetCountdown(3); Shot(hud,"01-countdown");
               Check(VisibleAlpha(hud.Arena)==0,"Countdown hides arena artwork and targets beneath the modal");
             typeof(GameManager).GetField("countdown",BindingFlags.NonPublic|BindingFlags.Instance).SetValue(game,0f);
-            typeof(GameManager).GetMethod("Update",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(game,null);
+            typeof(GameManager).GetMethod("AdvanceFrame",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(game,null);
             Shot(hud,"05-tutorial");
               Check(VisibleAlpha(hud.Arena)==1,"Gameplay restores arena visibility");
               var progress=Field<Image>(hud,"progressFill");
@@ -215,9 +215,21 @@ public static class GuiSmoke
             UnitySmoke.Capture(hud,"gui-levels-tablet",1536,2048,validateLayout:()=>Layout(hud));
             ReferenceSelection(game,hud);
             Field<Button>(nav,"selectionClose").onClick.Invoke(); Check(game.Session.State==RoundState.Ready,"Level selection close returns to briefing");
-            var result=new RoundSession(new RoundRules(45,20,10,240,20)); result.Reset(); result.StartPlaying(); for(int i=0;i<20;i++) result.Tap();
+            var result=new RoundSession(game.CurrentLevel.Scripted?game.CurrentLevel.Rules:new RoundRules(45,20,10,240,20));result.Reset();result.StartPlaying();
+            if(result.Scripted)
+            {
+                while(result.State==RoundState.Playing){for(int i=0;i<result.Wave.quota;i++)result.Tap();result.Tick(result.Wave.duration);}
+            }
+            else for(int i=0;i<20;i++)result.Tap();
             hud.SetSettings(true, true); hud.ShowResults(result,true,result.Score,new ProgressStore.RewardReceipt(50,25,50,25));
-            Check(hud.ResultRevealComplete,"Reduced-motion results are immediately readable"); Shot(hud,"results-complete");
+            Check(hud.ResultRevealComplete,"Reduced-motion results are immediately readable");Shot(hud,"results-complete");
+            if(result.Scripted)
+            {
+                var summary=Field<TMP_Text>(hud,"campaignResult");summary.ForceMeshUpdate(true);
+                Check(summary.preferredHeight<=summary.rectTransform.rect.height+2,"V3 result summary fits its saved hint card");
+                foreach(var stat in Field<TMP_Text[]>(hud,"resultStatTiles")){stat.ForceMeshUpdate(true);var tile=(RectTransform)stat.transform.parent;Check(stat.rectTransform.rect.height<=tile.rect.height,"V3 stat text box stays within its card height");Check(stat.preferredHeight<=stat.rectTransform.rect.height+2,"V3 result tile fits "+stat.name+" (preferred "+stat.preferredHeight+", box "+stat.rectTransform.rect.height+")");}
+                var status=Field<TMP_Text>(hud,"pressureStatus");Check(status.font.HasCharacter('0'),"Pressure uses supported numeric text and saved image pips");
+            }
             File.AppendAllText("gui-smoke-results.txt","PASS Reference-state screenshots rendered from the saved Canvas.\n");
             SessionState.SetBool(Key,false); EditorApplication.Exit(0);
         }

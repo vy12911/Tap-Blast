@@ -12,18 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9218bab79c640ef96f356711932423c, type: 3}
   m_Name: Level12
   m_EditorClassIdentifier: 
-  displayName: DOUBLE IMPACT
+  designVersion: 5
+  bossPhases: []
+  displayName: Quick Fingers
   levelId: 12
   objective: 6
   targetScore: 500
+  objectiveCount: 3
+  mechanicHint: Tap a linked group of 3+ matching shapes. Bombs stop chain links.
   firstTapTutorial: 0
   targetSizes: []
   duration: 45
   requiredTaps: 20
   basePoints: 10
-  spawnInterval: 0.50
-  targetLifetime: 4.5
-  maxTargets: 12
+  spawnInterval: 1.4
+  finalSpawnInterval: 0
+  accelerationSeconds: 20
+  targetLifetime: 3.8
+  maxTargets: 8
   targetSize: 150
   targetSpacing: 36
   movingTargets: 0
@@ -31,17 +37,261 @@ MonoBehaviour:
   timeChance: 0
   isBossLevel: 0
   bossHealth: 1
-  twoStarScore: 1500
-  threeStarCombo: 20
-  coinReward: 225
-  xpReward: 120
-  objectiveCount: 3
-  mechanicHint: When 3 or more targets share a color, tap one to blast them all. That is 1 chain.
+  goldenPoints: 100
+  timeBonus: 3
+  maxTimeTargets: 6
+  bossSize: 270
   clusterSize: 5
   clusterInterval: 2.4
   movementSpeed: 70
   bombChance: 0
   shieldCharges: 0
-  requiredCombo: 0
   bombPenalty: 50
   chainBonus: 25
+  requiredCombo: 0
+  twoStarScore: 1000
+  threeStarCombo: 20
+  coinReward: 225
+  xpReward: 120
+  scripted: 1
+  seed: 31164
+  pressureLimit: 3
+  priorityMissLimit: 99
+  noBombs: 0
+  allowUltimate: 1
+  normalCharge: 3
+  goldenCharge: 6
+  chainCharge: 10
+  ultimateEligible: 0000000006000000010000000200000004000000
+  scriptedGoal: Make 3 chains across 3 waves
+  waves:
+  - rules:
+      title: CHAIN INTRO
+      duration: 9
+      gate: 6
+      quota: 1
+      pairs: 0
+      coreHits: 0
+      priorityOrder: 0
+      coreWarning: 0.45
+      coreOpen: 1.6
+      coreClosed: 1.2
+    maxActive: 4
+    schedule:
+    - id: L12-W1-S01
+      gateId: L12-W1-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1
+      at: 0.65
+      kind: 9
+      count: 3
+      color: 0
+      position: {x: 0, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L12-W1-S02
+      gateId: L12-W1-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1
+      at: 5.15
+      kind: 9
+      count: 3
+      color: 1
+      position: {x: 0, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L12-W1-S03
+      gateId: 
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1
+      at: 6.5
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 0
+      critical: 0
+    encounters:
+    - id: L12-P1-encounter
+      kind: 5
+      at: 0
+      warning: 0.45
+      active: 2
+      corridorX: 0.7
+  - rules:
+      title: LINKED CHAIN TEST
+      duration: 22.5
+      gate: 6
+      quota: 1
+      pairs: 0
+      coreHits: 0
+      priorityOrder: 0
+      coreWarning: 0.45
+      coreOpen: 1.6
+      coreClosed: 1.2
+    maxActive: 4
+    schedule:
+    - id: L12-W2-S01
+      gateId: L12-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1
+      at: 0.65
+      kind: 9
+      count: 3
+      color: 0
+      position: {x: 0, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L12-W2-S02
+      gateId: L12-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1
+      at: 6.65
+      kind: 9
+      count: 3
+      color: 1
+      position: {x: 0, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L12-W2-S03
+      gateId: L12-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1
+      at: 12.65
+      kind: 9
+      count: 3
+      color: 2
+      position: {x: 0, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L12-W2-S04
+      gateId: 
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1
+      at: 20
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 0
+      critical: 0
+    encounters:
+    - id: L12-P2-encounter
+      kind: 5
+      at: 0
+      warning: 0.45
+      active: 2
+      corridorX: 0.7
+  - rules:
+      title: CHAIN FINISH
+      duration: 13.5
+      gate: 6
+      quota: 1
+      pairs: 0
+      coreHits: 0
+      priorityOrder: 0
+      coreWarning: 0.45
+      coreOpen: 1.6
+      coreClosed: 1.2
+    maxActive: 4
+    schedule:
+    - id: L12-W3-S01
+      gateId: L12-W3-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1
+      at: 0.65
+      kind: 9
+      count: 3
+      color: 0
+      position: {x: 0, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L12-W3-S02
+      gateId: L12-W3-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1
+      at: 5.65
+      kind: 9
+      count: 3
+      color: 1
+      position: {x: 0, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L12-W3-S03
+      gateId: 
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1
+      at: 11
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 0
+      critical: 0
+    encounters:
+    - id: L12-P3-encounter
+      kind: 5
+      at: 0
+      warning: 0.45
+      active: 2
+      corridorX: 0.7

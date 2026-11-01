@@ -27,16 +27,41 @@ namespace TapBlast
         private float clock;
         private bool reduced, shield, drawn;
         private TargetPool pool;
+        private EncounterEvent encounter;
+        private float encounterAge, bossTime;
+        private bool bossVisible, coreOpen;
+        private BossSignature bossSignature;
+        private Vector2 bossNormalized;
+        public void SetEncounter(EncounterEvent value, float age) { encounter = value; encounterAge = age; SetVerticesDirty(); }
+        public void SetBoss(BossSignature signature, bool visible, bool exposed, float age, Vector2 position)
+        { bossSignature = signature; bossVisible = visible; coreOpen = exposed; bossTime = age; bossNormalized = position; SetVerticesDirty(); }
+        public void CoreCrack(Vector2 p)
+        { Emit(11, p, p, UIArt.Gold, 110, 0, .5f); Emit(1, p, p, Color.white, 210, .1f, .5f); }
+        public void BossDefeat(Vector2 p)
+        {
+            CoreCrack(p);
+            for (int i = 0; i < 5; i++)
+            {
+                Vector2 q = p + new Vector2((i - 2) * 80, (i % 2 == 0 ? 1 : -1) * 90);
+                Emit(11, q, q, UIArt.Gold, 120, .25f + i * .16f, .6f);
+                Emit(1, q, q, Color.white, 180, .25f + i * .16f, .5f);
+            }
+            Finale(p, UIArt.Gold, 1.05f);
+        }
         public int ActiveEffectCount
         {
             get { int count = 0; for (int i = 0; i < effects.Length; i++) if (effects[i].Life > 0) count++; return count; }
         }
+        private bool icons = true, lowBudget;
+        public void SetPerformanceBudget(bool reducedExtras) { lowBudget = reducedExtras; }
+        public void SetIcons(bool value) { icons = value; SetVerticesDirty(); }
         public void Bind(TargetPool value) { pool = value; raycastTarget = false; }
         public void Configure(int id, bool shieldActive) { level = id; shield = shieldActive; }
         public void Clear()
         {
             for (int i = 0; i < effects.Length; i++) effects[i] = default;
             cursor = 0; clock = 0; shield = false; reactionSequence = 0; LastReactionStyle = 0; SetVerticesDirty();
+            encounter = null; bossVisible = false;
         }
         public void SetMotion(bool value)
         {
@@ -60,12 +85,12 @@ namespace TapBlast
                 if (effects[i].Age >= effects[i].Life) effects[i].Life = 0; else live = true;
             }
             // World 2 boards animate every frame; otherwise rebuild only while effects play (plus one clearing frame).
-            if (live || drawn || level >= 11) SetVerticesDirty();
+            if (live || drawn || level >= 11 || bossVisible || encounter != null || pool != null && pool.ActiveCount > 0) SetVerticesDirty();
             drawn = live;
         }
         private void Emit(int kind, Vector2 from, Vector2 to, Color tint, float size, float delay = 0, float life = .65f)
         {
-            if (reduced) return;
+            if (reduced || lowBudget && (kind == 2 || kind == 11 || kind == 12 || kind == 21)) return;
             effects[cursor % effects.Length] = new Effect { Kind = kind, From = from, To = to,
                 Tint = tint, Size = size, Age = -delay, Life = life, Seed = cursor * 2.39996f };
             cursor++;
@@ -74,6 +99,7 @@ namespace TapBlast
         public void Burst(Vector2 position, Color tint, float radius, TargetKind kind)
         {
             Emit(10, position, position, new Color(1, 1, 1, .85f), radius * 1.25f, 0, .24f);
+            if (kind == TargetKind.Priority) { Emit(22, position, position, UIArt.Gold, radius * 2.1f, 0, .55f); Emit(11, position, position, UIArt.Gold, radius, 0, .5f); Emit(1, position, position, Color.white, radius * 2, 0, .45f); }
             if (kind == TargetKind.Golden)
             {
                 Emit(11, position, position, UIArt.Gold, radius * 1.1f, 0, .7f);
@@ -113,11 +139,12 @@ namespace TapBlast
                 Vector2 p = members[i].Position;
                 Color tint = members[i].Tint;
                 float delay = i * TargetView.ChainStepSeconds;
-                if (i > 0) Emit(4 + style, members[i - 1].Position, p, tint, linkWidth,
+                if (i > 0) Emit(21, p, p, tint, members[i].Radius * 1.45f, delay - .1f, .1f);
+                if (i > 0) Emit(4 + style, members[i].GraphChain ? members[i].ChainFrom : members[i - 1].Position, p, tint, linkWidth,
                     delay - TargetView.ChainStepSeconds, TargetView.ChainStepSeconds + .23f);
                 float size = burstRadius * (count >= 8 ? 1.3f : 1);
                 Emit(10, p, p, new Color(1, 1, 1, .8f), members[i].Radius * 1.3f, delay, .24f);
-                Emit(7 + style, p, p, tint, size, delay, .75f);
+                Emit(19, p, p, tint, members[i].Radius * 2.2f, delay + .07f, .55f);
                 if (style == 0) Emit(2, p, p, tint, size * .7f, delay, .5f);
                 if (level == 12) Emit(1, p, p, UIArt.Gold, size * .8f, delay + .18f);
                 if (level == 18) Emit(3, p, p, new Color(.4f, 1, .65f), size * .65f, delay);
@@ -126,7 +153,11 @@ namespace TapBlast
             float finish = (count - 1) * TargetView.ChainStepSeconds;
             if (count >= 8)
             {
-                Finale(last, UIArt.Gold, finish);
+                Vector2 center = Vector2.zero;
+                for (int i = 0; i < count; i++) center += members[i].Position;
+                center /= count;
+                Emit(20, center, center, UIArt.Gold, 300, finish + .09f, .75f);
+                Finale(center, UIArt.Gold, finish + .09f);
                 Emit(1, last, last, UIArt.Gold, burstRadius * 2.1f, finish, .9f);
                 Emit(2, last, last, Color.white, burstRadius * 1.8f, finish, 1);
                 if (level == 19) Emit(1, last, last, UIArt.Cyan, burstRadius * 2.4f, finish + .22f, 1);
@@ -154,6 +185,13 @@ namespace TapBlast
                 Vector2 top = p + Vector2.up * (180 + i % 3 * 95);
                 Emit(2, top, top, tint, 115, .3f + i * .05f);
             }
+        }
+        public void PairLink(Vector2 first, Vector2 second, bool complete)
+        {
+            Emit(0, first, second, UIArt.Gold, 6, 0, .35f);
+            if (!complete) return;
+            Emit(1, first, first, Color.white, 140, 0, .45f); Emit(1, second, second, Color.white, 140, .05f, .45f);
+            Emit(11, first, first, UIArt.Gold, 75, 0, .5f); Emit(11, second, second, UIArt.Gold, 75, .05f, .5f);
         }
         public void ShieldActivate() { Emit(3, Vector2.zero, Vector2.zero, UIArt.Cyan, 420, 0, .85f); }
         // The bomb swells for this long (HUD popup) before it blows.
@@ -189,6 +227,7 @@ namespace TapBlast
             vh.Clear();
             if (pool == null) return;
             if (level >= 11) DrawBoard(vh);
+            DrawMechanicCues(vh);
             for (int i = 0; i < effects.Length; i++)
             {
                 Effect e = effects[i];
@@ -197,7 +236,8 @@ namespace TapBlast
                 Color c = e.Tint; c.a = (1 - t) * intensity;
                 if (e.Kind >= 10)
                 {
-                    DrawPop(vh, e, t);
+                    if (e.Kind == 21 || e.Kind == 22) DrawFocus(vh, e, t);
+                    else if (e.Kind == 19 || e.Kind == 20) DrawCandy(vh, e, t); else DrawPop(vh, e, t);
                 }
                 else if (e.Kind >= 4)
                 {
@@ -326,6 +366,57 @@ namespace TapBlast
                 Ring(vh, o, e.Size * (1 - fast) + 8, 4, ring, 32, 0);
             }
         }
+        // Local accents preserve target visibility; no full-screen flash or new objects.
+        private void DrawFocus(VertexHelper vh, Effect e, float t)
+        {
+            Color light = Color.Lerp(e.Tint, Color.white, .7f);
+            if (e.Kind == 21)
+            {
+                // Anticipation converges onto the next member before its scheduled pop.
+                light.a = Mathf.Sin(t * Mathf.PI) * .7f * intensity;
+                Ring(vh, e.From, e.Size * Mathf.Lerp(1.25f, .7f, t), 2 + t * 3, light, 32, 0);
+                return;
+            }
+            float ease = 1 - Mathf.Pow(1 - t, 3);
+            light.a = Mathf.Pow(1 - t, 1.6f) * intensity;
+            Ring(vh, e.From, e.Size * (.3f + .7f * ease), 5 * (1 - t) + 1, light, 40, 0);
+            for (int i = 0; i < 4; i++)
+            {
+                float angle = Mathf.PI * (.25f + i * .5f);
+                Vector2 direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+                Vector2 point = e.From + direction * (e.Size * (.35f + ease * .65f));
+                Star(vh, point, 15 * Mathf.Sin(Mathf.PI * t), light);
+            }
+        }
+        private void DrawCandy(VertexHelper vh, Effect e, float t)
+        {
+            float ease = 1 - Mathf.Pow(1 - t, 3), fade = Mathf.Pow(1 - t, 1.4f) * intensity;
+            Color c = Color.Lerp(e.Tint, Color.white, .6f); c.a = fade;
+            float radius = e.Size * (.15f + .85f * ease);
+            bool mega = e.Kind == 20;
+            // Short radial streaks carry the impact, then disappear before the debris tail.
+            if (t < .4f)
+                for (int i = 0; i < (mega ? 12 : 6); i++)
+                {
+                    float a = e.Seed + i * Mathf.PI * 2 / (mega ? 12 : 6);
+                    Vector2 d = new Vector2(Mathf.Cos(a), Mathf.Sin(a));
+                    Color streak = c; streak.a *= (1 - t / .4f) * .65f;
+                    Line(vh, e.From + d * radius * .65f, e.From + d * radius * 1.1f, mega ? 4 : 2, streak);
+                }
+            Ring(vh, e.From, radius, (mega ? 20 : 9) * (1 - t) + 1, c, 48, 0);
+            Ring(vh, e.From, radius * .7f, (mega ? 12 : 5) * (1 - t) + 1, c, 40, 0);
+            if (mega) Glow(vh, e.From, radius * .6f, new Color(1, .94f, .65f, Mathf.Clamp01(1 - t * 4) * .9f));
+            int pieces = mega ? (lowBudget ? 16 : 24) : (lowBudget ? 6 : 10);
+            for (int i = 0; i < pieces; i++)
+            {
+                float angle = e.Seed + i * Mathf.PI * 2 / pieces;
+                Vector2 d = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+                Vector2 p = e.From + d * (radius * (i % 2 == 0 ? 1.1f : .85f)) + Vector2.down * (150 * t * t);
+                Color piece = i % 3 == 0 ? Color.white : e.Tint; piece.a = fade;
+                Shard(vh, p, (mega ? 22 : 12) * (1 - t), angle + t * 5, piece);
+                if (i % 3 == 0) Star(vh, p + d * 12, (mega ? 15 : 8) * (1 - t), c);
+            }
+        }
         private void DrawReaction(VertexHelper vh, Effect e, float t, Color c)
         {
             Color core = Color.Lerp(c, Color.white, .7f); core.a = c.a;
@@ -416,6 +507,61 @@ namespace TapBlast
                 }
             }
         }
+        private void DrawMechanicCues(VertexHelper vh)
+        {
+            for (int i = 0; i < pool.Capacity; i++)
+            {
+                var target = pool.At(i);
+                if (!target.Active || target.BlastPending) continue;
+                if (target.LaneWarning)
+                {
+                    Vector2 from = target.Position, to = target.LaneDestination;
+                    Color c = new Color(1, .9f, .5f, .85f);
+                    Line(vh, from, to, 3, c);
+                    Vector2 direction = (to - from).normalized, side = new Vector2(-direction.y, direction.x);
+                    Line(vh, to, to - direction * 20 + side * 12, 4, c);
+                    Line(vh, to, to - direction * 20 - side * 12, 4, c);
+                    Ring(vh, to, target.Radius + 8, 2, c, 32, 0);
+                }
+                if (target.Kind == TargetKind.Conduit)
+                    Ring(vh, target.Position, target.Radius + 14, 3, UIArt.Gold, 6, 0);
+            }
+            if (encounter != null)
+            {
+                float x = rectTransform.rect.width * .24f;
+                Color c = encounter.kind == ArenaEventKind.SafeCorridor ? UIArt.Cyan : UIArt.Gold;
+                c.a = .7f;
+                if (encounter.kind == ArenaEventKind.SafeCorridor)
+                    for (float y = rectTransform.rect.yMin + 20; y < rectTransform.rect.yMax - 20; y += 42)
+                        Line(vh, new Vector2(x, y), new Vector2(x, y + 24), 3, c);
+                else if (!reduced && (encounter.kind == ArenaEventKind.PulsePreview || encounter.kind == ArenaEventKind.TempoFakeout))
+                    Ring(vh, Vector2.zero, 120 + Mathf.PingPong(encounterAge * 85, 80), 3, c, 48, 0);
+            }
+            if (!bossVisible) return;
+            Vector2 p = new Vector2(bossNormalized.x * (rectTransform.rect.width * .5f - 156), bossNormalized.y * (rectTransform.rect.height * .5f - 156));
+            Color tint = coreOpen ? UIArt.Gold : UIArt.Cyan;
+            float rotation = reduced ? 0 : bossTime * 1.3f;
+            if (bossSignature == BossSignature.Sentinel)
+            {
+                // A gap rotates around the core; OPEN uses a bright complete gold halo.
+                for (int i = 0; i < 32; i++)
+                {
+                    if (!coreOpen && i < 8) continue;
+                    float a = rotation + i * Mathf.PI * 2 / 32, b = rotation + (i + 1) * Mathf.PI * 2 / 32;
+                    Line(vh, p + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * 100, p + new Vector2(Mathf.Cos(b), Mathf.Sin(b)) * 100, 7, tint);
+                }
+            }
+            else
+            {
+                for (int i = -1; i <= 1; i += 2)
+                {
+                    Vector2 node = p + new Vector2(i * 125, -80);
+                    Ring(vh, node, 22, 4, tint, 6, 0);
+                    Line(vh, node, p, coreOpen ? 5 : 2, tint);
+                }
+                Ring(vh, p, 95, 4, tint, 6, rotation);
+            }
+        }
         private void DrawBoard(VertexHelper vh)
         {
             for (int i = 0; i < pool.Capacity; i++)
@@ -442,6 +588,11 @@ namespace TapBlast
                     continue;
                 }
                 if (target.Kind != TargetKind.Chain) continue;
+                if (icons)
+                {
+                    int sides = target.Tint.g > target.Tint.b * 1.1f ? 4 : target.Tint.r > .5f ? 3 : 6;
+                    Ring(vh, p + Vector2.down * (target.Radius * .55f), 10, 4, Color.white, sides, 0);
+                }
                 int matches = 0;
                 for (int j = 0; j < pool.Capacity; j++)
                 {

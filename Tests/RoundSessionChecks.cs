@@ -172,6 +172,65 @@ internal static class RoundSessionChecks
             s.Miss(); s.Tick(55); Check(s.Won && s.Stars < 3, "Earned hybrid goal survives a later miss but mastery does not");
             s.Reset(); s.StartPlaying(); for (int i = 0; i < 100; i++) s.Tap(); s.Tick(55);
             Check(!s.Won, "High combo cannot substitute for Chain Master's five chains");
+            var campaign = new CampaignRules { pressureLimit = 3, waves = new[] {
+                new WaveRules { duration = 2, gate = GateKind.Priority, quota = 1 },
+                new WaveRules { duration = 2, gate = GateKind.Pairs, quota = 1 },
+                new WaveRules { duration = 2, gate = GateKind.Chains, quota = 1 } } };
+            var v3 = new RoundRules(6,20,10,100,20,campaign:campaign);
+            s = new RoundSession(v3); s.Reset(); s.StartPlaying();
+            for (int i=0;i<100;i++) s.Tap(); s.Tick(2);
+            Check(!s.Won && s.State==RoundState.Results, "V3 score cannot bypass a Priority gate");
+            s.Reset(); s.StartPlaying(); s.Tap(TargetKind.Priority,true,HitSource.Ultimate); s.Tick(2);
+            Check(!s.Won, "Ultimate cannot earn mandatory direct Priority credit");
+            s.Reset(); s.StartPlaying(); s.Tap(TargetKind.Priority); s.Tick(2);
+            Check(s.WaveIndex==1 && s.ClearedWaves==1, "Only a direct Priority hit unlocks the next wave");
+            int pressure=s.Pressure; Check(s.PairTap(1,2)==0 && s.Pressure==pressure, "Wrong order resets a World 2 pair without pressure");
+            Check(s.PairTap(1,1)==1, "Pair starts from its numbered first node");
+            s.Pause(); s.Tick(1); Check(s.PairRemaining==2.5f, "Pause freezes the ordered-pair timer"); s.Resume();
+            Check(s.PairTap(1,2)==2 && s.PairsCompleted==1, "Correct second direct tap completes a pair once");
+            Check(s.PairTap(1,2)==0 && s.PairsCompleted==1, "Duplicate second node cannot repeat pair credit");
+            s.Tick(2); s.RecordChain(3); s.Tick(2);
+            Check(s.Won && s.GoalMet && s.ClearedWaves==3, "All three mandatory gates pass the V3 level");
+            s.Reset(); s.StartPlaying(); s.Miss(false); Check(s.Pressure==0, "Ordinary misses do not add pressure");
+            s.Miss(true,true);s.Miss(true,true);s.Miss(true,true);
+            Check(s.State==RoundState.Results && s.Pressure==3 && !s.Won, "Pressure limit causes an immediate single failure");
+            s.Reset();s.StartPlaying();s.Tap(TargetKind.Time);s.Tap(TargetKind.Time);s.Tap(TargetKind.Time);
+            Check(s.AddedTime==6, "V3 time rewards are capped at six seconds");
+            s.Reset();s.StartPlaying();for(int i=0;i<60;i++)s.Tap();
+            Check(s.UltimateCharge==100 && s.UseUltimate() && !s.UseUltimate(), "Ultimate charge clamps to 100 and is consumed exactly once");
+            int comboBefore=s.Combo;int directBefore=s.SuccessfulDirectTaps;s.Tap(TargetKind.Chain,true,HitSource.Chain);
+            Check(s.Combo==comboBefore && s.SuccessfulDirectTaps==directBefore, "Blast-cleared targets do not inflate direct combo or accuracy");
+            s.EmptyTap();s.InvalidTap("WRONG ORDER");
+            Check(s.Accuracy<1 && s.InvalidTaps==1 && s.EmptyTaps==1, "Direct accuracy counts empty and invalid taps");
+            s.Fail("TEST");s.SetPractice(true);s.Reset();s.StartPlaying();s.Tap(TargetKind.Priority);s.Tick(2/.7f);s.PairTap(2,1);s.PairTap(2,2);s.Tick(2/.7f);s.RecordChain(3);s.Tick(2/.7f);
+            Check(s.Practice && s.Won && s.Stars==0, "Practice clears gates with relaxed time but grants no stars");
+            var boss = new CampaignRules { waves = new[] { new WaveRules { duration = 10, quota = 1, gate = GateKind.Taps, coreHits = 1 } } };
+            s = new RoundSession(new RoundRules(10,20,10,100,20,campaign:boss)); s.Reset(); s.StartPlaying();
+            Check(s.Tap(TargetKind.Boss)==0 && s.WaveCoreHits==0, "V5 shielded core rejects early direct hits");
+            s.Tap(); s.Tick(.45f);
+            Check(s.CoreExposed && !s.WaveGateMet, "V5 skill gate exposes core but does not replace its direct hit");
+            s.Tap(TargetKind.Boss,true,HitSource.Ultimate); s.Tap(TargetKind.Boss,true,HitSource.Chain);
+            Check(s.WaveCoreHits==0, "V5 area effects cannot damage boss core");
+            s.Pause(); s.Tick(1); Check(s.CoreExposed, "V5 pause freezes core vulnerability"); s.Resume();
+            s.Tick(1.61f); Check(!s.CoreExposed, "V5 rotating shield closes after its open window");
+            s.Tick(1.2f); Check(s.CoreExposed, "V5 rotating shield opens again deterministically");
+            s.Tap(TargetKind.Boss); s.Tap(TargetKind.Boss);
+            Check(s.WaveCoreHits==1 && s.WaveGateMet, "V5 core damage commits exactly once");
+            s.Tick(10); Check(s.Won, "V5 boss phase requires both skill gate and core hit");
+            s.Reset();s.StartPlaying();s.Tap();s.Tick(10);Check(!s.Won&&s.FailureReason.Contains("core 0/1"),"V5 boss failure identifies its missing core hit");
+            var ordered = new CampaignRules { waves = new[] { new WaveRules { duration = 5, quota = 1, gate = GateKind.Taps, priorityOrder = 2 } } };
+            s = new RoundSession(new RoundRules(5,20,10,100,20,campaign:ordered));s.Reset();s.StartPlaying();s.Tap();
+            Check(!s.PriorityTap(2) && !s.WaveGateMet, "V5 ordered Priority cannot be completed out of order");
+            Check(s.PriorityTap(1)&&s.PriorityTap(2)&&s.WaveGateMet, "V5 ordered Priority finale credits both direct inputs");
+            s.Tap(TargetKind.Multiplier); int doubled=s.Tap();s.Tick(4.01f);
+            Check(s.BonusMultiplierRemaining==0 && doubled>10, "V5 optional multiplier expires on the simulation clock");
+            float accuracyBeforeMiss=s.Accuracy;int pressureBeforeMiss=s.Pressure;s.Miss();Check(s.Accuracy<accuracyBeforeMiss&&s.Pressure==pressureBeforeMiss,"V5 expired targets reduce accuracy without adding pressure");
+            foreach(int hz in new[]{30,60,120})
+            {
+                float t=0;for(int i=0;i<hz;i++)t+=1f/hz;
+                Check(Math.Abs(LaneTiming.Fraction(t,.45f,.22f,1.4f)-1)<.001f, "V5 lane motion settles identically at "+hz+" Hz");
+                Check(LaneTiming.Fraction(.44f,.45f,.22f,1.4f)==0 && LaneTiming.Fraction(.56f,.45f,.22f,1.4f)>.49f, "V5 lane preview precedes transit at "+hz+" Hz");
+            }
             Console.WriteLine(checks + " round-rule checks passed."); return 0;
         }
         catch (Exception e) { Console.Error.WriteLine(e); return 1; }

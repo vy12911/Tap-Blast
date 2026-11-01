@@ -1,3 +1,7 @@
+# Active v3 authoring
+
+Use `Tools/LiveEdits/20-campaign-v3.cs` to re-author v3 levels and the matching scene/prefab. New saved bindings: Ultimate button/charge fill, pressure label/Image pips, shape-cue setting, optional Practice button and arena empty-tap surface. Priority ! and pair numbers are saved on the target prefab. The prior first-20 mechanic list below is historical; [the v3 guide](GDD-v3-Level01-20.md) is authoritative for active gameplay.
+
 # Editing the Canvas and gameplay feedback
 
 All UI labels use **TextMeshProUGUI** with a saved TMP font/material. Script bindings, including result reveals and pooled feedback labels, use **`TMPro.TMP_Text`**. Always use TMP for new text; do not add legacy `UnityEngine.UI.Text`. Keep prefab/scene references wired and text raycasts disabled. Shared fonts, shaders and default settings are in `Assets/TextMesh Pro/`.

@@ -12,38 +12,371 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9218bab79c640ef96f356711932423c, type: 3}
   m_Name: Level19
   m_EditorClassIdentifier: 
-  displayName: MEGA MASTERY
+  designVersion: 5
+  bossPhases: []
+  displayName: Skill Trial
   levelId: 19
   objective: 7
   targetScore: 500
+  objectiveCount: 2
+  mechanicHint: Make 8-target Megas, then tap !1 before !2. Tap pairs 1 then 2.
   firstTapTutorial: 0
   targetSizes: []
   duration: 45
   requiredTaps: 20
   basePoints: 10
-  spawnInterval: 0.50
+  spawnInterval: 1.4
   finalSpawnInterval: 0.35
   accelerationSeconds: 20
-  targetLifetime: 4.5
-  maxTargets: 12
+  targetLifetime: 3.8
+  maxTargets: 8
   targetSize: 150
   targetSpacing: 36
-  movingTargets: 1
+  movingTargets: 0
   goldenChance: 0
   timeChance: 0
   isBossLevel: 0
   bossHealth: 1
-  twoStarScore: 3200
-  threeStarCombo: 32
-  coinReward: 400
-  xpReward: 190
-  objectiveCount: 2
-  mechanicHint: A Mega Chain needs 8 or more targets of one color. Wait, then tap one.
+  goldenPoints: 100
+  timeBonus: 3
+  maxTimeTargets: 6
+  bossSize: 270
   clusterSize: 8
   clusterInterval: 2.4
   movementSpeed: 70
-  bombChance: 0.5
+  bombChance: 0
   shieldCharges: 1
-  requiredCombo: 0
   bombPenalty: 50
   chainBonus: 25
+  requiredCombo: 0
+  twoStarScore: 1000
+  threeStarCombo: 32
+  coinReward: 400
+  xpReward: 190
+  scripted: 1
+  seed: 31843
+  pressureLimit: 3
+  priorityMissLimit: 99
+  noBombs: 0
+  allowUltimate: 1
+  normalCharge: 3
+  goldenCharge: 6
+  chainCharge: 10
+  ultimateEligible: 0000000006000000010000000200000004000000
+  scriptedGoal: Make 2 Megas, 1 pair, then tap !1 followed by !2
+  waves:
+  - rules:
+      title: PAIR WARM UP
+      duration: 9
+      gate: 8
+      quota: 1
+      pairs: 0
+      coreHits: 0
+      priorityOrder: 0
+      coreWarning: 0.45
+      coreOpen: 1.6
+      coreClosed: 1.2
+    maxActive: 4
+    schedule:
+    - id: L19-W1-S01
+      gateId: L19-W1-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 0.65
+      kind: 8
+      count: 2
+      color: 0
+      position: {x: 0, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L19-W1-S02
+      gateId: L19-W1-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 5.15
+      kind: 8
+      count: 2
+      color: 1
+      position: {x: 0, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L19-W1-S03
+      gateId: 
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 6.5
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 0
+      critical: 0
+    encounters:
+    - id: L19-P1-encounter
+      kind: 7
+      at: 0
+      warning: 0.45
+      active: 2
+      corridorX: 0.7
+  - rules:
+      title: "MEGA \xB7 8 LINKED CIRCLES"
+      duration: 22.5
+      gate: 7
+      quota: 1
+      pairs: 0
+      coreHits: 0
+      priorityOrder: 0
+      coreWarning: 0.45
+      coreOpen: 1.6
+      coreClosed: 1.2
+    maxActive: 8
+    schedule:
+    - id: L19-W2-S01
+      gateId: L19-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 0.65
+      kind: 4
+      count: 8
+      color: 0
+      position: {x: 0, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L19-W2-S02
+      gateId: L19-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 6.65
+      kind: 4
+      count: 8
+      color: 1
+      position: {x: 0, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L19-W2-S03
+      gateId: L19-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 12.65
+      kind: 4
+      count: 8
+      color: 2
+      position: {x: 0, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L19-W2-S04
+      gateId: 
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 20
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 0
+      critical: 0
+    encounters:
+    - id: L19-P2-encounter
+      kind: 7
+      at: 0
+      warning: 0.45
+      active: 2
+      corridorX: 0.7
+  - rules:
+      title: SECOND MEGA
+      duration: 13.5
+      gate: 7
+      quota: 1
+      pairs: 0
+      coreHits: 0
+      priorityOrder: 2
+      coreWarning: 0.45
+      coreOpen: 1.6
+      coreClosed: 1.2
+    maxActive: 8
+    schedule:
+    - id: L19-W3-S01
+      gateId: L19-W3-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 0.65
+      kind: 4
+      count: 8
+      color: 0
+      position: {x: 0, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L19-W3-S02
+      gateId: 
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 5
+      kind: 10
+      count: 1
+      color: 0
+      position: {x: 0, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 0
+      critical: 0
+    - id: L19-W3-S03
+      gateId: L19-W3-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 5.65
+      kind: 4
+      count: 8
+      color: 1
+      position: {x: 0, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L19-W3-S04
+      gateId: L19-W3-gate
+      laneId: 1
+      order: 1
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 8.5
+      kind: 7
+      count: 1
+      color: 0
+      position: {x: -0.6, y: 0.4}
+      life: 2.7
+      size: 156
+      moving: 0
+      required: 1
+      critical: 1
+    - id: L19-W3-S05
+      gateId: L19-W3-gate
+      laneId: 0
+      order: 2
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 8.6
+      kind: 7
+      count: 1
+      color: 0
+      position: {x: 0.6, y: -0.4}
+      life: 2.7
+      size: 156
+      moving: 0
+      required: 1
+      critical: 1
+    - id: L19-W3-S06
+      gateId: 
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 11
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 0
+      critical: 0
+    - id: L19-W3-S07
+      gateId: L19-W3-gate
+      laneId: 0
+      order: 1
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 11.2
+      kind: 7
+      count: 1
+      color: 0
+      position: {x: -0.6, y: 0.4}
+      life: 1.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 1
+    - id: L19-W3-S08
+      gateId: L19-W3-gate
+      laneId: 1
+      order: 2
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.6
+      at: 11.3
+      kind: 7
+      count: 1
+      color: 0
+      position: {x: 0.6, y: -0.4}
+      life: 1.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 1
+    encounters:
+    - id: L19-P3-encounter
+      kind: 7
+      at: 0
+      warning: 0.45
+      active: 2
+      corridorX: 0.7

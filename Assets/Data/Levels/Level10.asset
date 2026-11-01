@@ -11,30 +11,639 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e9218bab79c640ef96f356711932423c, type: 3}
   m_Name: Level10
-  m_EditorClassIdentifier:
-  displayName: GOLDEN CORE
+  m_EditorClassIdentifier: 
+  designVersion: 5
+  bossPhases:
+  - {fileID: 11400000, guid: d63ed4c05d4393a4ea4fde87326124d4, type: 2}
+  - {fileID: 11400000, guid: dacd4675914a2b948b0df49b0cc3db25, type: 2}
+  - {fileID: 11400000, guid: f1c58370da61ef34abdaf7c241c69bb6, type: 2}
+  - {fileID: 11400000, guid: 5cfb8acd08a9ab649bd97e07acf6df2a, type: 2}
+  - {fileID: 11400000, guid: 256c03030d1bb0546a517eb3804daabe, type: 2}
+  displayName: Sentinel
   levelId: 10
   objective: 5
   targetScore: 3000
+  objectiveCount: 1
+  mechanicHint: Clear each phase gate, then tap the gold core while its shield is
+    open.
   firstTapTutorial: 0
   targetSizes: []
-  duration: 50
+  duration: 60
   requiredTaps: 20
   basePoints: 10
-  spawnInterval: 0.50
-  targetLifetime: 4.0
-  maxTargets: 6
+  spawnInterval: 1.4
+  finalSpawnInterval: 0
+  accelerationSeconds: 20
+  targetLifetime: 3.8
+  maxTargets: 8
   targetSize: 150
   targetSpacing: 36
-  movingTargets: 1
-  goldenChance: 0.20
-  timeChance: 0.15
+  movingTargets: 0
+  goldenChance: 0
+  timeChance: 0
   isBossLevel: 1
   bossHealth: 5
-  twoStarScore: 3000
+  goldenPoints: 100
+  timeBonus: 3
+  maxTimeTargets: 6
+  bossSize: 270
+  clusterSize: 0
+  clusterInterval: 2.4
+  movementSpeed: 100
+  bombChance: 0
+  shieldCharges: 0
+  bombPenalty: 50
+  chainBonus: 25
+  requiredCombo: 0
+  twoStarScore: 1000
   threeStarCombo: 25
   coinReward: 250
   xpReward: 100
-  bossSize: 270
-  mechanicHint: Tap the big CORE target 5 times. Its ring shows the hits left.
-  objectiveCount: 1
+  scripted: 1
+  seed: 30970
+  pressureLimit: 4
+  priorityMissLimit: 99
+  noBombs: 0
+  allowUltimate: 1
+  normalCharge: 3
+  goldenCharge: 6
+  chainCharge: 10
+  ultimateEligible: 0000000006000000010000000200000004000000
+  scriptedGoal: Clear 5 Sentinel phases and direct-hit each exposed core
+  waves:
+  - rules:
+      title: CORE SKILL
+      duration: 10
+      gate: 0
+      quota: 5
+      pairs: 0
+      coreHits: 1
+      priorityOrder: 0
+      coreWarning: 0.45
+      coreOpen: 1.6
+      coreClosed: 1.2
+    maxActive: 4
+    schedule:
+    - id: L10-W1-S01
+      gateId: L10-W1-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 0.65
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: -0.62, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L10-W1-S02
+      gateId: L10-W1-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 1.9499999
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L10-W1-S03
+      gateId: L10-W1-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 3.25
+      kind: 0
+      count: 1
+      color: 2
+      position: {x: 0.62, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L10-W1-S04
+      gateId: L10-W1-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 4.5499997
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: -0.62, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L10-W1-S05
+      gateId: L10-W1-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 5.85
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L10-W1-S06
+      gateId: L10-W1-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 7.1499996
+      kind: 0
+      count: 1
+      color: 2
+      position: {x: 0.62, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    encounters:
+    - id: L10-P1-encounter
+      kind: 0
+      at: 0
+      warning: 0.45
+      active: 2
+      corridorX: 0.7
+  - rules:
+      title: MOVEMENT REVIEW
+      duration: 12
+      gate: 2
+      quota: 4
+      pairs: 0
+      coreHits: 1
+      priorityOrder: 0
+      coreWarning: 0.45
+      coreOpen: 1.6
+      coreClosed: 1.2
+    maxActive: 4
+    schedule:
+    - id: L10-W2-S01
+      gateId: L10-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 0.65
+      kind: 6
+      count: 1
+      color: 0
+      position: {x: -0.62, y: -0.55}
+      life: 3.8
+      size: 132
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L10-W2-S02
+      gateId: L10-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 2.15
+      kind: 6
+      count: 1
+      color: 1
+      position: {x: 0, y: -0.55}
+      life: 3.8
+      size: 132
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L10-W2-S03
+      gateId: L10-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 3.65
+      kind: 6
+      count: 1
+      color: 2
+      position: {x: 0.62, y: -0.55}
+      life: 3.8
+      size: 132
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L10-W2-S04
+      gateId: L10-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 5.15
+      kind: 6
+      count: 1
+      color: 0
+      position: {x: -0.62, y: 0}
+      life: 3.8
+      size: 132
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L10-W2-S05
+      gateId: L10-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 6.65
+      kind: 6
+      count: 1
+      color: 1
+      position: {x: 0, y: 0}
+      life: 3.8
+      size: 132
+      moving: 1
+      required: 1
+      critical: 0
+    - id: L10-W2-S06
+      gateId: L10-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 8.15
+      kind: 6
+      count: 1
+      color: 2
+      position: {x: 0.62, y: 0}
+      life: 3.8
+      size: 132
+      moving: 1
+      required: 1
+      critical: 0
+    encounters:
+    - id: L10-P2-encounter
+      kind: 0
+      at: 0
+      warning: 0.45
+      active: 2
+      corridorX: 0.7
+  - rules:
+      title: "COMBO GATE \xB7 5 IN A ROW"
+      duration: 15
+      gate: 3
+      quota: 5
+      pairs: 0
+      coreHits: 1
+      priorityOrder: 0
+      coreWarning: 0.45
+      coreOpen: 1.6
+      coreClosed: 1.2
+    maxActive: 4
+    schedule:
+    - id: L10-W3-S01
+      gateId: L10-W3-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 0.65
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: -0.62, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L10-W3-S02
+      gateId: L10-W3-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 1.9499999
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L10-W3-S03
+      gateId: L10-W3-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 3.25
+      kind: 0
+      count: 1
+      color: 2
+      position: {x: 0.62, y: -0.55}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L10-W3-S04
+      gateId: L10-W3-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 4.5499997
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: -0.62, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L10-W3-S05
+      gateId: L10-W3-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 5.85
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L10-W3-S06
+      gateId: L10-W3-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 7.1499996
+      kind: 0
+      count: 1
+      color: 2
+      position: {x: 0.62, y: 0}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L10-W3-S07
+      gateId: L10-W3-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 8.45
+      kind: 0
+      count: 1
+      color: 0
+      position: {x: -0.62, y: 0.55}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L10-W3-S08
+      gateId: L10-W3-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 9.75
+      kind: 0
+      count: 1
+      color: 1
+      position: {x: 0, y: 0.55}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L10-W3-S09
+      gateId: L10-W3-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 11.049999
+      kind: 0
+      count: 1
+      color: 2
+      position: {x: 0.62, y: 0.55}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 1
+      critical: 0
+    encounters:
+    - id: L10-P3-encounter
+      kind: 0
+      at: 0
+      warning: 0.45
+      active: 2
+      corridorX: 0.7
+  - rules:
+      title: "PRESSURE WAVE \xB7 TAP !"
+      duration: 15
+      gate: 5
+      quota: 3
+      pairs: 0
+      coreHits: 1
+      priorityOrder: 0
+      coreWarning: 0.45
+      coreOpen: 1.6
+      coreClosed: 1.2
+    maxActive: 4
+    schedule:
+    - id: L10-W4-S01
+      gateId: 
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 0
+      kind: 5
+      count: 1
+      color: 0
+      position: {x: 0.82, y: 0.25}
+      life: 3.8
+      size: 156
+      moving: 0
+      required: 0
+      critical: 0
+    - id: L10-W4-S02
+      gateId: L10-W4-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 0.65
+      kind: 7
+      count: 1
+      color: 0
+      position: {x: -0.5, y: -0.55}
+      life: 2.7
+      size: 156
+      moving: 0
+      required: 1
+      critical: 1
+    - id: L10-W4-S03
+      gateId: L10-W4-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 3.9499998
+      kind: 7
+      count: 1
+      color: 1
+      position: {x: -0.5, y: -0.55}
+      life: 2.7
+      size: 156
+      moving: 0
+      required: 1
+      critical: 1
+    - id: L10-W4-S04
+      gateId: L10-W4-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 7.25
+      kind: 7
+      count: 1
+      color: 2
+      position: {x: -0.5, y: -0.55}
+      life: 2.7
+      size: 156
+      moving: 0
+      required: 1
+      critical: 1
+    - id: L10-W4-S05
+      gateId: L10-W4-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 10.55
+      kind: 7
+      count: 1
+      color: 0
+      position: {x: -0.5, y: 0}
+      life: 2.7
+      size: 156
+      moving: 0
+      required: 1
+      critical: 1
+    encounters:
+    - id: L10-P4-encounter
+      kind: 2
+      at: 0
+      warning: 0.45
+      active: 2
+      corridorX: 0.7
+  - rules:
+      title: FINAL DIRECT CHECK
+      duration: 8
+      gate: 5
+      quota: 1
+      pairs: 0
+      coreHits: 1
+      priorityOrder: 0
+      coreWarning: 0.45
+      coreOpen: 1.6
+      coreClosed: 1.2
+    maxActive: 4
+    schedule:
+    - id: L10-W5-S01
+      gateId: L10-W5-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 0.65
+      kind: 7
+      count: 1
+      color: 0
+      position: {x: -0.62, y: -0.55}
+      life: 2.7
+      size: 156
+      moving: 0
+      required: 1
+      critical: 1
+    - id: L10-W5-S02
+      gateId: L10-W5-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 4.75
+      kind: 7
+      count: 1
+      color: 1
+      position: {x: 0, y: -0.55}
+      life: 2.7
+      size: 156
+      moving: 0
+      required: 1
+      critical: 1
+    encounters:
+    - id: L10-P5-encounter
+      kind: 0
+      at: 0
+      warning: 0.45
+      active: 2
+      corridorX: 0.7

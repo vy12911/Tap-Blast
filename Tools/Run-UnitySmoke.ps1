@@ -8,6 +8,7 @@ Copy-Item -LiteralPath (Join-Path $workspace 'ProjectSettings') -Destination $va
 Copy-Item -LiteralPath (Join-Path $workspace 'Tools/UnitySmoke.cs') -Destination (Join-Path $validationProject 'Assets/Editor/UnitySmoke.cs') -Force
 Copy-Item -LiteralPath (Join-Path $workspace 'Tools/CampaignSmoke.cs') -Destination (Join-Path $validationProject 'Assets/Editor/CampaignSmoke.cs') -Force
 Copy-Item -LiteralPath (Join-Path $workspace 'Tools/World1Smoke.cs') -Destination (Join-Path $validationProject 'Assets/Editor/World1Smoke.cs') -Force
+Copy-Item -LiteralPath (Join-Path $workspace 'Tools/CampaignV3Smoke.cs') -Destination (Join-Path $validationProject 'Assets/Editor/CampaignV3Smoke.cs') -Force
 New-Item -ItemType Directory -Force -Path (Join-Path $validationProject 'Packages') | Out-Null
 $localDependencies = @{}
 $originalManifest = Get-Content (Join-Path $workspace 'Packages/manifest.json') -Raw | ConvertFrom-Json

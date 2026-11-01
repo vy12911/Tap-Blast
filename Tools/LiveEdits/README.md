@@ -27,3 +27,7 @@ unity command script eval_file --project-path . --file Tools/LiveEdits/<file>.cs
 17. `17-results-wallet.cs` – Results: indigo-violet star stage (nested Canvas + RectMask2D) with a turning sunburst and gold glow, a gradient score, trophy best chip, three stat tiles, coin / XP reward chips and a tinted hint chip. Wallet: gradient header, coin and XP tiles, player-level bar, stronger backdrop. Safe to re-run.
 18. `18-app-icon.cs` – the Badge app icon (Assets/Art/Brand). Sets the default icon plus the Android legacy, round and adaptive icons (sunburst background, badge foreground inside the safe circle). Source: Documentation/Previews/Logo/tap-blast-logo.html.
 19. `19-remove-vibration.cs` – vibration removed from the game: deletes the Pause card Vibration row and glow, moves Exit up and shortens the card. Safe to re-run.
+
+20. 20-campaign-v3.cs � authors all twenty v3 wave schedules, pressure/Ultimate/shape-cue controls and Priority/pair target symbols in the scene and prefab. Re-runnable; implementation in Assets/Editor/CampaignV3Authoring.cs.
+
+21. 21-campaign-v5.cs - Active idempotent v5 author: twenty levels, ten boss phases, lane/event data, stable IDs and target input roots, scene and UI template. Implementation: Assets/Editor/CampaignV5Authoring.cs.

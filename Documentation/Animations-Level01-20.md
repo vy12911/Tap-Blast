@@ -1,3 +1,18 @@
+## Active v5 animation additions — 1 November 2026
+
+The [v5 guide](GDD-v5-Level01-20.md) supersedes historical timing and boss descriptions below. Chain links resolve every 70 ms. Lane targets show a 450 ms directional warning and 220 ms transit; the target prefab's stable hit root is separate from animated visuals. Sentinel has a rotating shield/open-core halo; Architect has linked energy nodes and pair-controlled exposure. Both use pooled core crack, cascading bursts and a final shockwave over a two-second defeat stage before rewards/results. Essential arrows, IDs and core state remain under reduced motion; cosmetic effects remain suppressed. The campaign harness captures `v5-lane-*`, `v5-conduit-routing.png` and `v5-boss-*-core-*` / `v5-boss-*-defeat-*` frames.
+
+## Animation polish — 30 October 2026
+
+Settled target bodies retain a stable scale and tap boundary. Idle breathing belongs to the decorative glow. Priority warnings accelerate smoothly with remaining lifetime and shift from gold toward the warning token, with a constant readable identifier. Collection adds a short local four-star focus burst.
+
+Every delayed chain member gets a 0.10-second contracting anticipation ring before its scheduled impact. Circular candy impacts add short radial streaks that disappear before the falling shard tail. Mega keeps its centered shockwave and sequential member timing. Slow-frame mode suppresses optional anticipation and reduces shard geometry; target timing and required Priority feedback stay intact. All effects use the shared fixed mesh/pool and retain reduced-motion, pause, replay and finite-life behavior.
+
+Captures: `Temp/Campaign20Validation/v3-priority-01-warning.png`, `v3-priority-02-collection.png`, and `v3-mega-01-first-pop.png` through `v3-mega-03-central-shockwave.png`. Automated checks cover stable Priority scale, collection effects, pause, cleanup and reduced motion. Human playtesting remains necessary to judge enjoyment.
+# Active v3 campaign
+
+The v3 wave, Priority, ordered-pair, pressure, Ultimate and boss feedback contracts are described in [GDD v3 levels 1–20](GDD-v3-Level01-20.md#feedback-and-saved-ui). Those rules supersede the historical v1 per-level themes and chain impact descriptions below. All three travel styles now end in circular candy blasts; Mega finishes at the matched group's center. Saved Image pressure pips and numbered pair symbols remain readable without color.
+
 # Gameplay animations
 
 Reference: supplied Tap Blast GDD v1.0, animation table on pages 13–14, target/tutorial requirements on pages 2 and 8, and the detailed early-level progression on pages 12–13.

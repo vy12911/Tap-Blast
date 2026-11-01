@@ -11,11 +11,15 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e9218bab79c640ef96f356711932423c, type: 3}
   m_Name: Level02
-  m_EditorClassIdentifier:
-  displayName: SIZE IT UP
+  m_EditorClassIdentifier: 
+  designVersion: 5
+  bossPhases: []
+  displayName: Quick Fingers
   levelId: 2
   objective: 1
   targetScore: 500
+  objectiveCount: 1
+  mechanicHint: Tap the small circles. Blasts cannot clear this direct-tap gate.
   firstTapTutorial: 0
   targetSizes:
   - 216
@@ -24,13 +28,392 @@ MonoBehaviour:
   duration: 45
   requiredTaps: 20
   basePoints: 10
-  spawnInterval: 0.75
-  targetLifetime: 4.5
-  maxTargets: 4
+  spawnInterval: 1.4
+  finalSpawnInterval: 0
+  accelerationSeconds: 20
+  targetLifetime: 3.8
+  maxTargets: 8
   targetSize: 168
   targetSpacing: 36
-  twoStarScore: 750
+  movingTargets: 0
+  goldenChance: 0
+  timeChance: 0
+  isBossLevel: 0
+  bossHealth: 5
+  goldenPoints: 100
+  timeBonus: 3
+  maxTimeTargets: 6
+  bossSize: 270
+  clusterSize: 0
+  clusterInterval: 2.4
+  movementSpeed: 100
+  bombChance: 0
+  shieldCharges: 0
+  bombPenalty: 50
+  chainBonus: 25
+  requiredCombo: 0
+  twoStarScore: 1000
   threeStarCombo: 20
   coinReward: 75
   xpReward: 35
-  mechanicHint: Every target is worth 10 points, whatever its size. Streaks multiply points.
+  scripted: 1
+  seed: 30194
+  pressureLimit: 4
+  priorityMissLimit: 99
+  noBombs: 0
+  allowUltimate: 1
+  normalCharge: 3
+  goldenCharge: 6
+  chainCharge: 10
+  ultimateEligible: 0000000006000000010000000200000004000000
+  scriptedGoal: Direct-tap 8 Small targets
+  waves:
+  - rules:
+      title: SMALL CIRCLES
+      duration: 9
+      gate: 1
+      quota: 2
+      pairs: 0
+      coreHits: 0
+      priorityOrder: 0
+      coreWarning: 0.45
+      coreOpen: 1.6
+      coreClosed: 1.2
+    maxActive: 4
+    schedule:
+    - id: L02-W1-S01
+      gateId: L02-W1-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 0.65
+      kind: 6
+      count: 1
+      color: 0
+      position: {x: -0.55, y: -0.45}
+      life: 3.8
+      size: 132
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L02-W1-S02
+      gateId: L02-W1-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 2.4499998
+      kind: 6
+      count: 1
+      color: 1
+      position: {x: 0.55, y: -0.45}
+      life: 3.8
+      size: 132
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L02-W1-S03
+      gateId: L02-W1-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 4.25
+      kind: 6
+      count: 1
+      color: 2
+      position: {x: -0.55, y: 0}
+      life: 3.8
+      size: 132
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L02-W1-S04
+      gateId: L02-W1-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 6.0499997
+      kind: 6
+      count: 1
+      color: 0
+      position: {x: 0.55, y: 0}
+      life: 3.8
+      size: 132
+      moving: 0
+      required: 1
+      critical: 0
+    encounters:
+    - id: L02-P1-encounter
+      kind: 5
+      at: 0
+      warning: 0.45
+      active: 2
+      corridorX: 0.7
+  - rules:
+      title: SMALL TARGET TEST
+      duration: 22.5
+      gate: 1
+      quota: 4
+      pairs: 0
+      coreHits: 0
+      priorityOrder: 0
+      coreWarning: 0.45
+      coreOpen: 1.6
+      coreClosed: 1.2
+    maxActive: 4
+    schedule:
+    - id: L02-W2-S01
+      gateId: L02-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 0.65
+      kind: 6
+      count: 1
+      color: 0
+      position: {x: -0.55, y: -0.45}
+      life: 3.8
+      size: 132
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L02-W2-S02
+      gateId: L02-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 2.25
+      kind: 6
+      count: 1
+      color: 1
+      position: {x: 0.55, y: -0.45}
+      life: 3.8
+      size: 132
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L02-W2-S03
+      gateId: L02-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 3.85
+      kind: 6
+      count: 1
+      color: 2
+      position: {x: -0.55, y: 0}
+      life: 3.8
+      size: 132
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L02-W2-S04
+      gateId: L02-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 5.45
+      kind: 6
+      count: 1
+      color: 0
+      position: {x: 0.55, y: 0}
+      life: 3.8
+      size: 132
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L02-W2-S05
+      gateId: L02-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 7.05
+      kind: 6
+      count: 1
+      color: 1
+      position: {x: -0.55, y: 0.45}
+      life: 3.8
+      size: 132
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L02-W2-S06
+      gateId: L02-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 8.65
+      kind: 6
+      count: 1
+      color: 2
+      position: {x: 0.55, y: 0.45}
+      life: 3.8
+      size: 132
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L02-W2-S07
+      gateId: L02-W2-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 10.25
+      kind: 6
+      count: 1
+      color: 0
+      position: {x: -0.55, y: -0.45}
+      life: 3.8
+      size: 132
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L02-W2-S08
+      gateId: L02-W2-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 11.85
+      kind: 6
+      count: 1
+      color: 1
+      position: {x: 0.55, y: -0.45}
+      life: 3.8
+      size: 132
+      moving: 0
+      required: 1
+      critical: 0
+    encounters:
+    - id: L02-P2-encounter
+      kind: 5
+      at: 0
+      warning: 0.45
+      active: 2
+      corridorX: 0.7
+  - rules:
+      title: PRECISION FINISH
+      duration: 13.5
+      gate: 1
+      quota: 2
+      pairs: 0
+      coreHits: 0
+      priorityOrder: 0
+      coreWarning: 0.45
+      coreOpen: 1.6
+      coreClosed: 1.2
+    maxActive: 4
+    schedule:
+    - id: L02-W3-S01
+      gateId: L02-W3-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 0.65
+      kind: 6
+      count: 1
+      color: 0
+      position: {x: -0.55, y: -0.45}
+      life: 3.8
+      size: 132
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L02-W3-S02
+      gateId: L02-W3-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 2.4499998
+      kind: 6
+      count: 1
+      color: 1
+      position: {x: 0.55, y: -0.45}
+      life: 3.8
+      size: 132
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L02-W3-S03
+      gateId: L02-W3-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 4.25
+      kind: 6
+      count: 1
+      color: 2
+      position: {x: -0.55, y: 0}
+      life: 3.8
+      size: 132
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L02-W3-S04
+      gateId: L02-W3-gate
+      laneId: 1
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 6.0499997
+      kind: 6
+      count: 1
+      color: 0
+      position: {x: 0.55, y: 0}
+      life: 3.8
+      size: 132
+      moving: 0
+      required: 1
+      critical: 0
+    - id: L02-W3-S05
+      gateId: L02-W3-gate
+      laneId: 0
+      order: 0
+      telegraph: 0.45
+      transit: 0.22
+      cadence: 1.4
+      at: 7.85
+      kind: 6
+      count: 1
+      color: 1
+      position: {x: -0.55, y: 0.45}
+      life: 3.8
+      size: 132
+      moving: 0
+      required: 1
+      critical: 0
+    encounters:
+    - id: L02-P3-encounter
+      kind: 5
+      at: 0
+      warning: 0.45
+      active: 2
+      corridorX: 0.7

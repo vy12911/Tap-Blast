@@ -1,112 +1,38 @@
-# Tap Blast — Campaign (Levels 1–20)
+# Tap Blast — GDD v5 campaign, levels 1–20
 
-Unity **6000.3.17f1**, URP, uGUI and Input System. Use a **9:16** Game view (1080 × 1920 reference frame).
+The first twenty levels now include the v5 encounters, lane warnings/transits, conduit routing, ordered Priority finales, Sentinel and Architect boss phases, protected exposed cores and two-second boss defeat sequences. See the [v5 implementation and validation guide](Documentation/GDD-v5-Level01-20.md). The earlier [audit](Documentation/GDD-v5-Level01-20-Audit.md) records the state before this migration.
 
-The Canvas uses Scale With Screen Size / Expand and an authored 1080 × 1920 portrait frame. `ResponsiveCanvas` fits it inside phone and tablet safe areas while the background fills the screen. Edit UI manually in `Assets/Prefabs/UI/GameCanvas.prefab`; retain TMP text and serialized references. See [Canvas editing](Documentation/Canvas-Editing.md) for layout and device-preview guidance.
+Unity 6000.3.17f1 · URP/uGUI · portrait 1080 × 1920 reference · hard 60 fps cap.
 
-All UI text uses **TextMeshProUGUI** components and **`TMPro.TMP_Text`** script bindings. Always use TMP for new labels. Prefabs retain their saved scene references and use the shared Liberation Sans SDF font in `Assets/TextMesh Pro/`; no text UI is rebuilt at runtime.
+The active design is [Step-by-Step Development GDD v5.0](Assets/Design%20Doc/Tap_Blast_v5_Full_Step_by_Step_Development_GDD.pdf). The [v3 guide](Documentation/GDD-v3-Level01-20.md) documents the retained scoring, pressure and progression baseline; the v5 guide supersedes its timing/encounter/boss details.
 
-## Play and campaign flow
+Each normal level has three waves over 45 seconds. Bosses 10 and 20 have five phases over 60 seconds, ending in an eight-second direct Priority check. Passing requires every gate and a safe pressure level. Score cannot bypass a failed skill gate.
 
-Open **Tap Blast > Open Campaign**, enter Play Mode and select **Let's Play**. Completing a level unlocks the next one up to Level 20.
+The campaign includes Small and moving circles, Golden and Time rewards, Priority ! targets, graph-based breadth-first chains and Mega blasts, numbered Linked Pairs, Bomb avoidance, Shield interception, direct accuracy, capped Ultimate charge and safe clearing, pressure, explicit failure causes, recovery tips and optional Practice. Practice grants no stars, records or rewards. Later-world mechanics are not introduced before their v3 recipes.
 
-Flow: briefing and reward preview → three-second countdown → gameplay → score/star/reward results → replay, next level or level selection. First launch opens Level 1; later launches restore the selected unlocked level.
+- 1 star: all mandatory gates pass.
+- 2 stars: pass plus either 85% direct accuracy or the authored secondary score.
+- 3 stars: all gates, zero unprotected Bomb hits, at most three critical misses, and no Practice/continue.
+- Pressure: four in World 1, three in World 2; Priority expiry and unprotected Bombs add pressure. Ordinary misses do not.
+- Pairs: tap 1 then 2 within 2.5 seconds. Wrong order resets the pair without World 2 pressure.
+- Chains: 3/5/8/12 linked matching targets, once-only breadth-first resolution, Bomb-blocked propagation. Only the direct root increments direct combo/accuracy. Mega waves explicitly allow eight active targets; other waves cap at four.
+- Ultimate: data-driven charge capped at 100; required/direct/ordered gates cannot be cleared or credited. Eligible optional targets award score only.
+- Time bonuses: at most +6 seconds per round.
 
-Level 1 starts with a non-expiring target and tap-hand tutorial. Its clock starts with the first tap and the round finishes on target 20. Levels 2–20 start the clock after countdown and continue until timeout, allowing mastery after the primary goal is met. Their briefings explain this. Expired targets reset the current streak; a previously reached best-streak objective remains earned. Empty-space taps are ignored.
+Coins, XP, best score/stars/combo, attempt/failure counts and settings persist locally. A level-bound round token prevents duplicate rewards. Local telemetry is buffered in a fixed array during play and flushed to `campaign-v3-events.jsonl` on completion.
 
-## World 1 & World 2 objectives
+The UI remains the owner's unpacked **Tap Blast UI** in `Assets/Scenes/Level01.unity`, with a matching saved `Assets/Prefabs/UI/GameCanvas.prefab`. Use TMP/Poppins labels. Author both through the live editor; do not build UI at runtime. See [Canvas editing](Documentation/Canvas-Editing.md) and [animations](Documentation/Animations-Level01-20.md).
 
-These use the **suggested early-level objectives in the supplied GDD v1.0, pages 12–13**. Durations, exact sizes, pacing, star scores and rewards are implementation tuning values.
+To re-author the v5 levels and saved UI, recompile then evaluate `Tools/LiveEdits/21-campaign-v5.cs` through Unity Pipeline. Its idempotent implementation is `Assets/Editor/CampaignV5Authoring.cs`. The v3 author is a baseline helper; do not invoke it alone to replace v5 content.
 
-The goal column is the exact text the player sees on the briefing, the countdown and the hint card.
-
-### World 1: Learn to Tap (Levels 1–10)
-| Level | Goal (as shown in game) | Base time | Two-star score | Three-star streak |
-|---|---|---|---|---|
-| 1 — First Spark | Tap 20 targets | 60s | 240 | 20 |
-| 2 — Size It Up | Score 500 points (cycling sizes) | 45s | 750 | 20 |
-| 3 — Streak Starter | Hit 5 targets in a row | 45s | 600 | 15 |
-| 4 — Precision Push | Score 1,000 points (small targets) | 45s | 1,250 | 15 |
-| 5 — On the Move | Hit 10 targets in a row (moving targets) | 45s | 800 | 15 |
-| 6 — Golden Opportunity | Tap 3 Golden targets | 45s | 1,800 | 15 |
-| 7 — Fast & Furious | Score 2,000 points (accelerating spawns) | 40s | 2,500 | 20 |
-| 8 — Tick Tock | Tap 3 Time Bubbles | 35s | 1,400 | 20 |
-| 9 — Master Streak | Hit 15 targets in a row | 45s | 1,600 | 25 |
-| 10 — Golden Core | Destroy the Golden Core (5 hits) | 50s | 3,000 | 25 |
-
-### World 2: Combo City (Levels 11–20)
-
-| Level | Goal (as shown in game) | Base time | Two-star score | Three-star streak |
-|---|---|---|---|---|
-| 11 — Chain Spark | Make 2 chains | 45s | 900 | 12 |
-| 12 — Double Impact | Make 3 chains (five-target groups) | 45s | 1,500 | 20 |
-| 13 — Mega Burst | Make 1 Mega Chain | 45s | 2,500 | 24 |
-| 14 — Drift Cluster | Score 3,000 points (moving clusters) | 45s | 3,800 | 25 |
-| 15 — Combo City | Hit 20 targets in a row | 45s | 2,200 | 30 |
-| 16 — Danger Signs | Tap 20 targets without tapping a Bomb | 45s | 650 | 15 |
-| 17 — Shield School | Block 1 Bomb with your Shield | 45s | 700 | 15 |
-| 18 — Safe Chain | Make 3 chains without tapping a Bomb | 45s | 1,800 | 25 |
-| 19 — Mega Mastery | Make 2 Mega Chains | 45s | 3,200 | 32 |
-| 20 — Chain Master | Hit 30 in a row and make 5 chains | 55s | 4,500 | 40 |
-
-### What the player is told
-
-Every level shows the same three parts, built in `LevelConfig`:
-
-1. **Goal** (`Goal` / `GoalText`): the exact target with its time limit, e.g. "Block 1 Bomb with your Shield in 45 seconds".
-2. **How to do it** (`mechanicHint`, one sentence per level asset), e.g. "Press SHIELD above the arena, then tap a red Bomb. The Shield stops it."
-3. **Win rule** (`WinRule`): Level 1 ends as soon as the 20th target is tapped. Every other level runs the full timer and passes if the goal is done when time runs out ("Reach it before time runs out, then keep scoring for more stars"). The no-Bomb levels (16 and 18) add "One Bomb tap fails the goal".
-
-The goal and how-to also appear on the hint card during play, and the objective bar counts progress (for example "BOMBS BLOCKED 0 / 1").
-
-**Level 17, Shield School:** the player gets one Shield per round. Pressing **USE SHIELD** (above the arena) turns it on; the button then reads **SHIELD ON** and the hint says "SHIELD ON! NOW TAP A BOMB". Tapping a red Bomb while it is on blocks it: no points lost, streak kept, and the goal is done. Pressing Shield alone does not count. Tapping a Bomb with the Shield off costs up to 50 points and resets the streak, and the hint says "Press SHIELD first, then tap a Bomb".
-
-**Stars** (shown on the briefing tiles): 1 star = complete the goal. 2 stars = goal + the two-star score. 3 stars = the two-star score, the three-star streak (hits in a row), no misses (no target allowed to fade) and, on Bomb levels, no Bomb hits. A Shield-blocked Bomb is not a Bomb hit.
-
-See [the World 1 guide](Assets/Design%20Doc/World1_Level_Objectives_and_Progression.md) and [the World 2 guide](Assets/Design%20Doc/World2_Level_Objectives_and_Progression.md) for rewards and tuning decisions.
-
-## Targets and scoring
-
-- Normal targets award 10 base points; Level 4's small targets award 15.
-- Golden targets award **100 base points**, using the low end of the GDD's 100–1,000 range. They update actual score and collection progress, not only feedback text. `goldenPoints` is tunable per level.
-- Time Bubbles award normal tap points and add **3 seconds** through the pure round rules. A maximum of six Time Bubbles can spawn per round, limiting added time to 18 seconds with the default tuning.
-- Golden and Time lessons start with the relevant target and guarantee another opportunity every fourth spawn, subject to the Time Bubble budget. Additional specials follow the configured probabilities.
-- Moving targets bounce inside the arena on every pooled tick, including after resizing. Movement continues in reduced-motion mode because it is a gameplay mechanic.
-- The Core spawns at round start, is larger than normal targets, never expires, and displays remaining health in its ring. Every hit scores and builds combo; only the fifth hit records destruction. Other targets continue spawning for score mastery.
-- Level 7 interpolates from 0.75s to 0.5s spawn intervals during its first 20 seconds.
-- Special targets have authored GOLD, +3s and CORE labels so color is not their only identifier.
-
-Multipliers apply after the current hit: 1–4 = 1x, 5–9 = 1.25x, 10–19 = 1.5x, 20–29 = 2x, 30–49 = 3x, 50+ = 4x. Fractional scores round to the nearest integer, halves up. A clean Level 1 round scores 275.
-
-## World 2 chains, Bombs and Shield
-
-From level 11, ordinary colored targets appear gradually across the board. Tap one when at least three share its color to detonate every matching target, regardless of distance. Other colors and Bombs remain. Fewer than three matches give a single tap. The reaction proceeds one target at a time with colored bursts and explosion sounds. Five matches make Chain 2; eight make Mega. This user-requested rule replaces the earlier spatial LINK/area-blast interpretation. See the World 2 guide for spawning and tuning.
-
-Red X/BOMB targets spawn at random safe positions and move in random directions. They bounce at arena edges and reverse before overlapping valid targets. Ignoring them is safe; tapping one breaks combo and subtracts up to 50 points. Chain blasts exclude Bombs. From level 17, the authored Shield button grants one protection per round; activation alone does not satisfy the Shield lesson until a Bomb is blocked. No-Bomb objectives remain at risk until time expires.
-
-Level select shows all 20 levels in one scrolling list with no world pages, and both Editor and Android use the same 20 serialized configs. Next opens level 11 after level 10 like any other level; level 20 reports campaign completion without offering an unavailable level 21. The World 1/World 2 headings below are design groupings only.
-
-## Progress, rewards and controls
-
-Coins, XP, best scores and stars persist locally per level. Every 100 XP advances the player profile. Successful replays award the configured rewards again; failure and abandonment grant none. Starting a round saves a unique level-bound token; completion consumes it with the saved rewards to prevent duplicate payout. Existing progress is retained when updating this campaign, including historical World 2 records from earlier placeholder objectives. New attempts use the GDD objectives. Best combo is now saved per level alongside scores and stars.
-
-Pause freezes targets, spawning, effects and time. Escape toggles pause; losing focus or backgrounding pauses the game. Restart/replay clear score, collections, boss state, targets, tutorial and feedback. Pause settings include sound and reduced motion. The game does not vibrate.
-
-## Architecture and tuning
-
-`RoundSession.cs` owns scoring, collection counts, combo objectives, time bonuses and stars with no Unity dependencies. `GameManager.cs` coordinates views, round state and persistence. Level mechanics, timing, values, objective counts, star thresholds and rewards are serialized in `Assets/Data/Levels/`. Pool capacity is preallocated from the largest configured level (12 targets); no per-target Update, physics, coroutines or LINQ runs in gameplay loops.
-
-Edit the authored Canvas and target prefab for presentation; see [Canvas editing](Documentation/Canvas-Editing.md). Gameplay feedback (tap pops, chains, bomb explosions, callouts, shake) is event-driven and applies to every level; see [Gameplay animations](Documentation/Animations-Level01-20.md) and the rules for new levels in [AGENTS.md](AGENTS.md). The detailed GDD campaign is implemented through level 20, including Chain at 11, Bombs at 16 and Shield at 17. Later power-ups, Perfect, Ultimate and other modes/meta systems remain outside this first-20-level scope. See the World 2 guide for tuning decisions and the distinction from the GDD's broader MVP recommendations.
-
-## Validation
+Validation (run Unity modes one at a time and wait for each final report/process):
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Validate-Level1.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Run-Campaign20.ps1 -Mode Smoke
-powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Run-Campaign20.ps1 -Mode Persistence
 powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Run-Campaign20.ps1 -Mode GuiSmoke
+powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Run-Campaign20.ps1 -Mode Persistence
+powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Run-UnitySmoke.ps1 -Method RunWorld1
 ```
 
-The CLI validates all 20 serialized scene references, compiles runtime/editor sources and runs pure C# rule checks. The Unity harness uses a disposable project and separate save identity. It simulates all 20 authored levels and verifies reachable three-star scores, navigation, board-wide color matching, Bomb spacing, Shield, pause/replay, UI bindings/text fit, records, rewards and duplicate protection. The persistence mode checks records in a fresh Unity process after a successful smoke run. Runners start Unity asynchronously: inspect the final report and process exit before starting another run.
-
-CLI report: `Logs/Validation/round-rules.txt`. Unity reports and phone/tall-phone/tablet captures: `Temp/Campaign20Validation/`. Unity logs: `Logs/Validation/campaign20-*.log`. Android/iOS builds, hardware touch, performance and human difficulty still require device testing.
+Reports and captures: `Temp/Campaign20Validation/`, `Temp/Level1Validation/`; logs: `Logs/Validation/`. Runtime/editor compilation and pure tests do not prove device performance or visual feel. Physical Android/iOS QA and human playtests remain part of production sign-off.

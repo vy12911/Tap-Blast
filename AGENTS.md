@@ -1,3 +1,19 @@
+# Active campaign override — GDD v5 (1 November 2026)
+
+The user requested the updated v5 GDD implemented through level 20. `Documentation/GDD-v5-Level01-20.md` and the saved v5 level/boss assets supersede the historical v3 timing/encounter/boss details below. Use `CampaignV5Authoring.Author`, invoked by `Tools/LiveEdits/21-campaign-v5.cs`; the v3 author is only its baseline helper. All twenty levels have designVersion 5. Ten saved BossPhaseDefinition assets provide Sentinel/Architect phases, each requiring its skill gate and one direct exposed-core hit. Never let Chain or Ultimate credit core/ordered/direct gates.
+
+V5 adds 450 ms lane warnings, 220 ms lane transits, 70 ms chain links, R conduits, ordered Priority finales/recovery, optional temporary x2 score, arena events, stable input roots with animated Visuals children, primary-touch filtering and a 2 s boss defeat stage. Normal timing is 9/22.5/13.5 s including L8; staging is 1.5 s outside the round timer. The v5 scene/template opt into safe-area insets; the component default remains off. Preserve all TMP, pooling, pure-C#, saved scene/prefab, no-vibration and reward-free Practice rules. Physical-device production QA remains separate from automated acceptance.
+
+# Historical campaign override — GDD v3 (30 October 2026)
+
+The user requested `Assets/Design Doc/Tap_Blast_FULL_Development_GDD_v3.0.pdf` through level 20. The active recipes, pressure/star rules, wave schedules and authoring decisions are documented in `Documentation/GDD-v3-Level01-20.md` and README.md. These supersede the historical v1 game/objective tables below. Preserve the performance, TMP, saved scene/prefab, pure C# and feedback rules below.
+
+Levels 1–20 are now scripted: Small 8/12 (L2/L4), moving 10 (L5), Golden 3 (L6), rush 15 (L7), Priority 5 with at most 2 misses (L8), five-phase bosses (L10/L20), linked graph chains (L11–13), pairs (L14), direct combo 20 (L15), no-Bomb waves (L16/L18), Shield block (L17), two Megas (L19). Normal rounds are 45 s; bosses 60 s. Ultimate and visible pressure are shared v3 mechanics. Only scripted Mega waves allow 8 active targets; all other waves cap at 4.
+
+Pure v3 evaluation is in RoundSession; deterministic queues in CampaignDirector; manager/HUD integration in their Campaign partial files. New target kinds: Small, Priority, LinkedPair. `CampaignV3Authoring.Author` is the idempotent saved asset/scene/prefab author, invoked via `Tools/LiveEdits/20-campaign-v3.cs`. Tests route v3 assets into `Tools/CampaignV3Smoke.cs`. Never use score, Chain or Ultimate to auto-complete a direct or ordered gate. Practice awards no records, stars or currency.
+
+The remainder retains historical background and general engineering constraints.
+
 # AGENTS.md — Agent Guide for Tap Blast
 
 > **MANDATORY FOR ALL AI CODING AGENTS**: Read this document before making any code modifications, inspecting issues, or adding features to this codebase.

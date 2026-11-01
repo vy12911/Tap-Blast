@@ -72,6 +72,16 @@ namespace TapBlast
             source.PlayOneShot(tap);
             if (milestone) source.PlayOneShot(comboRise, .7f);
         }
+        public void PlayTarget(TargetKind kind, int combo)
+        {
+            PlayTap(combo);
+            if (!SoundEnabled) return;
+            if (kind == TargetKind.Priority) { source.pitch = 1.5f; source.PlayOneShot(comboRise, .35f); }
+            if (kind == TargetKind.Golden) { source.pitch = 1.2f; source.PlayOneShot(success, .3f); }
+            if (kind == TargetKind.Time) { source.pitch = 1.6f; source.PlayOneShot(shield, .3f); }
+        }
+        public void PlaySequence(bool valid) { if (SoundEnabled) { source.pitch = valid ? 1.25f : .8f; source.PlayOneShot(valid ? shield : failure, .55f); } }
+        public void PlayPressure() { if (SoundEnabled) { source.pitch = .9f; source.PlayOneShot(failure, .7f); } }
         public void PlayResult(bool won)
         {
             if (!SoundEnabled) return; source.pitch = 1; source.PlayOneShot(won ? success : failure);

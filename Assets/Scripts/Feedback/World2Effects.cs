@@ -126,6 +126,23 @@ namespace TapBlast
             Emit(2, position, position, new Color(1, .86f, .35f), 240, delay + .05f, .9f);
             Emit(1, position, position, Color.white, 330, delay, .6f);
         }
+        public void UltimateBlast(Vector2 position)
+        {
+            // Readable anticipation, then a wave that reaches the whole arena.
+            float reach = rectTransform.rect.size.magnitude * .6f;
+            Emit(21, position, position, UIArt.Gold, 170, 0, .16f);
+            Emit(12, position, position, new Color(1, .9f, .6f, .28f), 0, .16f, .45f);
+            Emit(1, position, position, Color.white, reach, .16f, .65f);
+            Emit(1, position, position, UIArt.Gold, reach * .95f, .23f, .65f);
+            Emit(1, position, position, UIArt.Cyan, reach * .85f, .3f, .65f);
+            Emit(11, position, position, UIArt.Gold, 220, .16f, .75f);
+            Emit(2, position, position, Color.white, 280, .22f, .75f);
+        }
+        public void UltimateTarget(Vector2 position, Color tint, float radius, float delay)
+        {
+            Emit(10, position, position, Color.white, radius * 1.4f, delay, .24f);
+            Emit(11, position, position, tint, radius, delay, .55f);
+        }
         /// <summary>Quiet grey puff where a target expired; misses should read, not celebrate.</summary>
         public void Puff(Vector2 position) { Emit(10, position, position, new Color(.78f, .8f, .92f, .45f), 95, 0, .4f); }
         public int Chain(TargetView[] members, int count)

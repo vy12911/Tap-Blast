@@ -68,7 +68,12 @@ public static class Campaign20Smoke
             EditorApplication.Exit(1);
         }
     }
-    static void Call(object o, string name) => o.GetType().GetMethod(name, Private).Invoke(o, null);
+    static void Call(object o, string name)
+    {
+        if (o is GameManager && name == "Finish" && Field<float>(o, "resultDelay") > 0)
+            o.GetType().GetMethod("TickResultDelay", Private).Invoke(o, new object[] { 3f });
+        else o.GetType().GetMethod(name, Private).Invoke(o, null);
+    }
     static void Check(bool condition, string message)
     {
         if (!condition) throw new Exception(message);
@@ -188,7 +193,7 @@ public static class Campaign20Smoke
                 var rim=FrameRect((RectTransform)hud.transform.Find(HudPath+"Arena/Arena rim"));
                 Check(status.yMin>rim.yMax && status.yMax<fill.yMin,"World 2 status stays between progress track and arena rim");
             }
-            Check(Field<TMP_Text>(hud, "mechanicStatus").gameObject.activeSelf == (id > 10) && hud.Shield.gameObject.activeSelf == (id >= 17), "Relevant mechanics are visible immediately when level " + id + " starts");
+            Check(Field<TMP_Text>(hud, "mechanicStatus").gameObject.activeSelf == (game.CurrentLevel.AllowUltimate || id > 10) && hud.Shield.gameObject.activeSelf == (id >= 17), "Relevant mechanics are visible immediately when level " + id + " starts");
             var config = game.CurrentLevel;
             var pool = Field<TargetPool>(game, "pool"); var spawner = Field<TargetSpawner>(game, "spawner");
             float time = game.Session.RemainingTime;
@@ -290,26 +295,31 @@ public static class Campaign20Smoke
         game.Pause(); Call(game, "AdvanceFrame"); Check(pool.ActiveCount == 9, "Pause freezes the color cascade");
         game.Resume(); foreach (var t in Targets()) if (t.BlastPending) Tap(t);
         Check(game.Session.Score == score, "Resume keeps committed colors noninteractive");
-        pool.Tick(.08f, false);
+        pool.Tick(.035f, false);
         Check(Field<Image>(buffer[1], "lifetimeRing").color != buffer[1].Tint && Field<Image>(buffer[7], "lifetimeRing").color == buffer[7].Tint,
             "Only the next matching target heats to white");
-        pool.Tick(.1f, false); Check(pool.ActiveCount == 8, "Color targets detonate individually");
+        pool.Tick(.075f, false); Check(pool.ActiveCount == 8, "Color targets detonate individually");
         pool.Tick(1.2f, false);
         Check(pool.ActiveCount == 2 && game.Session.Misses == 0, "Other colors remain after the cascade");
 
         Begin(); pool.Clear();
-        pool.Spawn(new Vector2(-350, -300), 150, .01f, Color.cyan, false, false, TargetKind.Chain);
-        pool.Spawn(new Vector2(350, 300), 150, .01f, Color.cyan, false, false, TargetKind.Chain);
-        pool.Spawn(new Vector2(-350, 300), 150, .01f, Color.cyan, false, false, TargetKind.Chain);
-        pool.Spawn(Vector2.zero, 150, 4, Color.green, false, false, TargetKind.Chain);
-        pool.Spawn(new Vector2(177, 0), 150, 4, Color.cyan, false, false, TargetKind.Golden);
-        pool.Spawn(new Vector2(-177, 0), 150, 4, Color.cyan, false, false, TargetKind.Time);
+        pool.Spawn(new Vector2(-350, -300), 150, 4, Color.cyan, false, false, TargetKind.Chain, graph: true);
+        pool.Spawn(new Vector2(350, 300), 150, 4, Color.cyan, false, false, TargetKind.Chain, graph: true);
+        pool.Spawn(new Vector2(-350, 300), 150, 4, Color.cyan, false, false, TargetKind.Chain, graph: true);
+        Check(pool.FindChain(ChainTarget(), buffer) == 0, "V1 distant matching colors cannot replace a connected chain");
+        pool.Clear();
+        pool.Spawn(new Vector2(-177, 0), 150, .01f, Color.cyan, false, false, TargetKind.Chain, graph: true);
+        pool.Spawn(Vector2.zero, 150, .01f, Color.cyan, false, false, TargetKind.Chain, graph: true);
+        pool.Spawn(new Vector2(177, 0), 150, .01f, Color.cyan, false, false, TargetKind.Chain, graph: true);
+        pool.Spawn(new Vector2(0, 177), 150, 4, Color.green, false, false, TargetKind.Chain, graph: true);
+        pool.Spawn(new Vector2(177, 125), 150, 4, Color.cyan, false, false, TargetKind.Golden);
+        pool.Spawn(new Vector2(-177, 125), 150, 4, Color.cyan, false, false, TargetKind.Time);
         pool.Spawn(new Vector2(0, -177), 150, 4, Color.cyan, false, false, TargetKind.Bomb);
         origin = ChainTarget();
-        Check(pool.FindChain(origin, buffer) == 3, "Three matching colors chain across the entire board regardless of spacing");
+        Check(pool.FindChain(origin, buffer) == 3, "V1 spatial chain follows connected matching circles");
         Tap(origin); pool.Tick(.5f, false);
-        Check(pool.ActiveCount == 4 && game.Session.Hits == 3 && game.Session.Chains == 1 && game.Session.Misses == 0 && game.Session.BombHits == 0 && game.Session.GoldenHits == 0 && game.Session.TimeHits == 0,
-            "Color cascade excludes other colors and special targets and survives original expiry");
+        Check(pool.ActiveCount == 2 && game.Session.Hits == 5 && game.Session.Chains == 1 && game.Session.Misses == 0 && game.Session.BombHits == 0 && game.Session.GoldenHits == 1 && game.Session.TimeHits == 1,
+            "V1 area blast collects nearby bonuses while sparing Bombs and other chain colors; committed members cannot expire");
         Begin(); pool.Clear();
         pool.Spawn(Vector2.zero, 150, 4, Color.cyan, false, false, TargetKind.Chain);
         pool.Spawn(new Vector2(177, 0), 150, 4, Color.cyan, false, false, TargetKind.Chain);
@@ -317,7 +327,7 @@ public static class Campaign20Smoke
         Check(pool.FindChain(ChainTarget(), buffer) == 0, "Two matching colors plus a different color cannot form a chain");
         Tap(ChainTarget()); Check(game.Session.Hits == 1 && game.Session.Chains == 0 && pool.ActiveCount == 2, "Fewer than three matching colors give an individual tap");
         Begin(); pool.Clear();
-        for (int i = 0; i < 12; i++) pool.Spawn(new Vector2((i % 4 - 1.5f) * 180, (i / 4 - 1) * 180), 150, 4, Color.cyan, false, false, TargetKind.Chain);
+        for (int i = 0; i < 12; i++) pool.Spawn(new Vector2((i % 4 - 1.5f) * 180, (i / 4 - 1) * 180), 150, 4, Color.cyan, false, false, TargetKind.Chain, graph: true);
         Check(pool.FindChain(ChainTarget(), buffer) == 12, "Every matching target participates up to full pool capacity");
         Tap(ChainTarget()); pool.Tick(0, true);
         Check(pool.ActiveCount == 0 && game.Session.Hits == 12 && game.Session.LargestChain == 12, "Full-board color chain resolves exactly once in reduced motion");
@@ -337,6 +347,30 @@ public static class Campaign20Smoke
         game.SelectLevel(16); Begin(); int coins = ProgressStore.Coins;
         foreach (var t in Targets()) if (t.Kind == TargetKind.Bomb) { Tap(t); break; }
         Complete(); Check(!game.Session.Won && ProgressStore.Coins == coins && !hud.Next.gameObject.activeSelf, "Bomb objective failure cannot grant rewards or show Next");
+        game.SelectLevel(6); Begin(); pool.Clear();
+        for (int i = 0; i < 34; i++) game.Session.Tap();
+        Call(game, "RefreshHUD");
+        Check(Field<Button>(hud, "ultimateButton").gameObject.activeInHierarchy && Field<Button>(hud, "ultimateButton").interactable,
+            "V1 Ultimate control is visible and usable in World 1 through the saved hierarchy");
+        pool.Spawn(Vector2.zero, 150, 4, Color.yellow, false, false, TargetKind.Golden);
+        pool.Spawn(new Vector2(200, 0), 150, 4, Color.cyan, false, false, TargetKind.Time);
+        pool.Spawn(new Vector2(-200, 0), 150, 4, Color.yellow, false, false, TargetKind.Boss);
+        pool.Spawn(new Vector2(0, -200), 150, 4, Color.red, false, false, TargetKind.Bomb);
+        int beforeUltimate = game.Session.Score, beforeCombo = game.Session.Combo;
+        Field<Button>(hud, "ultimateButton").onClick.Invoke();
+        Check(pool.ActiveCount == 4 && game.Session.UltimateCharge == 0, "Ultimate reserves targets during its anticipation rather than making them vanish on activation");
+        Check(Field<float>(game, "ultimateSlowRemaining") > 0 && hud.WorldEffects.ActiveEffectCount > 0, "GDD Ultimate starts time-stretch and its arena-wide blast sequence");
+        TickHUD(.07f); UnitySmoke.Capture(hud, "gdd-ultimate-01-anticipation");
+        game.Pause(); float ultimateClock = Field<float>(hud.WorldEffects, "clock"), slowTime = Field<float>(game, "ultimateSlowRemaining");
+        TickHUD(.5f); Call(game, "AdvanceFrame");
+        Check(Field<float>(hud.WorldEffects, "clock") == ultimateClock && Field<float>(game, "ultimateSlowRemaining") == slowTime && pool.ActiveCount == 4,
+            "Pause freezes Ultimate anticipation, its target clears and time-stretch");
+        game.Resume(); TickHUD(.2f); pool.Tick(.4f, false);
+        UnitySmoke.Capture(hud, "gdd-ultimate-02-wave");
+        Check(pool.ActiveCount == 2 && pool.BombCount == 1 && game.Session.UltimateCharge == 0 && game.Session.Score > beforeUltimate &&
+            game.Session.GoldenHits == 0 && game.Session.TimeHits == 0 && game.Session.BossesDestroyed == 0 && game.Session.Combo == beforeCombo,
+            "V1 saved Ultimate button clears eligible targets for score while protecting direct collection, Core, Bomb and combo rules");
+        TickHUD(2); Check(hud.WorldEffects.ActiveEffectCount == 0, "Ultimate blast and target accents drain to zero");
     }
     static void VerifyInputRouting()
     {
@@ -354,19 +388,19 @@ public static class Campaign20Smoke
             ExecuteEvents.ExecuteHierarchy(hits[0].gameObject, pointer, ExecuteEvents.pointerDownHandler);
             Check(game.Session.Chains == 1, "Level " + id + " chain receives input through the visible Canvas raycast hierarchy");
     }
-    static void VerifyMovingBombs()
+    static void VerifyBombSafety()
     {
         var pool = Field<TargetPool>(game, "pool");
-        Vector2 previousPosition = default, previousVelocity = default;
-        bool variedPosition = false, variedDirection = false;
+        Vector2 previousPosition = default;
+        bool variedPosition = false;
         for (int id = 16; id <= 20; id++)
         {
             game.SelectLevel(id); Begin(); TargetView bomb = null;
             foreach (var t in Targets()) if (t.Kind == TargetKind.Bomb) bomb = t;
-            Check(bomb != null && bomb.Velocity.magnitude >= 60, "Level " + id + " spawns a moving Bomb");
+            Check(bomb != null && bomb.Velocity == Vector2.zero, "Level " + id + " spawns a readable stationary Bomb outside reserved cluster slots");
             Vector2 initial = bomb.Position;
-            if (id > 16) { variedPosition |= (initial - previousPosition).sqrMagnitude > 1; variedDirection |= (bomb.Velocity.normalized - previousVelocity.normalized).sqrMagnitude > .01f; }
-            previousPosition = initial; previousVelocity = bomb.Velocity;
+            if (id > 16) { variedPosition |= (initial - previousPosition).sqrMagnitude > 1;  }
+            previousPosition = initial;
             game.Pause(); Call(game, "AdvanceFrame"); Check(bomb.Position == initial, "Pause freezes the Bomb in level " + id); game.Resume();
             bool safe = true, moved = false; float minimumGap = float.MaxValue;
             for (int frame = 0; frame < 60; frame++)
@@ -381,9 +415,9 @@ public static class Campaign20Smoke
                     minimumGap = Mathf.Min(minimumGap, gap); safe &= gap >= 15;
                 }
             }
-            Check(moved && safe, "Level " + id + " Bomb moves in reduced motion while remaining in bounds and separated from targets (moved " + moved + ", safe " + safe + ", minimum gap " + minimumGap + ")");
+            Check(!moved && safe, "Level " + id + " Bomb remains in bounds and separated from moving targets in reduced motion (moved " + moved + ", safe " + safe + ", minimum gap " + minimumGap + ")");
         }
-        Check(variedPosition && variedDirection, "Bomb positions and movement directions vary across rounds");
+        Check(variedPosition, "Safe Bomb positions vary across rounds");
         Begin(); pool.Clear();
         pool.Spawn(Vector2.zero, 150, 4, Color.cyan, false, false, TargetKind.Chain);
         pool.Spawn(new Vector2(-230, 0), 150, 4, Color.red, false, false, TargetKind.Bomb, new Vector2(250, 0));
@@ -412,12 +446,15 @@ public static class Campaign20Smoke
         UnitySmoke.Capture(hud, "animation-golden-expanded");
         pool.Tick(.5f, false);
         Check(goldenScale > goldenRing.rectTransform.localScale.x + .05f && goldenRing.fillAmount < 1, "Golden ring radiates while lifetime remains accurate");
+        Check(goldenRing.rectTransform.localEulerAngles.z > 1 && golden.transform.localScale == Vector3.one,
+            "GDD Golden ring rotates without moving or scaling its tap boundary");
         UnitySmoke.Capture(hud, "animation-golden-rest");
         game.Pause(); Vector3 pausedScale = goldenRing.rectTransform.localScale;
         Call(game, "AdvanceFrame"); TickHUD(.5f);
         Check(goldenRing.rectTransform.localScale == pausedScale, "Pause freezes target cosmetics");
         hud.Motion.onClick.Invoke();
         Check(goldenRing.rectTransform.localScale == Vector3.one && Field<Image>(golden, "glow").rectTransform.localScale == Vector3.one, "Reduced motion immediately clears target pulses while paused");
+        Check(goldenRing.rectTransform.localEulerAngles == Vector3.zero, "Reduced motion resets Golden ring rotation immediately");
         hud.Motion.onClick.Invoke(); game.Resume();
         game.SelectLevel(16); Begin(false); TargetView bomb = null;
         foreach (var t in Targets()) if (t.Kind == TargetKind.Bomb) bomb = t;
@@ -450,7 +487,7 @@ public static class Campaign20Smoke
         UnitySmoke.Capture(hud, "animation-chain-start");
         game.Pause(); float delayedAge = PopupPart<float>(last, "Age"); TickHUD(.5f);
         Check(PopupPart<float>(last, "Age") == delayedAge, "Pause freezes delayed chain waves");
-        game.Resume(); TickHUD(1.15f); pool.Tick(1.15f, false);
+        game.Resume(); TickHUD(7 * TargetView.ChainStepSeconds); pool.Tick(7 * TargetView.ChainStepSeconds, false);
         Check(PopupPart<Image>(last, "Ring").enabled && PopupPart<CanvasGroup>(last, "Alpha").alpha > 0, "Chain wave reaches later members in sequence");
         UnitySmoke.Capture(hud, "animation-chain-wave");
         TickHUD(.8f); Check(!PopupPart<bool>(first, "Active") && !PopupPart<bool>(last, "Active"), "Chain feedback releases all pooled bursts");
@@ -458,6 +495,20 @@ public static class Campaign20Smoke
         Check(PopupPart<CanvasGroup>(last, "Alpha").alpha > 0 && !PopupPart<Image>(last, "Ring").enabled && !PopupPart<Image>(last, "Core").enabled, "Reduced motion reveals pending chain score text without animated effects");
         Check(hud.Shield.transform.localScale == Vector3.one && Field<TMP_Text>(hud, "timer").rectTransform.localScale == Vector3.one, "Reduced motion settles all new HUD punches");
         hud.SetSettings(true, false);
+        game.SelectLevel(1); game.StartPractice();
+        typeof(GameManager).GetField("countdown", Private).SetValue(game, 0f); Call(game, "AdvanceFrame");
+        for (int i = 0; i < 19; i++) game.Session.Tap();
+        Tap(Targets()[0]);
+        Check(game.Session.State == RoundState.Results && Field<float>(game, "resultDelay") > 0 && !Field<GameObject>(hud, "results").activeSelf && hud.WorldEffects.ActiveEffectCount > 0,
+            "GDD final winning tap remains visible before the results modal clears gameplay feedback");
+        TickHUD(.04f);
+        var winningPopup = Field<Array>(hud, "popups").GetValue(0);
+        var shrinkingCore = PopupPart<Image>(winningPopup, "Core").rectTransform.localScale;
+        Check(shrinkingCore.x < 1 && shrinkingCore.y < 1, "GDD tap visibly scales down before its pop and ring burst");
+        UnitySmoke.Capture(hud, "gdd-win-01-shrink");
+        TickHUD(.1f); UnitySmoke.Capture(hud, "gdd-win-02-ring");
+        typeof(GameManager).GetMethod("TickResultDelay", Private).Invoke(game, new object[] { .4f });
+        Check(Field<GameObject>(hud, "results").activeSelf && game.Session.Practice, "Results follow the final tap after its visible impact, with Practice rewards protected");
         game.SelectLevel(20); Begin();
         var result = new RoundSession(new RoundRules(45, 20, 10, 240, 20)); result.Reset(); result.StartPlaying();
         for (int i = 0; i < 20; i++) result.Tap();
@@ -500,7 +551,7 @@ public static class Campaign20Smoke
                 Tap(ChainTarget());
             }
             Check(fx.ActiveEffectCount > 0, "Level " + id + " emits themed feedback");
-            TickHUD(.08f); pool.Tick(.08f, false);
+            TickHUD(.08f); pool.Tick(.035f, false);
             UnitySmoke.Capture(hud, "vfx-" + id + "-impact");
             game.Pause(); float before = Field<float>(fx, "clock"); TickHUD(.5f);
             Check(Field<float>(fx, "clock") == before, "Level " + id + " freezes effects on pause");
@@ -608,7 +659,7 @@ public static class Campaign20Smoke
             Tap(ChainTarget());
             Check(fx.LastReactionStyle == style && game.Session.Hits == count && game.Session.Chains == 1,
                 "Real tap resolves the same chain once with reaction style " + style);
-            TickHUD(.08f); pool.Tick(.08f, false);
+            TickHUD(.08f); pool.Tick(.035f, false);
             UnitySmoke.Capture(hud, "reaction-" + style + "-travel");
             TickHUD(.25f); pool.Tick(.25f, false);
             UnitySmoke.Capture(hud, "reaction-" + style + "-burst");
@@ -630,7 +681,10 @@ public static class Campaign20Smoke
             {
                 game = UnityEngine.Object.FindFirstObjectByType<GameManager>(); hud = UnityEngine.Object.FindFirstObjectByType<GameHUD>();
                 if (game == null || game.Session == null || hud == null) return;
-                VerifyBindings(); VerifyCampaign(); VerifyMechanics(); VerifyMovingBombs();
+                // This harness advances simulation explicitly. Long capture/assertion frames
+                // must not expire the freshly prepared input board through LateUpdate.
+                game.enabled = false;
+                VerifyBindings(); VerifyCampaign(); VerifyMechanics(); VerifyBombSafety();
                 game.SelectLevel(inputLevel); Begin(); stage = 10; next = EditorApplication.timeSinceStartup + .1;
             }
             else if (stage == 10)

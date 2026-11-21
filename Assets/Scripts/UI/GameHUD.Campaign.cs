@@ -30,8 +30,18 @@ namespace TapBlast
             bool active = config.Scripted && session.State == RoundState.Playing;
             if (waveStatus == null) return;
             if (session.Practice) levelChip.text = "PRACTICE"; else if (levelChip.text == "PRACTICE") levelChip.text = "LEVEL " + config.LevelId.ToString("00");
-            waveStatus.gameObject.SetActive(active); pressureStatus.gameObject.SetActive(active);
-            ultimateButton.gameObject.SetActive(active && config.AllowUltimate);
+            waveStatus.gameObject.SetActive(!config.Scripted || active); pressureStatus.gameObject.SetActive(active);
+            ultimateButton.gameObject.SetActive(session.State == RoundState.Playing && config.AllowUltimate);
+            ultimateStatus.text = session.UltimateCharge >= 100 ? "ULTIMATE READY" : "ULTIMATE " + session.UltimateCharge + "%";
+            ultimateButton.interactable = session.UltimateCharge >= 100;
+            ultimateFill.fillAmount = session.UltimateCharge / 100f;
+            for (int i = 0; i < pressurePips.Length; i++) pressurePips[i].gameObject.SetActive(active && i < session.PressureLimit);
+            if (!config.Scripted)
+            {
+                // The existing status label also owns the saved Ultimate/Shield controls.
+                mechanicStatus.gameObject.SetActive(session.State == RoundState.Playing && (config.AllowUltimate || config.LevelId > 10));
+                if (config.LevelId <= 10) mechanicStatus.text = "";
+            }
             if (!active) return;
             var wave = session.Wave;
             waveStatus.text = (session.WaveIndex + 1) + " / " + session.WaveCount;
@@ -44,9 +54,6 @@ namespace TapBlast
             float completed = Mathf.Min(session.WaveProgress, wave.quota) + Mathf.Min(session.WavePairs, wave.pairs) + Mathf.Min(session.WaveCoreHits, wave.coreHits) + Mathf.Min(session.WavePriorityOrder, wave.priorityOrder);
             progressTarget = Mathf.Clamp01(completed / Mathf.Max(1, wave.quota + wave.pairs + wave.coreHits + wave.priorityOrder));
             if (session.State != RoundState.Playing || reducedMotion) ShowProgress(progressTarget);
-            ultimateStatus.text = session.UltimateCharge >= 100 ? "ULTIMATE READY" : "ULTIMATE " + session.UltimateCharge + "%";
-            ultimateButton.interactable = session.UltimateCharge >= 100;
-            ultimateFill.fillAmount = session.UltimateCharge / 100f;
             mechanicStatus.gameObject.SetActive(true);
             mechanicStatus.text = "DIRECT " + (session.Accuracy * 100).ToString("0") + "%   CHAINS " + session.Chains + "   PAIRS " + session.PairsCompleted;
         }
@@ -55,7 +62,7 @@ namespace TapBlast
             if (campaignResult == null) return;
             campaignResult.gameObject.SetActive(session.Scripted);
             int failures = ProgressStore.FailureCount(session.LevelId);
-            practiceButton.gameObject.SetActive(session.Scripted && !session.Won && failures >= 3);
+            practiceButton.gameObject.SetActive(!session.Won && failures >= 3);
 
             if (!session.Scripted) return;
             StatTile(0, Mathf.RoundToInt(session.Accuracy * 100), "Direct accuracy %\nGates " + session.ClearedWaves + "/" + session.WaveCount, "3B5BDB");

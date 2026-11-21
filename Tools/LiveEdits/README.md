@@ -31,3 +31,7 @@ unity command script eval_file --project-path . --file Tools/LiveEdits/<file>.cs
 20. 20-campaign-v3.cs — authors all twenty v3 wave schedules, pressure/Ultimate/shape-cue controls and Priority/pair target symbols in the scene and prefab. Re-runnable; implementation in Assets/Editor/CampaignV3Authoring.cs.
 
 21. 21-campaign-v5.cs - Active idempotent v5 author: twenty levels, ten boss phases, lane/event data, stable IDs and target input roots, scene and UI template. Implementation: Assets/Editor/CampaignV5Authoring.cs.
+
+- `22-campaign-v1.cs` - refresh and verify all 20 restored v1 level assets without modifying the current scene, UI template or target artwork.
+
+- `23-enable-gdd-animations.cs` - enables normal motion in local player preferences for the requested GDD animation presentation; preserves sound and every saved UI/art asset.

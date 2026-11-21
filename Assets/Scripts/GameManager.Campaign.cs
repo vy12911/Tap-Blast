@@ -215,14 +215,17 @@ public sealed partial class GameManager
     {
         if (!level.AllowUltimate || !Session.UseUltimate()) return;
         ultimateSlowRemaining = feedback.ReducedMotion ? 0 : .18f;
-        hud.WorldEffects.Finale(Vector2.zero, UIArt.Gold); hud.Callout("ULTIMATE!", UIArt.Gold); hud.Shake(12, .35f);
+        hud.WorldEffects.UltimateBlast(Vector2.zero); hud.Callout("ULTIMATE!", UIArt.Gold, .16f); hud.Shake(12, .35f, .16f);
         for (int i = 0; i < pool.Capacity; i++)
         {
             var target = pool.At(i);
             // Direct, ordered and required chain gates remain visible and never receive blast credit.
             if (!level.CanUltimateClear(target.Kind) || !target.Active || target.Required || target.BlastPending || target.Kind == TargetKind.Bomb || target.Kind == TargetKind.Priority || target.Kind == TargetKind.LinkedPair) continue;
             int points = Session.Tap(target.Kind, true, HitSource.Ultimate);
-            hud.Pop(target.Position, points, target.Tint, feedback.ReducedMotion, 0, 1.4f, 0, target); pool.Release(target);
+            float delay = feedback.ReducedMotion ? 0 : .16f + Mathf.Clamp01(target.Position.magnitude / Mathf.Max(1, hud.Arena.rect.size.magnitude * .5f)) * .12f;
+            hud.WorldEffects.UltimateTarget(target.Position, target.Tint, target.Radius, delay);
+            hud.Pop(target.Position, points, target.Tint, feedback.ReducedMotion, delay, 1.4f, 0, target);
+            target.BeginBlast(delay, feedback.ReducedMotion);
         }
         feedback.PlayChain(12); CampaignTelemetry.Add("ultimate_used", level.LevelId, Session.WaveIndex, 0); RefreshHUD();
     }

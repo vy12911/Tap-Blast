@@ -231,6 +231,18 @@ internal static class RoundSessionChecks
                 Check(Math.Abs(LaneTiming.Fraction(t,.45f,.22f,1.4f)-1)<.001f, "V5 lane motion settles identically at "+hz+" Hz");
                 Check(LaneTiming.Fraction(.44f,.45f,.22f,1.4f)==0 && LaneTiming.Fraction(.56f,.45f,.22f,1.4f)>.49f, "V5 lane preview precedes transit at "+hz+" Hz");
             }
+            s = new RoundSession(new RoundRules(45, 20, 10, 500, 20, ObjectiveKind.Golden, objectiveCount: 3));
+            s.Reset(); s.StartPlaying();
+            for (int i = 0; i < 40; i++) s.Tap();
+            Check(s.UltimateCharge == 100 && s.UseUltimate() && !s.UseUltimate(), "V1 Ultimate fills, clamps and consumes once");
+            int v1ComboBefore = s.Combo, v1HitsBefore = s.Hits;
+            s.Tap(TargetKind.Golden, source: HitSource.Ultimate);
+            s.Tap(TargetKind.Boss, source: HitSource.Ultimate);
+            Check(s.GoldenHits == 0 && s.BossesDestroyed == 0 && s.Combo == v1ComboBefore && s.Hits == v1HitsBefore && s.UltimateCharge == 0,
+                "V1 Ultimate awards score without collection, boss, tap or combo credit or self-charge");
+            s.Reset(); s.SetPractice(true); s.StartPlaying();
+            s.Tap(TargetKind.Golden); s.Tap(TargetKind.Golden); s.Tap(TargetKind.Golden); s.Tick(100);
+            Check(s.Won && s.Stars == 0, "V1 Practice completes objectives without stars");
             Console.WriteLine(checks + " round-rule checks passed."); return 0;
         }
         catch (Exception e) { Console.Error.WriteLine(e); return 1; }

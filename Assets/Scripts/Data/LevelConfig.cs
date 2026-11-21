@@ -32,7 +32,7 @@ namespace TapBlast
     [CreateAssetMenu(menuName = "Tap Blast/Level", fileName = "Level01")]
     public sealed class LevelConfig : ScriptableObject
     {
-        [SerializeField] private int designVersion = 3;
+        [SerializeField] private int designVersion = 1;
         [SerializeField] private BossPhaseDefinition[] bossPhases = new BossPhaseDefinition[0];
         public int DesignVersion => designVersion;
         public BossPhaseDefinition[] BossPhases => bossPhases;

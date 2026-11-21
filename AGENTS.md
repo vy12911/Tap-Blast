@@ -1,3 +1,13 @@
+# Active campaign override - restored GDD v1 (21 November 2026)
+
+The latest user request restores `Assets/Design Doc/Tap_Blast_FULL_GDD_v1.0.pdf`
+through level 20, preserving the current UI and art assets. This supersedes the
+v5/v3 campaign overrides below. All twenty active level assets use designVersion 1
+and the unscripted round path. See `Documentation/GDD-v1-Restoration.md`.
+Do not invoke CampaignV3Authoring or CampaignV5Authoring on the active campaign.
+Keep the current scene, UI template, target artwork, TMP, pools, pure C# rules,
+no-vibration preference and reward-free Practice behavior.
+
 # Active campaign override — GDD v5 (1 November 2026)
 
 The user requested the updated v5 GDD implemented through level 20. `Documentation/GDD-v5-Level01-20.md` and the saved v5 level/boss assets supersede the historical v3 timing/encounter/boss details below. Use `CampaignV5Authoring.Author`, invoked by `Tools/LiveEdits/21-campaign-v5.cs`; the v3 author is only its baseline helper. All twenty levels have designVersion 5. Ten saved BossPhaseDefinition assets provide Sentinel/Architect phases, each requiring its skill gate and one direct exposed-core hit. Never let Chain or Ultimate credit core/ordered/direct gates.

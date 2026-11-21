@@ -128,6 +128,8 @@ namespace TapBlast
             levelChip.text = "LEVEL " + config.LevelId.ToString("00");
             worldLabel.text = levelName;
             levelLabel.text = config.LevelId.ToString("00");
+            foreach (var label in levelLabel.transform.parent.GetComponentsInChildren<TMP_Text>(true))
+                if (label != levelLabel && (label.text == "Wave" || label.text == "Level")) label.text = config.Scripted ? "Wave" : "Level";
             countdownGoal.text = config.GoalText;
             introHero.SetActive(config.LevelId != 2); sizePreview.SetActive(config.LevelId == 2);
             // How to do it, then when you win: the same two lines on every level.
@@ -435,10 +437,10 @@ namespace TapBlast
                 return;
             }
             if (p.Kind != 0) return;
-            // Ball: quick squash (wide and short), then swells and fades as it bursts.
+            // Ball: shrink and squash, then swell and fade into the ring burst.
             float c = p.Age / .17f;
             p.Core.rectTransform.localScale = c >= 1 ? Vector3.zero : c < .45f
-                ? new Vector3(1 + .18f * Mathf.Sin(c / .45f * Mathf.PI * .5f), 1 - .16f * Mathf.Sin(c / .45f * Mathf.PI * .5f), 1)
+                ? new Vector3(1 - .12f * Mathf.Sin(c / .45f * Mathf.PI * .5f), 1 - .22f * Mathf.Sin(c / .45f * Mathf.PI * .5f), 1)
                 : Vector3.one * Mathf.Lerp(1.12f, 1.4f, (c - .45f) / .55f);
             var core = p.Core.color; core.a = c < .45f ? 1 : Mathf.Clamp01(1 - (c - .45f) / .55f); p.Core.color = core;
             p.Face.color = new Color(1, 1, 1, core.a);

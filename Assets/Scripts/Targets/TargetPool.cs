@@ -122,7 +122,7 @@ namespace TapBlast
                         if (!candidate.Active || candidate.BlastPending || candidate.Kind != TargetKind.Chain || candidate.Tint != origin.Tint) continue;
                         bool seen = false; for (int k = 0; k < count; k++) if (result[k] == candidate) { seen = true; break; }
                         if (seen || !Connected(result[head], candidate)) continue;
-                        if (count < result.Length && count < 8) { candidate.SetChainParent(result[head].Position); result[count++] = candidate; }
+                        if (count < result.Length) { candidate.SetChainParent(result[head].Position); result[count++] = candidate; }
                     }
                 return count >= 3 ? count : 0;
             }
@@ -146,6 +146,21 @@ namespace TapBlast
                 if ((a.Position + path * along - bomb.Position).sqrMagnitude < (bomb.Radius + 12) * (bomb.Radius + 12)) return false;
             }
             return true;
+        }
+        public int AppendAreaTargets(TargetView[] result, int chainCount)
+        {
+            int count = chainCount;
+            float radius = chainCount >= 12 ? 330 : chainCount >= 8 ? 270 : chainCount >= 5 ? 210 : 150;
+            for (int i = 0; i < targets.Length && count < result.Length; i++)
+            {
+                var target = targets[i];
+                if (!target.Active || target.BlastPending || (target.Kind != TargetKind.Normal && target.Kind != TargetKind.Small && target.Kind != TargetKind.Golden && target.Kind != TargetKind.Time)) continue;
+                bool nearby = false;
+                for (int n = 0; n < chainCount; n++)
+                    if ((result[n].Position - target.Position).sqrMagnitude <= radius * radius) { nearby = true; break; }
+                if (nearby) result[count++] = target;
+            }
+            return count;
         }
         public void Clear() { for (int i = 0; i < targets.Length; i++) targets[i].Release(); ActiveCount = 0; }
         public void SetInteractable(bool value) { for (int i = 0; i < targets.Length; i++) targets[i].SetInteractable(value); }

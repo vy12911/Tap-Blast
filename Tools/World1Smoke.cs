@@ -35,7 +35,12 @@ public static class World1Smoke
         SessionState.SetBool(Key, true); EditorApplication.EnterPlaymode();
     }
     static T Field<T>(object o, string name) => (T)o.GetType().GetField(name, Private).GetValue(o);
-    static void Call(object o, string name) => o.GetType().GetMethod(name, Private).Invoke(o, null);
+    static void Call(object o, string name)
+    {
+        if (o is GameManager && name == "Finish" && Field<float>(o, "resultDelay") > 0)
+            o.GetType().GetMethod("TickResultDelay", Private).Invoke(o, new object[] { 3f });
+        else o.GetType().GetMethod(name, Private).Invoke(o, null);
+    }
     static void Check(bool value, string message)
     { if (!value) throw new Exception(message); checks++; File.AppendAllText(Report, "PASS " + message + "\n"); }
     static void Finish(bool ok, string message)
@@ -169,10 +174,10 @@ public static class World1Smoke
         var sizes = new[] { new Vector2Int(1080, 1920), new Vector2Int(720, 1280), new Vector2Int(1080, 2400), new Vector2Int(1536, 2048), new Vector2Int(2048, 1536) };
         foreach (var size in sizes)
         {
-            // The 1080x2400 run still simulates a notch; safe areas are off, so the UI must use the whole screen.
+            // Preserve the saved scene's safe-area preference when simulating a notch.
             Rect notch = size.y == 2400 ? new Rect(0, 84, size.x, size.y - 204) : new Rect(0, 0, size.x, size.y);
-            Rect safe = new Rect(0, 0, size.x, size.y);
             var fitting = hud.GetComponent<ResponsiveCanvas>();
+            Rect safe = Field<bool>(fitting, "respectSafeArea") ? notch : new Rect(0, 0, size.x, size.y);
             int objects = hud.GetComponentsInChildren<RectTransform>(true).Length;
             string device = size.x + "x" + size.y;
             UnitySmoke.Capture(hud, "responsive-" + screenName + "-" + device, size.x, size.y, notch, () =>
@@ -197,7 +202,7 @@ public static class World1Smoke
                     }
                 }
                 Check(Mathf.Approximately(fitting.Frame.lossyScale.x, fitting.Frame.lossyScale.y), "Uniform layout scale " + device);
-                Check(fitting.Frame.rect.width >= 1079 && fitting.Frame.rect.height >= 1919 && fitting.Frame.rect.size == ((RectTransform)hud.transform).rect.size, "Frame fills the full canvas at reference size or larger " + device);
+                Check(fitting.Frame.rect.width >= 1079 && fitting.Frame.rect.height >= 1919 && fitting.Frame.rect.size == fitting.SafeArea.rect.size, "Frame fills the saved safe-area layout at reference size or larger " + device);
                 Check(hud.GetComponentsInChildren<RectTransform>(true).Length == objects, "Resizing does not create UI " + device);
             });
         }

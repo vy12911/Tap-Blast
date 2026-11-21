@@ -154,6 +154,14 @@ namespace TapBlast
         public int Tap(TargetKind kind = TargetKind.Normal, bool destroyed = true, HitSource source = HitSource.Direct, bool moving = false)
         {
             if (State != RoundState.Playing) return 0;
+            // Automatic clears award score, never collection, combo or direct boss progress.
+            if (!Scripted && source == HitSource.Ultimate)
+            {
+                if (kind == TargetKind.Bomb || kind == TargetKind.Boss) return 0;
+                int cleared = (int)Math.Round((kind == TargetKind.Golden ? rules.GoldenPoints : kind == TargetKind.Small ? 15 : rules.BasePoints) * Multiplier, MidpointRounding.AwayFromZero);
+                Score += cleared;
+                return cleared;
+            }
             if (Scripted && kind == TargetKind.Boss)
             {
                 if (source != HitSource.Direct || !CoreExposed) { if (source == HitSource.Direct) InvalidTap("CORE SHIELDED"); return 0; }
@@ -161,6 +169,7 @@ namespace TapBlast
             }
             if (kind == TargetKind.Bomb) return HitBomb();
             Hits++; if (!Scripted || source == HitSource.Direct) { Combo++; BestCombo = Math.Max(BestCombo, Combo); }
+            if (!Scripted && source == HitSource.Direct) UltimateCharge = Math.Min(100, UltimateCharge + (kind == TargetKind.Golden ? 6 : 3));
             if (Scripted && source == HitSource.Direct)
             {
                 SuccessfulDirectTaps++;
@@ -201,6 +210,7 @@ namespace TapBlast
         {
             if (State != RoundState.Playing || targets < 3) return 0;
             Chains++; LargestChain = Math.Max(LargestChain, targets);
+            if (!Scripted) UltimateCharge = Math.Min(100, UltimateCharge + (targets >= 12 ? 25 : 10));
             if (targets >= 8) MegaChains++;
             if (Scripted)
             {
@@ -254,7 +264,7 @@ namespace TapBlast
         }
         public bool UseUltimate()
         {
-            if (!Scripted || State != RoundState.Playing || UltimateCharge < 100) return false;
+            if (State != RoundState.Playing || UltimateCharge < 100) return false;
             UltimateCharge = 0; UltimatesUsed++; return true;
         }
         public void Tick(float delta)

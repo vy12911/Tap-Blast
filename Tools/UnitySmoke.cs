@@ -243,7 +243,7 @@ public static class UnitySmoke
                     previousHits = manager.Session.Hits;
                     if (previousHits == 8) Shot("04-gameplay");
                 }
-                if (manager.Session.State != RoundState.Results) return;
+                if (manager.Session.State != RoundState.Results || !(bool)typeof(GameManager).GetField("roundFinalized", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(manager)) return;
                 Check(manager.Session.Won && manager.Session.Score == 275 && manager.Session.Stars == 3, "Full 20-target play-through earns three stars");
                 Check(Targets().Length == 0, "Completion clears active targets");
                 Check(ProgressStore.BestScore == 275 && ProgressStore.BestStars == 3, "Best score and stars saved");

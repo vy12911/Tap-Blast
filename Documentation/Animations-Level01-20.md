@@ -1,4 +1,35 @@
-## Active v5 animation additions — 1 November 2026
+# Active GDD v1 animation verification - 21 November 2026
+
+The user's restored v1 campaign and current UI/art take precedence over the historical v3/v5 notes below. The source animation table is GDD pages 13-14.
+
+| GDD event | Active behavior through level 20 |
+|---|---|
+| Tap | Shrink/squash, swell/pop, expanding light ring, golden star arcs and floating score |
+| Combo | HUD number/fever punches; milestone callouts at 5/10/20/30/50 |
+| Golden | Pulsing glow and radiating ring rotating at 65 degrees/second; stable target/input root |
+| Bomb | Decorative warning pulse; steady X/BOMB identity; anticipation, explosion, shockwave, smoke |
+| Chain | Sequential impacts every 70 ms with travelling links and contracting anticipation; Mega finale at the end |
+| Ultimate | 180 ms time stretch, contracting anticipation, three expanding arena-wide rings, bounded flash and delayed target clears |
+| Level complete | Final winning tap remains visible for 360 ms, then confetti, score count-up, star bounces and reward reveal |
+| Core hit | Recoil on the Visuals child, gold impact/ring and shake; hit area stays stable |
+
+Perfect Tap's micro-freeze/precision ring belongs to World 5 (41-50), outside the requested first twenty levels.
+
+## Why animations were suppressed locally
+
+The main editor's saved player preference had Reduced Motion enabled. This is read by FeedbackPlayer and suppresses target cosmetics, pop animation, arena mesh effects, shake and confetti. `Tools/LiveEdits/23-enable-gdd-animations.cs` explicitly restores normal motion for the user's request, preserves sound, and leaves the accessibility toggle available in Pause. It does not modify the scene, UI template or artwork.
+
+The audit also corrected missing Golden ring rotation, the tap's initial shrink, Ultimate's reused Mega effect, and the winning-tap effect being cleared immediately by results. The duplicate immediate Mega finale was removed so its strongest finish lands at the last chain link.
+
+## Visual and lifecycle verification
+
+Campaign20Smoke verifies Golden rotation/reset, stable tap boundaries, tap shrink, winning impact before results, Ultimate anticipation/time stretch, protected direct goals, pause, draining, replay, reduced motion and fixed Canvas object counts. Captures include `gdd-ultimate-01-anticipation.png`, `gdd-ultimate-02-wave.png`, `gdd-win-01-shrink.png`, `gdd-win-02-ring.png`, existing `animation-*`, `reaction-*`, `pop-*`, `bomb-*` and `vfx-*` frames. All are under `Temp/Campaign20Validation/`.
+
+Results: runtime/editor compilation and 126 pure rules passed; campaign smoke passed 1,512 checks; GUI smoke passed 1,068 checks; fresh-process persistence passed; World 1 regression passed 5,294 checks. The main open editor recompiled successfully and its saved Reduced Motion preference was verified false. Physical-device animation feel remains a separate production check.
+
+---
+
+## Historical v5 animation additions — 1 November 2026
 
 The [v5 guide](GDD-v5-Level01-20.md) supersedes historical timing and boss descriptions below. Chain links resolve every 70 ms. Lane targets show a 450 ms directional warning and 220 ms transit; the target prefab's stable hit root is separate from animated visuals. Sentinel has a rotating shield/open-core halo; Architect has linked energy nodes and pair-controlled exposure. Both use pooled core crack, cascading bursts and a final shockwave over a two-second defeat stage before rewards/results. Essential arrows, IDs and core state remain under reduced motion; cosmetic effects remain suppressed. The campaign harness captures `v5-lane-*`, `v5-conduit-routing.png` and `v5-boss-*-core-*` / `v5-boss-*-defeat-*` frames.
 
@@ -9,7 +40,7 @@ Settled target bodies retain a stable scale and tap boundary. Idle breathing bel
 Every delayed chain member gets a 0.10-second contracting anticipation ring before its scheduled impact. Circular candy impacts add short radial streaks that disappear before the falling shard tail. Mega keeps its centered shockwave and sequential member timing. Slow-frame mode suppresses optional anticipation and reduces shard geometry; target timing and required Priority feedback stay intact. All effects use the shared fixed mesh/pool and retain reduced-motion, pause, replay and finite-life behavior.
 
 Captures: `Temp/Campaign20Validation/v3-priority-01-warning.png`, `v3-priority-02-collection.png`, and `v3-mega-01-first-pop.png` through `v3-mega-03-central-shockwave.png`. Automated checks cover stable Priority scale, collection effects, pause, cleanup and reduced motion. Human playtesting remains necessary to judge enjoyment.
-# Active v3 campaign
+# Historical v3 campaign
 
 The v3 wave, Priority, ordered-pair, pressure, Ultimate and boss feedback contracts are described in [GDD v3 levels 1–20](GDD-v3-Level01-20.md#feedback-and-saved-ui). Those rules supersede the historical v1 per-level themes and chain impact descriptions below. All three travel styles now end in circular candy blasts; Mega finishes at the matched group's center. Saved Image pressure pips and numbered pair symbols remain readable without color.
 
@@ -35,7 +66,7 @@ Reference: supplied Tap Blast GDD v1.0, animation table on pages 13–14, target
 
 ## Chains (any level with chain targets)
 
-Same-colour matching across the board, ordered nearest-first from the tapped target, detonates one target every 160 ms (`TargetView.ChainStepSeconds`). The next target heats from its colour to white and compresses just before it blows, and cannot be tapped or expire. Each detonation gets a white flash and a pooled pop (squash, ring, sparkles, score). The last link brings a callout: CHAIN! (3–4), SUPER CHAIN! (5–7, light shake) or MEGA CHAIN! (8+, gold arena flash, shard fountain, star shower, stronger shake). Score commits once; the visuals cannot grant extra rewards.
+Connected same-colour matching, traversed breadth-first from the tapped target, detonates one target every 70 ms (`TargetView.ChainStepSeconds`). The next target heats from its colour to white and compresses just before it blows, and cannot be tapped or expire. Each detonation gets a white flash and a pooled pop (squash, ring, sparkles, score). The last link brings a callout: CHAIN! (3–4), SUPER CHAIN! (5–7, light shake) or MEGA CHAIN! (8+, gold arena flash, shard fountain, star shower, stronger shake). Score commits once; the visuals cannot grant extra rewards.
 
 Successive chains rotate three reaction styles: Electric → Comet → Split Wave. Electric uses angular lightning and sharp shards; Comet follows a curved sparkling path and unwinds into twin spirals; Split Wave sends two ribbons around the path and bursts into four diagonal rays. Comet and Split Wave suppress the popup ring and sparks so the silhouettes stay distinct. Replay resets the rotation.
 
@@ -75,7 +106,7 @@ Target cosmetics use the pool tick; HUD and arena effects share one feedback clo
 
 Pause freezes every effect clock and the shake. Replay and navigation clear queued effects, popups and shake. Reduced motion removes squash, rings, sparks, flashes, explosions, callout motion, shake and confetti immediately, while score text, state labels, Golden/Bomb identities, lifetime/health rings and Shield status stay readable.
 
-Perfect Tap's micro-freeze and Ultimate's full-screen blast belong to later campaign systems.
+Perfect Tap's micro-freeze belongs to a later world; Ultimate's arena-wide blast is active in the restored campaign.
 
 ## Verification
 

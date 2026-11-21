@@ -155,9 +155,11 @@ namespace TapBlast
             float spring = arrival >= 1 ? 1 : Mathf.LerpUnclamped(.4f, 1, 1 + 2.4f * t * t * t + 1.4f * t * t);
             float impact = value ? 0 : Mathf.Sin(Mathf.Clamp01(impactAge / .22f) * Mathf.PI);
             float idle = Kind == TargetKind.Bomb ? 0 : Mathf.Sin(age * 3.5f) * .025f;
-            Vector3 scale = Vector3.one * (value ? 1 : spring);
+            Vector3 scale = Vector3.one * (value ? 1 : spring * (Kind == TargetKind.Boss ? 1 - impact * .08f : 1));
             if (VisualRect.localScale != scale) VisualRect.localScale = scale;
             lifetimeRing.rectTransform.localScale = Vector3.one;
+            Vector3 ringRotation = new Vector3(0, 0, !value && Kind == TargetKind.Golden ? age * 65 : 0);
+            if (lifetimeRing.rectTransform.localEulerAngles != ringRotation) lifetimeRing.rectTransform.localEulerAngles = ringRotation;
             glow.rectTransform.localScale = Vector3.one * (value ? 1 : 1 + idle);
             lifetimeRing.color = Tint; glow.color = Tint;
             hitImage.color = illustratedBodies != null && illustratedBodies.Length == 5 ? Color.white : new Color(Tint.r, Tint.g, Tint.b, .52f);

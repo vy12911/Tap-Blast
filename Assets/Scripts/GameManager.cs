@@ -105,13 +105,19 @@ public sealed partial class GameManager : MonoBehaviour
         }
         if (Session.State != RoundState.Playing) return;
         if (level.Scripted) { TickCampaign(Time.unscaledDeltaTime); return; }
+        float roundDelta = Time.unscaledDeltaTime;
+        if (ultimateSlowRemaining > 0)
+        {
+            float part = Mathf.Min(roundDelta, ultimateSlowRemaining);
+            ultimateSlowRemaining -= part; roundDelta -= part * .65f;
+        }
         if (tutorialStarted)
         {
-            Session.Tick(Time.unscaledDeltaTime);
+            Session.Tick(roundDelta);
             if (Session.State == RoundState.Results) { Finish(); return; }
-            spawner.Tick(Time.unscaledDeltaTime, feedback.ReducedMotion);
+            spawner.Tick(roundDelta, feedback.ReducedMotion);
         }
-        pool.Tick(Time.unscaledDeltaTime, feedback.ReducedMotion);
+        pool.Tick(roundDelta, feedback.ReducedMotion);
         if (Mathf.CeilToInt(Session.RemainingTime) != displayedSecond) RefreshHUD();
     }
 
@@ -161,11 +167,11 @@ public sealed partial class GameManager : MonoBehaviour
             Color chainTint = target.Tint;
             int reactionStyle = hud.WorldEffects.Chain(chainTargets, chainCount);
             int total = 0;
-            int blastCount = chainCount;
+            int blastCount = level.DesignVersion == 1 ? pool.AppendAreaTargets(chainTargets, chainCount) : chainCount;
             for (int i = 0; i < blastCount; i++)
             {
                 var member = chainTargets[i];
-                int memberPoints = Session.Tap(member.Kind); total += memberPoints;
+                int memberPoints = Session.Tap(member.Kind, true, i == 0 ? HitSource.Direct : HitSource.Chain); total += memberPoints;
                 hud.Pop(member.Position, memberPoints, member.Tint, feedback.ReducedMotion, i * TargetView.ChainStepSeconds,
                     chainCount >= 8 ? 1.65f : chainCount >= 5 ? 1.35f : 1.15f, reactionStyle, member);
                 if (member.Kind == TargetKind.Time) hud.TimeJuice();
@@ -210,7 +216,13 @@ public sealed partial class GameManager : MonoBehaviour
                 if (priorCombo < milestoneCombos[i] && Session.Combo >= milestoneCombos[i]) hud.Callout(milestoneWords[i], milestoneColors[i]);
         RefreshHUD();
 
-        if (Session.State == RoundState.Results) { Finish(); return; }
+        if (Session.State == RoundState.Results)
+        {
+            // Keep the final tap's shrink/pop/ring visible before the result modal clears it.
+            resultDelay = feedback.ReducedMotion ? 0 : .36f;
+            if (resultDelay <= 0) Finish();
+            return;
+        }
         if (kind == TargetKind.Boss)
             hud.SetHint(destroyed ? "GOLDEN CORE DESTROYED!" : "CORE HEALTH " + target.Health + " / " + target.MaxHealth,
                 destroyed ? "Keep scoring for mastery until time runs out" : "Every hit damages the Core and builds your combo");

@@ -70,8 +70,15 @@ namespace TapBlast
                 Vector2 position = new Vector2(Mathf.Lerp(bounds.xMin + margin, bounds.xMax - margin, (float)random.NextDouble()),
                     Mathf.Lerp(bounds.yMin + margin, bounds.yMax - margin, (float)random.NextDouble()));
                 if (!pool.HasSpace(position, size * 1.025f + 40)) continue;
+                if (level.DesignVersion == 1)
+                {
+                    bool reserved = false;
+                    for (int slot = 0; slot < level.ClusterSize + 2; slot++)
+                        if ((ClusterPosition(slot, bounds) - position).sqrMagnitude < (size * 1.025f + 40) * (size * 1.025f + 40)) { reserved = true; break; }
+                    if (reserved) continue;
+                }
                 float angle = (float)random.NextDouble() * Mathf.PI * 2;
-                float speed = 60 + (float)random.NextDouble() * 40 + (level.LevelId - 16) * 10;
+                float speed = level.DesignVersion == 1 ? 0 : 60 + (float)random.NextDouble() * 40 + (level.LevelId - 16) * 10;
                 pool.Spawn(position, size, level.TargetLifetime, UIArt.Gold, false, reducedMotion,
                     TargetKind.Bomb, new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * speed);
                 return;
@@ -86,6 +93,19 @@ namespace TapBlast
             float bottom = bounds.yMin + margin;
             float top = bounds.yMax - margin;
             if (bounds.width < margin * 2 || top <= bottom) return false;
+            if (level.DesignVersion == 1)
+            {
+                // Connected, separated circles teach spatial chains without changing their artwork.
+                Vector2 p = ClusterPosition(emitted, bounds);
+                if (!bounds.Contains(p + Vector2.one * margin) || !bounds.Contains(p - Vector2.one * margin) || !pool.HasSpace(p, size * 1.025f + 20)) return false;
+                int color = (waveColor + (emitted == 1 ? 1 : emitted == 3 ? 2 : 0)) % Palette.Length;
+                if (!pool.Spawn(p, size, level.TargetLifetime, Palette[color], false, reducedMotion, TargetKind.Chain, graph: true)) return false;
+                emitted++;
+                if (emitted == level.ClusterSize + 2 && level.MovingTargets)
+                    for (int i = 0; i < pool.Capacity; i++)
+                        if (pool.At(i).Active && pool.At(i).Kind == TargetKind.Chain) pool.At(i).SetVelocity(new Vector2(.8f, .6f) * level.MovementSpeed);
+                return true;
+            }
             for (int attempt = 0; attempt < 96; attempt++)
             {
                 Vector2 position = new Vector2(Mathf.Lerp(bounds.xMin + margin, bounds.xMax - margin, (float)random.NextDouble()),
@@ -99,6 +119,15 @@ namespace TapBlast
                 emitted++; return true;
             }
             return false;
+        }
+        private Vector2 ClusterPosition(int slot, Rect bounds)
+        {
+            float step = level.TargetSize * 1.025f + 24;
+            int index = slot - (slot > 1 ? 1 : 0) - (slot > 3 ? 1 : 0);
+            int rows = Mathf.CeilToInt(level.ClusterSize / 3f);
+            return bounds.center + (slot == 1 || slot == 3
+                ? new Vector2((slot == 1 ? -1 : 1) * step * 1.95f, (slot == 1 ? -1 : 1) * step * 1.5f)
+                : new Vector2((index % 3 - 1) * step, (index / 3 - (rows - 1) * .5f) * step));
         }
         private void SpawnAt(Vector2 position, bool reducedMotion, bool first)
         {

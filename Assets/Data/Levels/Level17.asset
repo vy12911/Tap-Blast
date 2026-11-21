@@ -12,14 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9218bab79c640ef96f356711932423c, type: 3}
   m_Name: Level17
   m_EditorClassIdentifier: 
-  designVersion: 5
-  bossPhases: []
-  displayName: Danger Read
+  displayName: SHIELD SCHOOL
   levelId: 17
   objective: 9
   targetScore: 500
-  objectiveCount: 1
-  mechanicHint: Press USE SHIELD, then tap a Bomb. Pair targets need 1 then 2.
   firstTapTutorial: 0
   targetSizes:
   - 120
@@ -27,11 +23,9 @@ MonoBehaviour:
   duration: 45
   requiredTaps: 20
   basePoints: 10
-  spawnInterval: 1.4
-  finalSpawnInterval: 0
-  accelerationSeconds: 20
-  targetLifetime: 3.8
-  maxTargets: 8
+  spawnInterval: 0.45
+  targetLifetime: 3.5
+  maxTargets: 12
   targetSize: 150
   targetSpacing: 36
   movingTargets: 0
@@ -39,397 +33,24 @@ MonoBehaviour:
   timeChance: 0
   isBossLevel: 0
   bossHealth: 1
-  goldenPoints: 100
-  timeBonus: 3
-  maxTimeTargets: 6
-  bossSize: 270
-  clusterSize: 3
-  clusterInterval: 2.4
-  movementSpeed: 70
-  bombChance: 0
-  shieldCharges: 1
-  bombPenalty: 50
-  chainBonus: 25
-  requiredCombo: 0
-  twoStarScore: 1000
+  twoStarScore: 700
   threeStarCombo: 15
   coinReward: 350
   xpReward: 170
-  scripted: 1
-  seed: 31649
-  pressureLimit: 3
-  priorityMissLimit: 99
-  noBombs: 0
+  objectiveCount: 1
+  mechanicHint: Press SHIELD, then tap one Bomb. The Shield protects your streak.
+  targetSizes: []
+  clusterSize: 3
+  clusterInterval: 2.4
+  movementSpeed: 70
+  bombChance: 0.3
+  shieldCharges: 1
+  requiredCombo: 0
+  bombPenalty: 50
+  chainBonus: 25
+
+  designVersion: 1
+  scripted: 0
+  bossPhases: []
+  waves: []
   allowUltimate: 1
-  normalCharge: 3
-  goldenCharge: 6
-  chainCharge: 10
-  ultimateEligible: 0000000006000000010000000200000004000000
-  scriptedGoal: Block 1 Bomb and complete both pair waves
-  waves:
-  - rules:
-      title: PAIR WARM UP
-      duration: 9
-      gate: 8
-      quota: 1
-      pairs: 0
-      coreHits: 0
-      priorityOrder: 0
-      coreWarning: 0.45
-      coreOpen: 1.6
-      coreClosed: 1.2
-    maxActive: 4
-    schedule:
-    - id: L17-W1-S01
-      gateId: L17-W1-gate
-      laneId: 0
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 0.65
-      kind: 8
-      count: 2
-      color: 0
-      position: {x: 0, y: 0}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L17-W1-S02
-      gateId: L17-W1-gate
-      laneId: 1
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 5.15
-      kind: 8
-      count: 2
-      color: 1
-      position: {x: 0, y: 0}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L17-W1-S03
-      gateId: 
-      laneId: 0
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 6.5
-      kind: 0
-      count: 1
-      color: 1
-      position: {x: 0, y: -0.55}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 0
-      critical: 0
-    encounters:
-    - id: L17-P1-encounter
-      kind: 2
-      at: 0
-      warning: 0.45
-      active: 8.55
-      corridorX: 0.7
-  - rules:
-      title: "SHIELD \xB7 BLOCK A BOMB"
-      duration: 22.5
-      gate: 10
-      quota: 1
-      pairs: 0
-      coreHits: 0
-      priorityOrder: 0
-      coreWarning: 0.45
-      coreOpen: 1.6
-      coreClosed: 1.2
-    maxActive: 4
-    schedule:
-    - id: L17-W2-S01
-      gateId: 
-      laneId: 0
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 0
-      kind: 5
-      count: 1
-      color: 2
-      position: {x: 0.82, y: 0.25}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 0
-      critical: 0
-    - id: L17-W2-S02
-      gateId: L17-W2-gate
-      laneId: 1
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 0.65
-      kind: 0
-      count: 1
-      color: 0
-      position: {x: -0.5, y: -0.55}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L17-W2-S03
-      gateId: L17-W2-gate
-      laneId: 0
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 2.75
-      kind: 0
-      count: 1
-      color: 1
-      position: {x: -0.5, y: -0.55}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L17-W2-S04
-      gateId: L17-W2-gate
-      laneId: 1
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 4.85
-      kind: 0
-      count: 1
-      color: 2
-      position: {x: -0.5, y: -0.55}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L17-W2-S05
-      gateId: 
-      laneId: 0
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 6
-      kind: 5
-      count: 1
-      color: 2
-      position: {x: 0.82, y: 0.25}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 0
-      critical: 0
-    - id: L17-W2-S06
-      gateId: L17-W2-gate
-      laneId: 1
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 6.95
-      kind: 0
-      count: 1
-      color: 0
-      position: {x: -0.5, y: 0}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L17-W2-S07
-      gateId: L17-W2-gate
-      laneId: 0
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 9.049999
-      kind: 0
-      count: 1
-      color: 1
-      position: {x: -0.5, y: 0}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L17-W2-S08
-      gateId: L17-W2-gate
-      laneId: 1
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 11.15
-      kind: 0
-      count: 1
-      color: 2
-      position: {x: -0.5, y: 0}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L17-W2-S09
-      gateId: 
-      laneId: 0
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 12
-      kind: 5
-      count: 1
-      color: 2
-      position: {x: 0.82, y: 0.25}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 0
-      critical: 0
-    - id: L17-W2-S10
-      gateId: L17-W2-gate
-      laneId: 1
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 13.249999
-      kind: 0
-      count: 1
-      color: 0
-      position: {x: -0.5, y: 0.55}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L17-W2-S11
-      gateId: L17-W2-gate
-      laneId: 0
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 15.349999
-      kind: 0
-      count: 1
-      color: 1
-      position: {x: -0.5, y: 0.55}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L17-W2-S12
-      gateId: 
-      laneId: 1
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 20
-      kind: 0
-      count: 1
-      color: 1
-      position: {x: -0.5, y: -0.55}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 0
-      critical: 0
-    encounters:
-    - id: L17-P2-encounter
-      kind: 2
-      at: 0
-      warning: 0.45
-      active: 22.05
-      corridorX: 0.7
-  - rules:
-      title: ORDERED FINISH
-      duration: 13.5
-      gate: 8
-      quota: 1
-      pairs: 0
-      coreHits: 0
-      priorityOrder: 0
-      coreWarning: 0.45
-      coreOpen: 1.6
-      coreClosed: 1.2
-    maxActive: 4
-    schedule:
-    - id: L17-W3-S01
-      gateId: L17-W3-gate
-      laneId: 0
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 0.65
-      kind: 8
-      count: 2
-      color: 0
-      position: {x: 0, y: 0}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L17-W3-S02
-      gateId: L17-W3-gate
-      laneId: 1
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 5.65
-      kind: 8
-      count: 2
-      color: 1
-      position: {x: 0, y: 0}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L17-W3-S03
-      gateId: 
-      laneId: 0
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 11
-      kind: 0
-      count: 1
-      color: 1
-      position: {x: 0, y: -0.55}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 0
-      critical: 0
-    encounters:
-    - id: L17-P3-encounter
-      kind: 2
-      at: 0
-      warning: 0.45
-      active: 13.05
-      corridorX: 0.7

@@ -12,24 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9218bab79c640ef96f356711932423c, type: 3}
   m_Name: Level13
   m_EditorClassIdentifier: 
-  designVersion: 5
-  bossPhases: []
-  displayName: Side Step
+  displayName: MEGA BURST
   levelId: 13
   objective: 7
   targetScore: 500
-  objectiveCount: 1
-  mechanicHint: Tap one circle when 8 matching shapes form a linked group.
   firstTapTutorial: 0
   targetSizes: []
   duration: 45
   requiredTaps: 20
   basePoints: 10
-  spawnInterval: 1.4
-  finalSpawnInterval: 0
-  accelerationSeconds: 20
-  targetLifetime: 3.8
-  maxTargets: 8
+  goldenPoints: 100
+  spawnInterval: 0.45
+  targetLifetime: 4.5
+  maxTargets: 12
   targetSize: 150
   targetSpacing: 36
   movingTargets: 0
@@ -37,380 +32,23 @@ MonoBehaviour:
   timeChance: 0
   isBossLevel: 0
   bossHealth: 1
-  goldenPoints: 100
-  timeBonus: 3
-  maxTimeTargets: 6
-  bossSize: 270
+  twoStarScore: 2500
+  threeStarCombo: 24
+  coinReward: 250
+  xpReward: 130
+  objectiveCount: 1
+  mechanicHint: Wait for 8 connected matching targets, then tap one for a Mega Chain.
   clusterSize: 8
   clusterInterval: 2.4
   movementSpeed: 70
   bombChance: 0
   shieldCharges: 0
+  requiredCombo: 0
   bombPenalty: 50
   chainBonus: 25
-  requiredCombo: 0
-  twoStarScore: 1000
-  threeStarCombo: 24
-  coinReward: 250
-  xpReward: 130
-  scripted: 1
-  seed: 31261
-  pressureLimit: 3
-  priorityMissLimit: 99
-  noBombs: 0
+
+  designVersion: 1
+  scripted: 0
+  bossPhases: []
+  waves: []
   allowUltimate: 1
-  normalCharge: 3
-  goldenCharge: 6
-  chainCharge: 10
-  ultimateEligible: 0000000006000000010000000200000004000000
-  scriptedGoal: Make 1 Mega Chain and clear every wave
-  waves:
-  - rules:
-      title: LANE WARM UP
-      duration: 9
-      gate: 0
-      quota: 3
-      pairs: 0
-      coreHits: 0
-      priorityOrder: 0
-      coreWarning: 0.45
-      coreOpen: 1.6
-      coreClosed: 1.2
-    maxActive: 4
-    schedule:
-    - id: L13-W1-S01
-      gateId: L13-W1-gate
-      laneId: 0
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 0.65
-      kind: 0
-      count: 1
-      color: 0
-      position: {x: -0.62, y: -0.55}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L13-W1-S02
-      gateId: L13-W1-gate
-      laneId: 1
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 2.05
-      kind: 0
-      count: 1
-      color: 1
-      position: {x: 0, y: -0.55}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L13-W1-S03
-      gateId: L13-W1-gate
-      laneId: 0
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 3.4499998
-      kind: 0
-      count: 1
-      color: 2
-      position: {x: 0.62, y: -0.55}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L13-W1-S04
-      gateId: L13-W1-gate
-      laneId: 1
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 4.85
-      kind: 0
-      count: 1
-      color: 0
-      position: {x: -0.62, y: 0}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L13-W1-S05
-      gateId: L13-W1-gate
-      laneId: 0
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 6.25
-      kind: 0
-      count: 1
-      color: 1
-      position: {x: 0, y: 0}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L13-W1-S06
-      gateId: 
-      laneId: 1
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 6.5
-      kind: 0
-      count: 1
-      color: 1
-      position: {x: 0, y: -0.55}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 0
-      critical: 0
-    encounters:
-    - id: L13-P1-encounter
-      kind: 0
-      at: 0
-      warning: 0.45
-      active: 2
-      corridorX: 0.7
-  - rules:
-      title: "MEGA \xB7 8 LINKED CIRCLES"
-      duration: 22.5
-      gate: 7
-      quota: 1
-      pairs: 0
-      coreHits: 0
-      priorityOrder: 0
-      coreWarning: 0.45
-      coreOpen: 1.6
-      coreClosed: 1.2
-    maxActive: 8
-    schedule:
-    - id: L13-W2-S01
-      gateId: L13-W2-gate
-      laneId: 0
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 0.65
-      kind: 4
-      count: 8
-      color: 0
-      position: {x: 0, y: 0}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L13-W2-S02
-      gateId: L13-W2-gate
-      laneId: 1
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 6.65
-      kind: 4
-      count: 8
-      color: 1
-      position: {x: 0, y: 0}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L13-W2-S03
-      gateId: L13-W2-gate
-      laneId: 0
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 12.65
-      kind: 4
-      count: 8
-      color: 2
-      position: {x: 0, y: 0}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L13-W2-S04
-      gateId: 
-      laneId: 1
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 20
-      kind: 0
-      count: 1
-      color: 1
-      position: {x: 0, y: -0.55}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 0
-      critical: 0
-    encounters:
-    - id: L13-P2-encounter
-      kind: 0
-      at: 0
-      warning: 0.45
-      active: 2
-      corridorX: 0.7
-  - rules:
-      title: SAFE FINISH
-      duration: 13.5
-      gate: 0
-      quota: 4
-      pairs: 0
-      coreHits: 0
-      priorityOrder: 0
-      coreWarning: 0.45
-      coreOpen: 1.6
-      coreClosed: 1.2
-    maxActive: 4
-    schedule:
-    - id: L13-W3-S01
-      gateId: L13-W3-gate
-      laneId: 0
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 0.65
-      kind: 0
-      count: 1
-      color: 0
-      position: {x: -0.62, y: -0.55}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L13-W3-S02
-      gateId: L13-W3-gate
-      laneId: 1
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 2.35
-      kind: 0
-      count: 1
-      color: 1
-      position: {x: 0, y: -0.55}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L13-W3-S03
-      gateId: L13-W3-gate
-      laneId: 0
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 4.05
-      kind: 0
-      count: 1
-      color: 2
-      position: {x: 0.62, y: -0.55}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L13-W3-S04
-      gateId: L13-W3-gate
-      laneId: 1
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 5.75
-      kind: 0
-      count: 1
-      color: 0
-      position: {x: -0.62, y: 0}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L13-W3-S05
-      gateId: L13-W3-gate
-      laneId: 0
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 7.4500003
-      kind: 0
-      count: 1
-      color: 1
-      position: {x: 0, y: 0}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L13-W3-S06
-      gateId: L13-W3-gate
-      laneId: 1
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 9.150001
-      kind: 0
-      count: 1
-      color: 2
-      position: {x: 0.62, y: 0}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 1
-      critical: 0
-    - id: L13-W3-S07
-      gateId: 
-      laneId: 0
-      order: 0
-      telegraph: 0.45
-      transit: 0.22
-      cadence: 1.2
-      at: 11
-      kind: 0
-      count: 1
-      color: 1
-      position: {x: 0, y: -0.55}
-      life: 3.8
-      size: 156
-      moving: 0
-      required: 0
-      critical: 0
-    encounters:
-    - id: L13-P3-encounter
-      kind: 0
-      at: 0
-      warning: 0.45
-      active: 2
-      corridorX: 0.7

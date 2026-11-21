@@ -441,7 +441,7 @@ namespace TapBlast
             float c = p.Age / .17f;
             p.Core.rectTransform.localScale = c >= 1 ? Vector3.zero : c < .45f
                 ? new Vector3(1 - .12f * Mathf.Sin(c / .45f * Mathf.PI * .5f), 1 - .22f * Mathf.Sin(c / .45f * Mathf.PI * .5f), 1)
-                : Vector3.one * Mathf.Lerp(1.12f, 1.4f, (c - .45f) / .55f);
+                : Vector3.Lerp(new Vector3(.88f, .78f, 1), new Vector3(1.4f, 1.4f, 1), Mathf.SmoothStep(0, 1, (c - .45f) / .55f));
             var core = p.Core.color; core.a = c < .45f ? 1 : Mathf.Clamp01(1 - (c - .45f) / .55f); p.Core.color = core;
             p.Face.color = new Color(1, 1, 1, core.a);
             // Ring: fast ease-out shockwave that thins as it fades.

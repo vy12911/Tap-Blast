@@ -35,3 +35,5 @@ unity command script eval_file --project-path . --file Tools/LiveEdits/<file>.cs
 - `22-campaign-v1.cs` - refresh and verify all 20 restored v1 level assets without modifying the current scene, UI template or target artwork.
 
 - `23-enable-gdd-animations.cs` - enables normal motion in local player preferences for the requested GDD animation presentation; preserves sound and every saved UI/art asset.
+
+- `24-mechanics-row.cs` - Mechanics row: status text on the left of a 1000-wide row, Shield and Ultimate pills right-aligned on the same centre line (64 tall, round ends), labels inset and auto-sized on one line, Ultimate charge line inset along the pill bottom. Safe to re-run.
